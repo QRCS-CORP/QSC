@@ -1,4 +1,4 @@
-/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
+﻿/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
  * NOTICE:
@@ -86,6 +86,10 @@
  * This header provides the interface for an implementation of the AES block cipher.
  * Supported features include:
  *   - AES-128 and AES-256 key sizes.
+ *   - Accelerated AES-GCM on supported x86 builds: AES-NI/PCLMUL, VAES-256/VPCLMUL,
+ *     or VAES-512/VPCLMUL selected at compile time; existing scalar and ARM
+ *     implementations are retained. No separate aes_gcm_intrinsics.h is required.
+ *     VAES and VPCLMULQDQ must both be enabled to select the VAES-256 GCM kernel.
  *   - Multiple cipher modes: Cipher Block Chaining (CBC), Counter (CTR) with both Big Endian 
  *     and Little Endian counter increments, and Electronic Code Book (ECB).
  *   - PKCS#7 padding for block alignment.
@@ -273,7 +277,7 @@ QSC_EXPORT_API typedef struct
 #if defined(QSC_SYSTEM_AESNI_ENABLED)
 	__m128i roundkeys[31U];			/*!< [__m128i] Round-key array for hardware accelerated AES */
 #	if defined(QSC_SYSTEM_HAS_VAES512)
-		__m512i roundkeysw[31U];		/*!< [__m512i] Extended round-key array for AVX-512 optimizations */
+		__m512i roundkeysw[31U];	/*!< [__m512i] Extended round-key array for AVX-512 optimizations */
 #	endif
 #else
 	uint32_t roundkeys[124U];		/*!< [uint32_t] Round-key array as 32-bit sub-keys for software-based AES */
@@ -282,6 +286,57 @@ QSC_EXPORT_API typedef struct
 	size_t rounds;					/*!< [size_t] Number of transformation rounds */
 	uint8_t* nonce;					/*!< [uint8_t*] Pointer to the nonce or initialization vector */
 } qsc_aes_state;
+
+/*! \brief Enforces a compatible AES state layout when linking the QSC library.
+ * \details A translation unit using a different AES feature configuration
+ * than the linked AES object references a missing layout-specific symbol.
+ * The check is retained by ELF linkers and checked by MSVC object directives;
+ * it cannot diagnose mismatches across independently loaded shared libraries.
+ * \warning All callers and the AES library must use identical AES layout
+ * feature macros. Rebuild the entire application when changing target ISA.
+ */
+#if defined(QSC_SYSTEM_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
+/*! \brief Binary-layout contract symbol for VAES-512 AES contexts. */
+QSC_EXPORT_API extern const uint8_t qsc_aes_layout_contract_vaes512_v1;
+/*! \brief Selects the VAES-512 AES context layout guard symbol. */
+#	define QSC_AES_LAYOUT_LINK_SYMBOL qsc_aes_layout_contract_vaes512_v1
+#	if defined(QSC_SYSTEM_COMPILER_MSC)
+#		pragma detect_mismatch("QSC_AES_STATE_LAYOUT", "vaes512-v1")
+#	endif
+#elif defined(QSC_SYSTEM_AESNI_ENABLED)
+/*! \brief Binary-layout contract symbol for AES-NI AES contexts. */
+QSC_EXPORT_API extern const uint8_t qsc_aes_layout_contract_aesni_v1;
+/*! \brief Selects the AES-NI context layout guard symbol. */
+#	define QSC_AES_LAYOUT_LINK_SYMBOL qsc_aes_layout_contract_aesni_v1
+#	if defined(QSC_SYSTEM_COMPILER_MSC)
+#		pragma detect_mismatch("QSC_AES_STATE_LAYOUT", "aesni-v1")
+#	endif
+#else
+/*! \brief Binary-layout contract symbol for scalar AES contexts. */
+QSC_EXPORT_API extern const uint8_t qsc_aes_layout_contract_scalar_v1;
+/*! \brief Selects the scalar AES context layout guard symbol. */
+#	define QSC_AES_LAYOUT_LINK_SYMBOL qsc_aes_layout_contract_scalar_v1
+#	if defined(QSC_SYSTEM_COMPILER_MSC)
+#		pragma detect_mismatch("QSC_AES_STATE_LAYOUT", "scalar-v1")
+#	endif
+#endif
+
+#if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
+/*! \brief Retained reference to the AES-layout contract on ELF toolchains.
+ * \note The used-only fallback on older compilers may be discarded by linker
+ * garbage collection. Modern GCC/Clang with retain support provides a hard
+ * link-time check without executable overhead.
+ */
+#	if defined(__has_attribute)
+#		if __has_attribute(retain)
+static const uint8_t* const qsc_aes_layout_required __attribute__((used, retain)) = &QSC_AES_LAYOUT_LINK_SYMBOL;
+#		else
+static const uint8_t* const qsc_aes_layout_required __attribute__((used)) = &QSC_AES_LAYOUT_LINK_SYMBOL;
+#		endif
+#	else
+static const uint8_t* const qsc_aes_layout_required __attribute__((used)) = &QSC_AES_LAYOUT_LINK_SYMBOL;
+#	endif
+#endif
 
 /* Function Declarations */
 
@@ -330,7 +385,10 @@ QSC_EXPORT_API void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keypara
  * other overlap is unsupported. Invalid arguments set outputlen to zero when it is non-NULL.
  * Invalid padding erases output and sets outputlen to zero; reinitialize the IV before retrying.
  * Zero output length also represents valid empty plaintext; this void API cannot distinguish them.
- * \warning Authenticate ciphertext before calling. Padding validation does not authenticate CBC.
+ * \warning Authenticate ciphertext before calling. This API exposes padding
+ * validity through outputlen and cannot be used as an oracle-safe decryption
+ * interface for unauthenticated, attacker-controlled ciphertext. Padding
+ * validation uses fixed-work checks and rejection clears the output.
  *
  * \param ctx: [struct] Pointer to an initialized qsc_aes_state structure.
  * \param output: [uint8_t*] Pointer to the output buffer where plaintext will be stored.
@@ -484,6 +542,24 @@ QSC_EXPORT_API void qsc_aes_ecb_decrypt_block(const qsc_aes_state* ctx, uint8_t*
  */
 QSC_EXPORT_API void qsc_aes_ecb_encrypt_block(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input);
 
+/*! \brief Encrypt several consecutive AES-ECB blocks in one call.
+ * \param ctx Initialized AES encryption context; borrowed and unchanged.
+ * \param output Output buffer, at least length bytes; exact in-place use permitted.
+ * \param input Input buffer, at least length bytes; partial overlap unsupported.
+ * \param length Byte count, must be a multiple of QSC_AES_BLOCK_SIZE.
+ * \note ECB is not semantically secure; use only as an internal building block. No allocations or shared state.
+ */
+QSC_EXPORT_API void qsc_aes_ecb_encrypt_blocks(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
+/*! \brief Decrypt several consecutive AES-ECB blocks in one call.
+ * \param ctx Initialized AES decryption context; borrowed and unchanged.
+ * \param output Output buffer, at least length bytes; exact in-place use permitted.
+ * \param input Input buffer, at least length bytes; partial overlap unsupported.
+ * \param length Byte count, must be a multiple of QSC_AES_BLOCK_SIZE.
+ * \note ECB is not semantically secure; use only as an internal building block. No allocations or shared state.
+ */
+QSC_EXPORT_API void qsc_aes_ecb_decrypt_blocks(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
+
 /* HBA-256 Authenticated Encryption */
 
 /*! 
@@ -507,6 +583,7 @@ QSC_EXPORT_API typedef struct
 	uint8_t cust[QSC_HBA_MAXINFO_SIZE];	/*!< [uint8_t[QSC_HBA_MAXINFO_SIZE]] Customization key (user provided tweak) */
 	size_t custlen;						/*!< [size_t] Length of the customization key */
 	bool encrypt;						/*!< [bool] Transformation mode: true for encryption, false for decryption */
+	uint16_t aadlen;					/*!< [uint16_t] Current message AAD bytes, or HBA invalid-state marker; reset on successful transform */
 } qsc_aes_hba256_state;
 
 /**
@@ -545,6 +622,12 @@ QSC_EXPORT_API void qsc_aes_hba256_initialize(qsc_aes_hba256_state* ctx, const q
  *
  * The associated data is used to authenticate additional information (such as headers) that is not encrypted.
  * It must be set after initialization and before each call to qsc_aes_hba256_transform.
+ * The cumulative AAD for each HBA message must not exceed QSC_HBA_MAXAAD_SIZE
+ * bytes across all setter calls. A successful transform resets this counter.
+ * Each nonempty AAD call retains its original HBA length framing.
+ * A rejected chunk, including non-NULL requirements and the cumulative limit,
+ * invalidates the operation; subsequent transforms return false without output
+ * until the HBA context is reinitialized. The void setter cannot report errors.
  *
  * \param ctx: [struct] Pointer to the qsc_aes_hba256_state structure.
  * \param data: [const uint8_t*] Pointer to the associated data.
@@ -567,6 +650,7 @@ QSC_EXPORT_API void qsc_aes_hba256_set_associated(qsc_aes_hba256_state* ctx, con
  * \param length: [size_t] Length of the input data in bytes (excluding the MAC for decryption).
  *
  * \return [bool] Returns \c true if the transformation (and MAC verification in decryption mode) was successful; otherwise, \c false.
+ * \note Rejected AAD causes false without writing output; reinitialize before retrying.
  *
  * \sa qsc_aes_hba256_initialize, qsc_aes_hba256_set_associated
  */
@@ -582,9 +666,8 @@ QSC_EXPORT_API bool qsc_aes_hba256_transform(qsc_aes_hba256_state* ctx, uint8_t*
  * an AEAD scheme. The internal layout is identical to qsc_aes_gcm256_state;
  * the sole distinction is that the cipher context is keyed with a 128-bit key.
  *
- * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
- *     qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt,
- *     qsc_aes_gcm128_transform, qsc_aes_gcm128_dispose
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt,
+ * qsc_aes_gcm128_transform, qsc_aes_gcm128_dispose
  */
 QSC_EXPORT_API typedef struct qsc_aes_gcm128_state
 {
@@ -610,20 +693,17 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm128_state
  *
  * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
  * \param output: [uint8_t*] Pointer to the plaintext output buffer.
- *                Must be at least (\p length - QSC_GCM128_MAC_SIZE) bytes.
+ * Must be at least (\p length - QSC_GCM128_MAC_SIZE) bytes.
  * \param input: [const uint8_t*] Pointer to the ciphertext buffer with the
- *                appended MAC tag.  Length must equal (ciphertext length +
- *                QSC_GCM128_MAC_SIZE).
- * \param length: [size_t] Total number of bytes in \p input, including the
- *                QSC_GCM128_MAC_SIZE-byte tag.
+ * appended MAC tag.  Length must equal (ciphertext length + QSC_GCM128_MAC_SIZE).
+ * \param length: [size_t] Total number of bytes in \p input, including the QSC_GCM128_MAC_SIZE-byte tag.
  *
  * \return [bool] \c true if authentication and decryption succeeded;
- *                \c false if the tag did not match (output is zeroed).
+ * \c false if the tag did not match (output is zeroed).
  *
  * \warning The ctx must be initialized via qsc_aes_gcm128_initialize before use.
  *
- * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
- *     qsc_aes_gcm128_encrypt, qsc_aes_gcm128_transform
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_transform
  */
 QSC_EXPORT_API bool qsc_aes_gcm128_decrypt(qsc_aes_gcm128_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
@@ -658,12 +738,13 @@ QSC_EXPORT_API void qsc_aes_gcm128_dispose(qsc_aes_gcm128_state* ctx);
  * \param length: [size_t] Number of plaintext bytes to encrypt (excluding the tag).
  *
  * \warning The ctx must be initialized via qsc_aes_gcm128_initialize before use.
- * \warning The nonce used during initialization must never be reused with the
- *          same key; doing so is a catastrophic loss of security.
+ * \warning The nonce used during initialization must never be reused with the same key; 
+ * doing so is a catastrophic loss of security.
  *
- * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
- *     qsc_aes_gcm128_decrypt, qsc_aes_gcm128_transform
- */
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated, qsc_aes_gcm128_decrypt, qsc_aes_gcm128_transform
+  * \warning A void encrypt call does not write ciphertext or a tag after an
+ * invalid AAD addition; prefer the checked transform when possible.
+*/
 QSC_EXPORT_API void qsc_aes_gcm128_encrypt(qsc_aes_gcm128_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /**
@@ -677,15 +758,11 @@ QSC_EXPORT_API void qsc_aes_gcm128_encrypt(qsc_aes_gcm128_state* ctx, uint8_t* o
  *
  * \param ctx: [struct] Pointer to a qsc_aes_gcm128_state structure to initialize.
  * \param keyparams: [const struct] Pointer to a constant qsc_aes_keyparams structure
- *                   supplying the 128-bit key (keylen == QSC_AES128_KEY_SIZE),
- *                   the nonce (noncelen in [1, QSC_GCM_MAX_NONCE_SIZE]), and an
- *                   optional info field (unused by GCM, may be NULL/0).
- * \param encryption:[bool] \c true to prepare the context for encryption;
- *                   \c false for decryption.
+ * supplying the 128-bit key (keylen == QSC_AES128_KEY_SIZE), the nonce 
+ * (noncelen in [1, QSC_GCM_MAX_NONCE_SIZE]), and an optional info field (unused by GCM, may be NULL/0).
+ * \param encryption:[bool] \c true to prepare the context for encryption; \c false for decryption.
  *
- * \warning Must be called before qsc_aes_gcm128_set_associated,
- *          qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt, or
- *          qsc_aes_gcm128_transform.
+ * \warning Must be called before qsc_aes_gcm128_set_associated, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt, or qsc_aes_gcm128_transform.
  * \warning A nonce must never be reused under the same key.
  *
  * \sa qsc_aes_gcm128_dispose, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
@@ -707,11 +784,17 @@ QSC_EXPORT_API void qsc_aes_gcm128_initialize(qsc_aes_gcm128_state* ctx, const q
  * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
  * \param data: [const uint8_t*] Pointer to the associated data buffer.
  * \param datalen: [size_t] Length of the associated data in bytes.
- *                 Must not exceed QSC_GCM_MAXAAD_SIZE per call.
+ * Cumulative AAD across all calls must not exceed QSC_GCM_MAXAAD_SIZE.
+ * Rejected AAD invalidates the context until reinitialization.
  *
  * \warning Must be called before any call to qsc_aes_gcm128_encrypt or qsc_aes_gcm128_decrypt.
  *
  * \sa qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
+ * \warning Rejected AAD (including cumulative limit violations) invalidates
+ * the GCM context. Subsequent operations do not produce authenticated output
+ * until reinitialization. This void setter cannot report failure directly.
+ * Use qsc_aes_gcm128_transform to obtain an
+ * explicit failure result; the direct void encrypt functions cannot report one.
  */
 QSC_EXPORT_API void qsc_aes_gcm128_set_associated(qsc_aes_gcm128_state* ctx, const uint8_t* data, size_t datalen);
 
@@ -726,9 +809,8 @@ QSC_EXPORT_API void qsc_aes_gcm128_set_associated(qsc_aes_gcm128_state* ctx, con
  * and the function returns \c true.
  *
  * In \b decryption mode \p length is the number of plaintext bytes (i.e. the
- * ciphertext length \e excluding the tag); the function internally reads
- * (\p length + QSC_GCM128_MAC_SIZE) bytes from \p input, verifies the tag,
- * and returns \c true on success or \c false on authentication failure
+ * ciphertext length \e excluding the tag); the function internally reads (\p length + QSC_GCM128_MAC_SIZE) bytes 
+ * from \p input, verifies the tag, and returns \c true on success or \c false on authentication failure 
  * (output is securely zeroed on failure).
  *
  * \param ctx: [struct] Pointer to an initialized qsc_aes_gcm128_state structure.
@@ -736,11 +818,9 @@ QSC_EXPORT_API void qsc_aes_gcm128_set_associated(qsc_aes_gcm128_state* ctx, con
  * \param input: [const uint8_t*] Pointer to the input buffer.
  * \param length: [size_t] Plaintext byte count (see above for per-mode semantics).
  *
- * \return [bool] \c true on success; \c false if authentication failed during
- *                decryption.
+ * \return [bool] \c true on success; \c false if authentication failed during decryption.
  *
- * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated,
- *     qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
+ * \sa qsc_aes_gcm128_initialize, qsc_aes_gcm128_set_associated, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt
  */
 QSC_EXPORT_API bool qsc_aes_gcm128_transform(qsc_aes_gcm128_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
@@ -807,7 +887,9 @@ QSC_EXPORT_API void qsc_aes_gcm256_dispose(qsc_aes_gcm256_state* ctx);
  * \param length: [size_t] Length of the input data in bytes (excluding the MAC for decryption).
  *
  * \sa qsc_aes_gcm256_initialize, qsc_aes_gcm256_set_associated
- */
+  * \warning A void encrypt call does not write ciphertext or a tag after an
+ * invalid AAD addition; prefer the checked transform when possible.
+*/
 QSC_EXPORT_API void qsc_aes_gcm256_encrypt(qsc_aes_gcm256_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 /**
@@ -840,8 +922,15 @@ QSC_EXPORT_API void qsc_aes_gcm256_initialize(qsc_aes_gcm256_state* ctx, const q
  * \param ctx: [struct] Pointer to the qsc_aes_gcm256_state structure.
  * \param data:	[const uint8_t*] Pointer to the associated data.
  * \param datalen: [size_t] Length of the associated data in bytes.
+ * Cumulative AAD across all calls must not exceed QSC_GCM_MAXAAD_SIZE.
+ * Rejected AAD invalidates the context until reinitialization.
  *
  * \sa qsc_aes_gcm256_encrypt
+ * \warning Rejected AAD (including cumulative limit violations) invalidates
+ * the GCM context. Subsequent operations do not produce authenticated output
+ * until reinitialization. This void setter cannot report failure directly.
+ * Use qsc_aes_gcm256_transform to obtain an
+ * explicit failure result; the direct void encrypt functions cannot report one.
  */
 QSC_EXPORT_API void qsc_aes_gcm256_set_associated(qsc_aes_gcm256_state* ctx, const uint8_t* data, size_t datalen);
 

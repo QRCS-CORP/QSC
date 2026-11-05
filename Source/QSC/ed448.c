@@ -1,1312 +1,1845 @@
 #include "ed448.h"
-#include "sha3.h"
-#include "memutils.h"
+#include "ed448base.h"
 
-/* ============================================================
- * Internal constants
- * ============================================================ */
+/* \cond NO_DOCUMENT */
 
-/*
- * The Goldilocks prime p = 2^448 - 2^224 - 1.
- * Used for reduction and canonicality checks.
+/*! \typedef ed448_point
+ * \brief Private extended Edwards point with X*Y = Z*T.
  */
-static const uint8_t SC448_ORDER[57U] =
+typedef struct
 {
-    0xF3U, 0x44U, 0x58U, 0xABU, 0x92U, 0xC2U, 0x78U, 0x23U,
-    0x55U, 0x8FU, 0xC5U, 0x8DU, 0x72U, 0xC2U, 0x6CU, 0x21U,
-    0x90U, 0x36U, 0xD6U, 0xAEU, 0x49U, 0xDBU, 0x4EU, 0xC4U,
-    0xE9U, 0x23U, 0xCAU, 0x7CU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x3FU,
-    0x00U
-};
+	/*! X coordinate. */
+	ed448_fe x;
+	/*! Y coordinate. */
+	ed448_fe y;
+	/*! Projective denominator Z. */
+	ed448_fe z;
+	/*! Extended coordinate T = X*Y/Z. */
+	ed448_fe t;
+} ed448_point;
 
-/*
- * d constant for Ed448-Goldilocks (twisted Edwards curve):
- *   d = -39081 mod p
- * Precomputed as a field element.
+/*! \typedef ed448_affine
+ * \brief Private affine point with precomputed d*x*y.
  */
-static const qsc_fe448 FE448_D =
+typedef struct
 {
-    -39081, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	/*! X coordinate. */
+	ed448_fe x;
+	/*! Y coordinate. */
+	ed448_fe y;
+	/*! Affine product d*x*y. */
+	ed448_fe td;
+} ed448_affine;
+
+/*! \brief Field zero. */
+static const ed448_fe ed448_zero = {{0U}};
+
+/*! \brief Field one. */
+static const ed448_fe ed448_one = {{1U}};
+
+/*! \brief Subgroup order L in fourteen little-endian 32-bit words. */
+static const uint32_t ed448_order[14U] = 
+{
+	UINT32_C(0xAB5844F3), 
+	UINT32_C(0x2378C292), 
+	UINT32_C(0x8DC58F55), 
+	UINT32_C(0x216CC272), 
+	UINT32_C(0xAED63690),
+	UINT32_C(0xC44EDB49), 
+	UINT32_C(0x7CCA23E9), 
+	UINT32_C(0xFFFFFFFF), 
+	UINT32_C(0xFFFFFFFF), 
+	UINT32_C(0xFFFFFFFF), 
+	UINT32_C(0xFFFFFFFF), 
+	UINT32_C(0xFFFFFFFF),
+	UINT32_C(0xFFFFFFFF), 
+	UINT32_C(0x3FFFFFFF)
 };
 
-/* 2*d constant for use in group operations. */
-static const qsc_fe448 FE448_2D =
+/*! \brief The constant 2^446 - L in seven little-endian 32-bit words. */
+static const uint32_t ed448_order_complement[7U] = 
 {
-    -78162, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	UINT32_C(0x54A7BB0D), 
+	UINT32_C(0xDC873D6D), 
+	UINT32_C(0x723A70AA), 
+	UINT32_C(0xDE933D8D), 
+	UINT32_C(0x5129C96F), 
+	UINT32_C(0x3BB124B6), 
+	UINT32_C(0x8335DC16)
 };
 
-static const uint8_t FE448_P_BYTES[56U] =
+/*! \brief Inverse of two modulo the field prime. */
+static const ed448_fe ed448_half = 
 {
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFEU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU
-};
-
-static const uint8_t FE448_PM2[56U] =
-{
-    0xFDU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFEU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU
-};
-
-static const uint8_t FE448_SQRT_EXP[56U] =
-{
-    0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-    0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-    0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-    0x00U, 0x00U, 0x00U, 0xC0U, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-    0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x3FU
-};
-
-static const qsc_fe448 FE448_INV2 =
-{
-    0, 0, 0, 0, 0, 0, 0, 134217728,
-    268435455, 268435455, 268435455, 268435455,
-    268435455, 268435455, 268435455, 134217727
-};
-
-static void fe448_canonicalize_bytes(uint8_t s[56U])
-{
-    uint8_t tmp[56U];
-    uint32_t borrow = 0U;
-    uint32_t mask;
-    size_t i;
-
-    for (i = 0U; i < 56U; ++i)
-    {
-        const uint32_t xi = (uint32_t)s[i];
-        const uint32_t yi = (uint32_t)FE448_P_BYTES[i];
-        const uint32_t sub = yi + borrow;
-
-        tmp[i] = (uint8_t)(xi - sub);
-        borrow = (uint32_t)((xi < sub) ? 1U : 0U);
-    }
-
-    mask = (uint32_t)(0U - (borrow ^ 1U));
-
-    for (i = 0U; i < 56U; ++i)
-    {
-        s[i] = (uint8_t)((s[i] & (uint8_t)(~mask)) | (tmp[i] & (uint8_t)mask));
-    }
-}
-
-static void fe448_p3_identity(qsc_ge448_p3* p)
-{
-    qsc_fe448_0(p->x);
-    qsc_fe448_1(p->y);
-    qsc_fe448_1(p->z);
-    qsc_fe448_0(p->t);
-}
-
-static void fe448_p2_identity(qsc_ge448_p2* p)
-{
-    qsc_fe448_0(p->x);
-    qsc_fe448_1(p->y);
-    qsc_fe448_1(p->z);
-}
-
-static void fe448_p3_cmov(qsc_ge448_p3* r, const qsc_ge448_p3* p, uint32_t b)
-{
-    qsc_fe448_cmov(r->x, p->x, b);
-    qsc_fe448_cmov(r->y, p->y, b);
-    qsc_fe448_cmov(r->z, p->z, b);
-    qsc_fe448_cmov(r->t, p->t, b);
-}
-
-static void fe448_p3_to_affine(qsc_fe448 x, qsc_fe448 y, const qsc_ge448_p3* p)
-{
-    qsc_fe448 zinv;
-
-    qsc_fe448_invert(zinv, p->z);
-    qsc_fe448_mul(x, p->x, zinv);
-    qsc_fe448_mul(y, p->y, zinv);
-}
-
-static void fe448_cached_to_affine(qsc_fe448 x, qsc_fe448 y, const qsc_ge448_cached* q)
-{
-    qsc_fe448 sum;
-    qsc_fe448 diff;
-    qsc_fe448 invz;
-
-    qsc_fe448_add(sum, q->yplusx, q->yminusx);
-    qsc_fe448_sub(diff, q->yplusx, q->yminusx);
-    qsc_fe448_mul(sum, sum, FE448_INV2);
-    qsc_fe448_mul(diff, diff, FE448_INV2);
-    qsc_fe448_invert(invz, q->z);
-    qsc_fe448_mul(x, diff, invz);
-    qsc_fe448_mul(y, sum, invz);
-}
-
-static void fe448_precomp_to_affine(qsc_fe448 x, qsc_fe448 y, const qsc_ge448_precomp* q)
-{
-    qsc_fe448_add(y, q->yplusx, q->yminusx);
-    qsc_fe448_sub(x, q->yplusx, q->yminusx);
-    qsc_fe448_mul(y, y, FE448_INV2);
-    qsc_fe448_mul(x, x, FE448_INV2);
-}
-
-static void fe448_affine_add(qsc_fe448 rx, qsc_fe448 ry, const qsc_fe448 x1, const qsc_fe448 y1, const qsc_fe448 x2, const qsc_fe448 y2)
-{
-    qsc_fe448 x1y2;
-    qsc_fe448 y1x2;
-    qsc_fe448 y1y2;
-    qsc_fe448 x1x2;
-    qsc_fe448 prod;
-    qsc_fe448 denx;
-    qsc_fe448 deny;
-    qsc_fe448 inv;
-    qsc_fe448 numx;
-    qsc_fe448 numy;
-    qsc_fe448 one;
-
-    qsc_fe448_1(one);
-    qsc_fe448_mul(x1y2, x1, y2);
-    qsc_fe448_mul(y1x2, y1, x2);
-    qsc_fe448_mul(y1y2, y1, y2);
-    qsc_fe448_mul(x1x2, x1, x2);
-    qsc_fe448_mul(prod, x1x2, y1y2);
-    qsc_fe448_mul(prod, prod, FE448_D);
-
-    qsc_fe448_add(numx, x1y2, y1x2);
-    qsc_fe448_add(denx, one, prod);
-    qsc_fe448_invert(inv, denx);
-    qsc_fe448_mul(rx, numx, inv);
-
-    qsc_fe448_sub(numy, y1y2, x1x2);
-    qsc_fe448_sub(deny, one, prod);
-    qsc_fe448_invert(inv, deny);
-    qsc_fe448_mul(ry, numy, inv);
-}
-
-
-/* ============================================================
- * Precomputed base point table
- *
- * The Ed448-Goldilocks base point in compressed form (RFC 8032):
- *   Gy = 693f46716eb6bc248876203756c9c7624bea73736ca3984087789c1e05a0c2d73ad3ff1ce67c39c4fdbd132c4ed7c8ad9808795bf230fa14
- *   (x is recovered as positive)
- *
- * The table below contains 57 groups of 8 precomputed points (yplusx, yminusx, xy2d)
- * representing multiples of B for the comb/wNAF scalar multiplication.
- * For clarity in this reference implementation a 4-bit sliding window over
- * 57 windows is used; the table has 57 * 8 = 456 entries.
- * Each entry is {yplusx, yminusx, xy2d}.
- *
- * NOTE: A complete precomputed table for Ed448 is large (~50 KB). The constants
- * below are the authoritative RFC 8032 values; in a production build these would
- * be generated offline by a dedicated tool and linked as a static table.
- * For the reference build the scalarmult_base function computes the table at
- * runtime from the base point using repeated doublings.
- * ============================================================ */
-
-/* Base point affine coordinates (RFC 8032 5.2.5) */
-static const uint8_t ED448_BASEPOINT[57U] =
-{
-    /* RFC 8032 Edwards448 base point, compressed: y || sign(x) */
-    0x14U, 0xFAU, 0x30U, 0xF2U, 0x5BU, 0x79U, 0x08U, 0x98U,
-    0xADU, 0xC8U, 0xD7U, 0x4EU, 0x2CU, 0x13U, 0xBDU, 0xFDU,
-    0xC4U, 0x39U, 0x7CU, 0xE6U, 0x1CU, 0xFFU, 0xD3U, 0x3AU,
-    0xD7U, 0xC2U, 0xA0U, 0x05U, 0x1EU, 0x9CU, 0x78U, 0x87U,
-    0x40U, 0x98U, 0xA3U, 0x6CU, 0x73U, 0x73U, 0xEAU, 0x4BU,
-    0x62U, 0xC7U, 0xC9U, 0x56U, 0x37U, 0x20U, 0x76U, 0x88U,
-    0x24U, 0xBCU, 0xB6U, 0x6EU, 0x71U, 0x46U, 0x3FU, 0x69U,
-    0x00U
-};
-
-/* ============================================================
- * Field element helpers
- * ============================================================ */
-
-/* Load a 32-bit little-endian integer from a byte array */
-static inline uint32_t load32_le(const uint8_t* src)
-{
-    return ((uint32_t)src[0U])
-        | ((uint32_t)src[1U] << 8)
-        | ((uint32_t)src[2U] << 16)
-        | ((uint32_t)src[3U] << 24);
-}
-
-/* Store a 32-bit little-endian integer to a byte array */
-/* ============================================================
- * Field arithmetic - GF(2^448 - 2^224 - 1)
- *
- * Representation: 16 limbs, each int32_t, in radix 2^28.
- * Limb i holds bits [28*i .. 28*i+27] of the canonical value.
- * After each operation limbs may exceed the 28-bit range and
- * are propagated by qsc_fe448_reduce / carry chains inside
- * mul/sq.
- * ============================================================ */
-
-void qsc_fe448_0(qsc_fe448 h)
-{
-    for (int32_t i = 0; i < 16; i++)
-    {
-        h[i] = 0;
-    }
-}
-
-void qsc_fe448_1(qsc_fe448 h)
-{
-    h[0U] = 1;
-
-    for (int32_t i = 1; i < 16; i++)
-    {
-        h[i] = 0;
-    }
-}
-
-void qsc_fe448_copy(qsc_fe448 h, const qsc_fe448 f)
-{
-    for (int32_t i = 0; i < 16; i++)
-    {
-        h[i] = f[i];
-    }
-}
-
-void qsc_fe448_add(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
-{
-    for (int32_t i = 0; i < 16; i++)
-    {
-        h[i] = f[i] + g[i];
-    }
-}
-
-void qsc_fe448_sub(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
-{
-    for (int32_t i = 0; i < 16; i++)
-    {
-        h[i] = f[i] - g[i];
-    }
-}
-
-void qsc_fe448_neg(qsc_fe448 h, const qsc_fe448 f)
-{
-    for (int32_t i = 0; i < 16; i++)
-    {
-        h[i] = -f[i];
-    }
-}
-
-void qsc_fe448_cmov(qsc_fe448 f, const qsc_fe448 g, uint32_t b)
-{
-    int32_t mask = (int32_t)(-(int64_t)b);  /* 0x00000000 or 0xFFFFFFFF */
-
-    for (int32_t i = 0; i < 16; i++)
-    {
-        f[i] ^= mask & (f[i] ^ g[i]);
-    }
-}
-
-void qsc_fe448_cswap(qsc_fe448 f, qsc_fe448 g, uint32_t b)
-{
-    int32_t mask = (int32_t)(-(int64_t)b);
-
-    for (int32_t i = 0; i < 16; i++)
-    {
-        int32_t t = mask & (f[i] ^ g[i]);
-        f[i] ^= t;
-        g[i] ^= t;
-    }
-}
-
-void qsc_fe448_from_bytes(qsc_fe448 h, const uint8_t* s)
-{
-    /* Each limb is 28 bits; 16 limbs x 28 bits = 448 bits = 56 bytes.
-     * We load 56 bytes (not 57; the 57th byte holds the sign of x for Ed448 points
-     * and is handled at the point decoding level, not here). */
-    int64_t tmp[16U] = { 0 };
-    uint64_t word;
-    int32_t i;
-    int32_t byte_off;
-    int32_t bit_off;
-    int32_t j;
-    int64_t v;
-
-    for (i = 0; i < 14; i++)
-    {
-        /* 4 bytes per limb for limbs 0..13, but the 28-bit boundary means we
-         * need to mask.  Load aligned 32-bit words and mask to 28 bits. */
-        tmp[i] = ((int64_t)load32_le(s + i * 4)) & 0x0FFFFFFFL;
-    }
-
-    /* Limbs 14 and 15 straddle byte 56; handle carefully.
-     * Byte layout (28-bit limbs):
-     *   limb 0:  bits   0..27  -> bytes  0..3  (mask 28 bits)
-     *   limb 1:  bits  28..55  -> bytes  3..6  (shift 4, mask 28 bits from 32-bit word)
-     * Using the standard approach of extracting 4 bytes and shifting: */
-
-    /* Recompute properly with bit offsets */
-    v = 0;
-
-    for (i = 0; i < 16; i++)
-    {
-        /* bit offset = 28*i */
-        byte_off = (28 * i) / 8;
-        bit_off  = (28 * i) % 8;
-        /* load 5 bytes to guarantee 28 bits are available */
-        word = 0;
-
-        for (j = 0; j < 5 && byte_off + j < 56; j++)
-        {
-            word |= ((uint64_t)s[byte_off + j]) << (8 * j);
-        }
-
-        tmp[i] = (int64_t)((word >> bit_off) & 0x0FFFFFFFUL);
-        (void)v;
-    }
-
-    for (i = 0; i < 16; i++)
-    {
-        h[i] = (int32_t)tmp[i];
-    }
-}
-
-void qsc_fe448_to_bytes(uint8_t* s, const qsc_fe448 h)
-{
-    qsc_fe448 t;
-    int64_t carry;
-    uint64_t val;
-    int32_t i;
-    int32_t j;
-    int32_t byte_off;
-    int32_t bit_off;
-
-    if (s != NULL)
-    {
-        qsc_fe448_copy(t, h);
-
-        for (j = 0; j < 2; ++j)
-        {
-            for (i = 0; i < 15; ++i)
-            {
-                carry = (int64_t)t[i] >> 28;
-                t[i] = (int32_t)((uint32_t)t[i] & 0x0FFFFFFFU);
-                t[i + 1] += (int32_t)carry;
-            }
-
-            carry = (int64_t)t[15] >> 28;
-            t[15] = (int32_t)((uint32_t)t[15] & 0x0FFFFFFFU);
-            t[0] += (int32_t)carry;
-            t[8] += (int32_t)carry;
-        }
-
-        qsc_memutils_clear(s, 56U);
-
-        for (i = 0; i < 16; ++i)
-        {
-            byte_off = (28 * i) / 8;
-            bit_off = (28 * i) % 8;
-            val = ((uint64_t)(uint32_t)t[i]) << bit_off;
-
-            for (j = 0; j < 5 && (byte_off + j) < 56; ++j)
-            {
-                s[byte_off + j] |= (uint8_t)(val >> (8 * j));
-            }
-        }
-
-        fe448_canonicalize_bytes(s);
-    }
-}
-
-
-void qsc_fe448_reduce(qsc_fe448 h, const qsc_fe448 f)
-{
-    int64_t carry;
-
-    qsc_fe448_copy(h, f);
-
-    for (int32_t i = 0; i < 15; i++)
-    {
-        carry  = (int64_t)h[i] >> 28;
-        h[i] = (int32_t)((uint32_t)h[i] & 0x0FFFFFFFU);
-        h[i + 1U] += (int32_t)carry;
-    }
-
-    carry  = (int64_t)h[15U] >> 28;
-    h[15U] = (int32_t)((uint32_t)h[15U] & 0x0FFFFFFFU);
-    h[0U]  += (int32_t)carry;
-    h[8U]  += (int32_t)carry;
-}
-
-int32_t qsc_fe448_is_negative(const qsc_fe448 f)
-{
-    uint8_t s[56U] = { 0 };
-
-    qsc_fe448_to_bytes(s, f);
-
-    return (int32_t)(s[0U] & 1);
-}
-
-int32_t qsc_fe448_is_zero(const qsc_fe448 f)
-{
-    uint8_t s[56U] = { 0 };
-    uint8_t d;
-    int32_t i;
-
-    d = 0;
-    qsc_fe448_to_bytes(s, f);
-
-    for (i = 0; i < 56; i++)
-    {
-        d |= s[i];
-    }
-
-    return (int32_t)(1 - ((d + 255) >> 8));
-}
-
-void qsc_fe448_mul32(qsc_fe448 h, const qsc_fe448 f, uint32_t n)
-{
-    int64_t carry;
-    
-    carry = 0;
-
-    for (int32_t i = 0; i < 16; i++)
-    {
-        carry   = (int64_t)f[i] * n + carry;
-        h[i]    = (int32_t)(carry & 0x0FFFFFFFL);
-        carry >>= 28;
-    }
-
-    /* Wrap carry using p = 2^448 - 2^224 - 1 */
-    h[0U] += (int32_t)carry;
-    h[8U] += (int32_t)carry;
-}
-
-/**
- * \brief Multiply signed radix-2^28 Ed448 field elements modulo p.
- * \param h: Caller-owned 16-limb destination, which may alias f or g.
- * \param f: Caller-owned 16-limb left operand, not modified.
- * \param g: Caller-owned 16-limb right operand, not modified.
- * \details Supports the full signed int32 limb range without int64 overflow.
- * Fixed loops, no shared mutable state, no secret-dependent branches.
- *
- * Strategy: schoolbook 16x16 -> 31-limb product, then reduce.
- * Reduction identity: 2^448 = 2^224 + 1 (mod p).
- * So for a product limb at position k >= 16:
- *   coefficient * 2^(28*k) = coefficient * 2^(28*(k-16)) * 2^448
- *                          = coefficient * 2^(28*(k-16)) * (2^224 + 1)
- *                          = coefficient * (2^(28*(k-16)+224) + 2^(28*(k-16)))
- * 224/28 = 8, so the shift by 224 bits = shift by 8 limbs.
- */
-void qsc_fe448_mul(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
-{
-    int64_t t[31U] = { 0 };
-	int64_t ff[16U] = { 0 };
-	int64_t gg[16U] = { 0 };
-	int64_t low;
-	int32_t pass;
-    int32_t i, j;
-    int64_t carry;
-
-	/* Normalize each lazy operand to bounded radix-2^28 limbs before the
-	 * 16x16 product. The signed-to-unsigned conversion is defined modulo
-	 * 2^64, including for negative limbs. Fixed-radix division is exact. */
-	for (i = 0; i < 16; ++i)
 	{
-		ff[i] = f[i];
-		gg[i] = g[i];
+		UINT64_C(0x0000000000000000), 
+		UINT64_C(0x0000000000000000), 
+		UINT64_C(0x0000000000000000), 
+		UINT64_C(0xFFFFFFFF80000000),
+		UINT64_C(0xFFFFFFFFFFFFFFFF), 
+		UINT64_C(0xFFFFFFFFFFFFFFFF), 
+		UINT64_C(0x7FFFFFFFFFFFFFFF)
+	}
+};
+
+/*! \brief Inverse of 2*d modulo the field prime. */
+static const ed448_fe ed448_inv2d = 
+{
+	{
+		UINT64_C(0xEDE19E6922AF54A3), 
+		UINT64_C(0x97BFB347D3824F1D), 
+		UINT64_C(0x3199B1BF6CD980B2), 
+		UINT64_C(0x3FB2712D5F6AF68C),
+		UINT64_C(0xA95CF546DEAD7864), 
+		UINT64_C(0x06D8639EB6462E99), 
+		UINT64_C(0x943A5A11C0792873)
+	}
+};
+
+/*! \brief Normalize all sixteen signed radix-2^28 limbs into a private field residue.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param in: Read-only operand in the declared fixed-size representation.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_from_legacy(ed448_fe* out, const qsc_fe448 in)
+{
+	int64_t w[16U];
+	int64_t low;
+	int64_t carry;
+	size_t i;
+	size_t pass;
+	size_t bit;
+
+	for (i = 0U; i < 16U; ++i)
+	{
+		w[i] = in[i];
 	}
 
-	for (pass = 0; pass < 2; ++pass)
+	for (pass = 0U; pass < 4U; ++pass)
 	{
-		for (i = 0; i < 15; ++i)
+		for (i = 0U; i < 15U; ++i)
 		{
-			low = (int64_t)((uint64_t)ff[i] & 0x0FFFFFFFULL);
-			carry = (ff[i] - low) / 268435456LL;
-			ff[i] = low;
-			ff[i + 1] += carry;
-
-			low = (int64_t)((uint64_t)gg[i] & 0x0FFFFFFFULL);
-			carry = (gg[i] - low) / 268435456LL;
-			gg[i] = low;
-			gg[i + 1] += carry;
+			low = (int64_t)((uint64_t)w[i] & UINT64_C(0xFFFFFFF));
+			carry = (w[i] - low) / INT64_C(268435456);
+			w[i] = low;
+			w[i + 1U] += carry;
 		}
 
-		low = (int64_t)((uint64_t)ff[15U] & 0x0FFFFFFFULL);
-		carry = (ff[15U] - low) / 268435456LL;
-		ff[15U] = low;
-		ff[0U] += carry;
-		ff[8U] += carry;
-
-		low = (int64_t)((uint64_t)gg[15U] & 0x0FFFFFFFULL);
-		carry = (gg[15U] - low) / 268435456LL;
-		gg[15U] = low;
-		gg[0U] += carry;
-		gg[8U] += carry;
+		low = (int64_t)((uint64_t)w[15U] & UINT64_C(0xFFFFFFF));
+		carry = (w[15U] - low) / INT64_C(268435456);
+		w[15U] = low;
+		w[0U] += carry;
+		w[8U] += carry;
 	}
 
-    /* Schoolbook product */
-    for (i = 0; i < 16; i++)
-    {
-        for (j = 0; j < 16; j++)
-        {
-            t[i + j] += ff[i] * gg[j];
-        }
-    }
+	*out = ed448_zero;
 
-    /* Reduce limbs 16..30 using 2^448 = 2^224 + 1 */
-    for (i = 30; i >= 16; i--)
-    {
-        int64_t c = t[i];
-        t[i - 16] += c;       /* * 2^0 */
-        t[i - 8]  += c;       /* * 2^224 */
-        t[i]       = 0;
-    }
+	for (i = 0U; i < 16U; ++i)
+	{
+		bit = 28U * i;
+		out->v[bit / 64U] |= (uint64_t)w[i] << (bit % 64U);
 
-    /* Propagate carries */
-    for (i = 0; i < 15; i++)
-    {
-        carry      = t[i] >> 28;
-        t[i]      &= 0x0FFFFFFFL;
-        t[i + 1]  += carry;
-    }
+		if (bit % 64U > 36U)
+		{
+			out->v[bit / 64U + 1U] |= (uint64_t)w[i] >> (64U - bit % 64U);
+		}
+	}
 
-    carry   = t[15] >> 28;
-    t[15]  &= 0x0FFFFFFFL;
-    t[0]   += carry;
-    t[8]   += carry;
-
-    /* One more pass to clean up */
-    for (i = 0; i < 15; i++)
-    {
-        carry     = t[i] >> 28;
-        t[i]     &= 0x0FFFFFFFL;
-        t[i + 1] += carry;
-    }
-
-    for (i = 0; i < 16; i++)
-    {
-        h[i] = (int32_t)t[i];
-    }
+	qsc_memutils_secure_erase(w, sizeof(w));
 }
 
-void qsc_fe448_sq(qsc_fe448 h, const qsc_fe448 f)
-{
-    /* Use multiplication for simplicity; a dedicated squaring routine would
-     * exploit f[i]*f[j] == f[j]*f[i] to halve the multiplications. */
-    qsc_fe448_mul(h, f, f);
-}
-
-void qsc_fe448_sq2(qsc_fe448 h, const qsc_fe448 f)
-{
-    qsc_fe448 t;
-    qsc_fe448_sq(t, f);
-    qsc_fe448_mul32(h, t, 2);
-}
-
-/*
- * Modular inversion via Fermat: z^(p-2) where p = 2^448 - 2^224 - 1.
- * Exponent e = p - 2 = 2^448 - 2^224 - 3.
- *
- * Addition chain (following standard Ed448 implementations):
- *   a1  = z
- *   a2  = a1^2
- *   a3  = a2 * a1
- *   a6  = a3^(2^3) * a3          (6 = 3+3)
- *   a9  = a6^(2^3) * a3
- *   a11 = a9 * a2
- *   a22 = a11^(2^1) * a11
- *   ... (standard Fermat inversion for p = 2^448 - 2^224 - 1)
+/*! \brief Export a canonical field residue as sixteen nonnegative radix-2^28 limbs.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param in: Read-only operand in the declared fixed-size representation.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
  */
-void qsc_fe448_invert(qsc_fe448 out, const qsc_fe448 z)
+static void ed448_to_legacy(qsc_fe448 out, const ed448_fe* in)
 {
-    qsc_fe448 result;
-    qsc_fe448 base;
-    int32_t i;
-    int32_t bit;
+	uint8_t bytes[56U];
+	uint32_t word;
+	size_t i;
+	size_t j;
+	size_t offset;
 
-    qsc_fe448_1(result);
-    qsc_fe448_copy(base, z);
+	ed448_store(bytes, in);
 
-    for (i = 55; i >= 0; --i)
-    {
-        uint8_t byteval = FE448_PM2[i];
+	for (i = 0U; i < 16U; ++i)
+	{
+		offset = (28U * i) / 8U;
+		word = 0U;
 
-        for (bit = 7; bit >= 0; --bit)
-        {
-            qsc_fe448_sq(result, result);
+		for (j = 0U; j < 4U; ++j)
+		{
+			word |= (uint32_t)bytes[offset + j] << (8U * j);
+		}
 
-            if (((byteval >> bit) & 1U) != 0U)
-            {
-                qsc_fe448_mul(result, result, base);
-            }
-        }
-    }
+		out[i] = (int32_t)((word >> (4U * (i & 1U))) & UINT32_C(0xFFFFFFF));
+	}
 
-    qsc_fe448_copy(out, result);
+	qsc_memutils_secure_erase(bytes, sizeof(bytes));
 }
 
-
-/* ============================================================
- * Scalar arithmetic (57-byte scalars mod l)
- *
- * l = 2^446 - 13818066809895115352007386748515426880316871408816
- *     44BI82177129234481
- * in little-endian:
- *   l[0..27] carry info, l[55] = 0x3F, l[56] = 0x00
- * ============================================================ */
-
-void qsc_sc448_clamp(uint8_t* k)
+/*! \brief Import the four public extended coordinates into the private arithmetic engine.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param in: Read-only operand in the declared fixed-size representation.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_import(ed448_point* out, const qsc_ge448_p3* in)
 {
-    /* RFC 7748 5: For X448 scalar multiplication */
-    k[0U]  &= 252U;   /* clear bits 0 and 1 */
-    k[55U] |= 128U;   /* set bit 447 */
+	ed448_from_legacy(&out->x, in->x);
+	ed448_from_legacy(&out->y, in->y);
+	ed448_from_legacy(&out->z, in->z);
+	ed448_from_legacy(&out->t, in->t);
 }
 
-int32_t qsc_sc448_is_canonical(const uint8_t s[57U])
+/*! \brief Export the four private extended coordinates through the public coordinate ABI.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param in: Read-only operand in the declared fixed-size representation.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_export(qsc_ge448_p3* out, const ed448_point* in)
 {
-    int32_t r;
-
-    r = 0;
-
-    if (s != NULL)
-    {
-        for (size_t i = 57U; i-- > 0U;)
-        {
-            if (s[i] < SC448_ORDER[i])
-            {
-                r = 1;
-                break;
-            }
-            else if (s[i] > SC448_ORDER[i])
-            {
-                r = 0;
-                break;
-            }
-        }
-    }
-
-    return r;
+	ed448_to_legacy(out->x, &in->x);
+	ed448_to_legacy(out->y, &in->y);
+	ed448_to_legacy(out->z, &in->z);
+	ed448_to_legacy(out->t, &in->t);
 }
 
-
-int32_t qsc_ed448_small_order(const uint8_t s[57U])
+/*! \brief Set an extended point to the group identity (0:1:1:0).
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_identity(ed448_point* out)
 {
-    static const uint8_t small_order_points[4][57] =
-    {
-        {
-            0x01U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U
-        },
-        {
-            0xFEU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-            0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-            0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-            0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFEU, 0xFFU, 0xFFU, 0xFFU,
-            0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-            0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-            0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU,
-            0x00U
-        },
-        {
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U
-        },
-        {
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
-            0x80U
-        }
-    };
-
-    uint32_t diff;
-    int32_t r;
-
-    r = 0;
-
-    if (s != NULL)
-    {
-        for (size_t i = 0U; i < 4U; ++i)
-        {
-            diff = 0U;
-
-            for (size_t j = 0U; j < 57U; ++j)
-            {
-                diff |= (uint32_t)(s[j] ^ small_order_points[i][j]);
-            }
-
-            if (diff == 0U)
-            {
-                r = 1;
-                break;
-            }
-        }
-    }
-
-    return r;
+	out->x = ed448_zero;
+	out->y = ed448_one;
+	out->z = ed448_one;
+	out->t = ed448_zero;
 }
 
-
-int32_t qsc_ge448_has_small_order(const uint8_t s[57U])
+/*! \brief Add extended Edwards points using the complete add-2008-hwcd formula for a = 1.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param p: Read-only point operand with valid coordinates and a nonzero projective denominator.
+ * \param q: Read-only point operand in the declared coordinate representation.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_add(ed448_point* out, const ed448_point* p, const ed448_point* q)
 {
-    return qsc_ed448_small_order(s);
+	ed448_fe a;
+	ed448_fe b;
+	ed448_fe c;
+	ed448_fe d;
+	ed448_fe e;
+	ed448_fe f;
+	ed448_fe g;
+	ed448_fe h;
+
+	/* EFD add-2008-hwcd: complete for a square and d a nonsquare. */
+	ed448_mul(&a, &p->x, &q->x);
+	ed448_mul(&b, &p->y, &q->y);
+	ed448_mul(&c, &p->t, &q->t);
+	ed448_mul_small(&c, &c, 39081U);
+	ed448_sub(&c, &ed448_zero, &c);
+	ed448_mul(&d, &p->z, &q->z);
+	ed448_add(&e, &p->x, &p->y);
+	ed448_add(&f, &q->x, &q->y);
+	ed448_mul(&e, &e, &f);
+	ed448_sub(&e, &e, &a);
+	ed448_sub(&e, &e, &b);
+	ed448_sub(&f, &d, &c);
+	ed448_add(&g, &d, &c);
+	ed448_sub(&h, &b, &a);
+	ed448_mul(&out->x, &e, &f);
+	ed448_mul(&out->y, &g, &h);
+	ed448_mul(&out->t, &e, &h);
+	ed448_mul(&out->z, &f, &g);
+}
+
+/*! \brief Add an affine (x,y,d*x*y) table entry to an extended Edwards point.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param p: Read-only point operand with valid coordinates and a nonzero projective denominator.
+ * \param q: Read-only point operand in the declared coordinate representation.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_add_affine(ed448_point* out, const ed448_point* p, const ed448_affine* q)
+{
+	ed448_fe a;
+	ed448_fe b;
+	ed448_fe c;
+	ed448_fe e;
+	ed448_fe f;
+	ed448_fe g;
+	ed448_fe h;
+
+	ed448_mul(&a, &p->x, &q->x);
+	ed448_mul(&b, &p->y, &q->y);
+	ed448_mul(&c, &p->t, &q->td);
+	ed448_add(&e, &p->x, &p->y);
+	ed448_add(&f, &q->x, &q->y);
+	ed448_mul(&e, &e, &f);
+	ed448_sub(&e, &e, &a);
+	ed448_sub(&e, &e, &b);
+	ed448_sub(&f, &p->z, &c);
+	ed448_add(&g, &p->z, &c);
+	ed448_sub(&h, &b, &a);
+	ed448_mul(&out->x, &e, &f);
+	ed448_mul(&out->y, &g, &h);
+	ed448_mul(&out->t, &e, &h);
+	ed448_mul(&out->z, &f, &g);
+}
+
+/*! \brief Double an extended Edwards point with the dbl-2008-hwcd formula for a = 1.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param p: Read-only point operand with valid coordinates and a nonzero projective denominator.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_double(ed448_point* out, const ed448_point* p)
+{
+	ed448_fe a;
+	ed448_fe b;
+	ed448_fe c;
+	ed448_fe e;
+	ed448_fe f;
+	ed448_fe g;
+	ed448_fe h;
+
+	/* EFD dbl-2008-hwcd with a = 1. */
+	ed448_square(&a, &p->x);
+	ed448_square(&b, &p->y);
+	ed448_square(&c, &p->z);
+	ed448_add(&c, &c, &c);
+	ed448_add(&e, &p->x, &p->y);
+	ed448_square(&e, &e);
+	ed448_sub(&e, &e, &a);
+	ed448_sub(&e, &e, &b);
+	ed448_add(&g, &a, &b);
+	ed448_sub(&f, &g, &c);
+	ed448_sub(&h, &a, &b);
+	ed448_mul(&out->x, &e, &f);
+	ed448_mul(&out->y, &g, &h);
+	ed448_mul(&out->t, &e, &h);
+	ed448_mul(&out->z, &f, &g);
+}
+
+/*! \brief Compress an extended point with one fixed-chain inversion; erase affine intermediates.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param p: Read-only point operand with valid coordinates and a nonzero projective denominator.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_encode(uint8_t out[57U], const ed448_point* p)
+{
+	ed448_fe inverse;
+	ed448_fe x;
+	ed448_fe y;
+	uint8_t xb[56U];
+
+	ed448_invert(&inverse, &p->z);
+	ed448_mul(&x, &p->x, &inverse);
+	ed448_mul(&y, &p->y, &inverse);
+	ed448_store(out, &y);
+	ed448_store(xb, &x);
+
+	out[56U] = (uint8_t)((xb[0U] & 1U) << 7);
+	qsc_memutils_secure_erase(&inverse, sizeof(inverse));
+	qsc_memutils_secure_erase(&x, sizeof(x));
+	qsc_memutils_secure_erase(&y, sizeof(y));
+	qsc_memutils_secure_erase(xb, sizeof(xb));
+}
+
+/*! \brief Conditionally assign seven limbs using an all-zero or all-one compiler-barrier mask.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param in: Read-only operand in the declared fixed-size representation.
+ * \param mask: Selection mask: all zero bits to retain output, all one bits to assign input.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_select_field(ed448_fe* out, const ed448_fe* in, uint64_t mask)
+{
+	size_t i;
+
+	mask = ed448_mask_barrier(mask);
+
+	for (i = 0U; i < 7U; ++i)
+	{
+		out->v[i] = (out->v[i] & ~mask) | (in->v[i] & mask);
+	}
+}
+
+/*! \brief Immutable (j+1)*256^i*B affine table, generated from RFC 8032; 56 rows of eight (x,y,d*x*y) entries. */
+static const ed448_affine ed448_base_table[56U][8U] = {
+{
+	{{{UINT64_C(0x2626A82BC70CC05E), UINT64_C(0x433B80E18B00938E), UINT64_C(0x12AE1AF72AB66511), UINT64_C(0xEA6DE324A3D3A464), UINT64_C(0x9E146570470F1767), UINT64_C(0x221D15A622BF36DA), UINT64_C(0x4F1970C66BED0DED)}}, {{UINT64_C(0x9808795BF230FA14), UINT64_C(0xFDBD132C4ED7C8AD), UINT64_C(0x3AD3FF1CE67C39C4), UINT64_C(0x87789C1E05A0C2D7), UINT64_C(0x4BEA73736CA39840), UINT64_C(0x8876203756C9C762), UINT64_C(0x693F46716EB6BC24)}}, {{UINT64_C(0x0E6A7C93790D43B1), UINT64_C(0x4AE485EE44C273B4), UINT64_C(0x3A6626961292E516), UINT64_C(0x5CB41037F1CE00E8), UINT64_C(0xB86E90478111129E), UINT64_C(0x5B8A5541C3FAF4D1), UINT64_C(0x26AFA9E48A9AA167)}}},
+	{{{UINT64_C(0x5555555555555555), UINT64_C(0x5555555555555555), UINT64_C(0x5555555555555555), UINT64_C(0xAAAAAAA955555555), UINT64_C(0xAAAAAAAAAAAAAAAA), UINT64_C(0xAAAAAAAAAAAAAAAA), UINT64_C(0xAAAAAAAAAAAAAAAA)}}, {{UINT64_C(0xDAEAFBCDEA9386ED), UINT64_C(0xBBBCB2BED1CDA06B), UINT64_C(0x0D6565833A2A3098), UINT64_C(0xB7E36D728AD8C4B8), UINT64_C(0x036ED7A035884DD7), UINT64_C(0xB359D6205086C2B0), UINT64_C(0xAE05E9634AD7048D)}}, {{UINT64_C(0x2A96D0FD22EA0BCF), UINT64_C(0x1FCE414F3022AAA3), UINT64_C(0x085CC8A2580F70AA), UINT64_C(0x1C60AFC379044D81), UINT64_C(0x16BB1E4E1E282702), UINT64_C(0x364906945FFC8B1B), UINT64_C(0x60181B4CB906001F)}}},
+	{{{UINT64_C(0x5728173286FF2F8F), UINT64_C(0xE862B769465DA857), UINT64_C(0xDAA9CBF7F6271FD6), UINT64_C(0xE2BA077A4A3FCFE8), UINT64_C(0x32241B8B8CDA82C7), UINT64_C(0x55BD64316CB69433), UINT64_C(0x0865886B9108AF64)}}, {{UINT64_C(0xB822AC13588ED6FC), UINT64_C(0xBFFA9A68FED02DAF), UINT64_C(0xBB3A331BDB6767F0), UINT64_C(0xFCE43C82EC4E1D58), UINT64_C(0x9A4A8D952356C3B9), UINT64_C(0x06CBDA7AD43AA644), UINT64_C(0xE005A8DBD5125CF7)}}, {{UINT64_C(0x16CD3A416E267A3A), UINT64_C(0x1129884610E5C7D8), UINT64_C(0x6492407E3E42F403), UINT64_C(0x8379C2B40D31D305), UINT64_C(0xDA309EC353ACF419), UINT64_C(0x037A60E8DFC2C41B), UINT64_C(0x4F44D997609BBB10)}}},
+	{{{UINT64_C(0xE2CE42AC48BA7F30), UINT64_C(0x21AEE1798949E120), UINT64_C(0x01B7BDF1515DD8BA), UINT64_C(0x93FDA4BE70C74CC3), UINT64_C(0x255A09CF4E0891C6), UINT64_C(0x1419A17226F929EA), UINT64_C(0x49DCBC5C6C0CCE2C)}}, {{UINT64_C(0x32E236F86DE51839), UINT64_C(0xB5D444285D0D4F5B), UINT64_C(0xC0D8F97EA1CA9472), UINT64_C(0xC90DC3227B8A5BC1), UINT64_C(0x9CB7C02F0457D845), UINT64_C(0x164B33A5DE021B97), UINT64_C(0xD49077E4ACCDE527)}}, {{UINT64_C(0x79AA3DCCA72BC254), UINT64_C(0x657868C0EDD7CA44), UINT64_C(0x69F9A166736E0583), UINT64_C(0xC241D5A3DA10C104), UINT64_C(0x55672BBCA6571BC5), UINT64_C(0x2830DBB5826B18EB), UINT64_C(0x16B986789758B764)}}},
+	{{{UINT64_C(0xD0A99D1092030034), UINT64_C(0xF07B2D8CEFC6F950), UINT64_C(0x8BC0D57A920C3C96), UINT64_C(0x56D761E895881280), UINT64_C(0x80CBCF728562ADA7), UINT64_C(0x2BA7601EEDB50DEF), UINT64_C(0x7A9F9335A48DCB0E)}}, {{UINT64_C(0x43B4731472F435EB), UINT64_C(0x58405512881F2254), UINT64_C(0x27D7A4EE59D2B33C), UINT64_C(0xD86551F7B6980171), UINT64_C(0x260CA1823AB18FCE), UINT64_C(0xB9109CE4FD580ADE), UINT64_C(0xADFD751A2517EDD3)}}, {{UINT64_C(0xE06C3E8E1F5BB305), UINT64_C(0xC7057034F02B36B2), UINT64_C(0xF84B332D67133823), UINT64_C(0x542CA4513AE3E790), UINT64_C(0x1A66A8A9DBE6491F), UINT64_C(0xAE0CF80DCE8E4B25), UINT64_C(0x67FE268FC13B327A)}}},
+	{{{UINT64_C(0x787FD7652ABEF79C), UINT64_C(0x71096C20A07443A8), UINT64_C(0x76451C5C1840D12A), UINT64_C(0x4AD95F654A06E4A8), UINT64_C(0xE673FB02603BED0B), UINT64_C(0x00349AEBD97125D2), UINT64_C(0x54523E04498B722E)}}, {{UINT64_C(0x8CEA5D1DA07C7BCC), UINT64_C(0x2B3ECCE776938EA9), UINT64_C(0xE1FF1B80284E861D), UINT64_C(0x69C5852248DE76B6), UINT64_C(0x53A2765A1A7B1218), UINT64_C(0x743EC056C667BFD0), UINT64_C(0x3F99B9CD8AB61C2D)}}, {{UINT64_C(0xCD84B14CF71FD75E), UINT64_C(0x6CF64E1BD5AEE29F), UINT64_C(0xC7849EE919FCC6A0), UINT64_C(0xC844442B549AD40B), UINT64_C(0x1FD148EC5F4B1939), UINT64_C(0xAEEE482CC284AE0E), UINT64_C(0x8ACFB79C73502CFD)}}},
+	{{{UINT64_C(0xD7DF9567CEB5EAF7), UINT64_C(0x6E0B110A6B478AC7), UINT64_C(0xB5A2092D33501470), UINT64_C(0xD568E6840DF9C7B0), UINT64_C(0xF2D8C3719BBA4223), UINT64_C(0x467B9A5291B6D78A), UINT64_C(0x079748E5C89BEF77)}}, {{UINT64_C(0x09E20D3FADAC377F), UINT64_C(0xBBB734E866972B5C), UINT64_C(0x2F84C9D8687A3C40), UINT64_C(0xCA78F50E7B3946FD), UINT64_C(0x94417E7179D00E40), UINT64_C(0x7373BCB23583B875), UINT64_C(0x7DDEDA3C90FD699C)}}, {{UINT64_C(0x84FAE64438EDF0D0), UINT64_C(0x4DE825186AA89F80), UINT64_C(0xF60EE2B4BBC907A5), UINT64_C(0x2338FDD5E1E5F106), UINT64_C(0x5F4BCF6588DAE6CE), UINT64_C(0x6ABE2815418A340F), UINT64_C(0x6B8BE3AE56F3CA79)}}},
+	{{{UINT64_C(0x962538A67153BDE0), UINT64_C(0x713E223ACA9406B6), UINT64_C(0x816A64F9080DC1AD), UINT64_C(0x85DC8B976C4CB47D), UINT64_C(0x037C08E2D7BC2856), UINT64_C(0x63FB45D0E66BD97B), UINT64_C(0xD1F1BC5520E8A35B)}}, {{UINT64_C(0x454EB873CE69E09B), UINT64_C(0xD89F1663164BC8EE), UINT64_C(0x86AD8208F7003BA8), UINT64_C(0x7BD94C7B4B98EAD3), UINT64_C(0x408C6B38B3A4B93B), UINT64_C(0xE87D1F3574FF46BA), UINT64_C(0xC7564F4E9BEA9BDA)}}, {{UINT64_C(0xF77F1F714F0C4CFE), UINT64_C(0x79CED33B910B3C56), UINT64_C(0x0ED043127AECA667), UINT64_C(0x4B9F1668A72DAA33), UINT64_C(0xAACBCACD703514D4), UINT64_C(0xBAD390FC827C460A), UINT64_C(0x46F8FC54E87F0EFF)}}}
+	},
+	{
+	{{{UINT64_C(0xCA2E4FDB25BFAC1C), UINT64_C(0xB7CCF0D79AAF5F3B), UINT64_C(0x39609AE756B0D20F), UINT64_C(0x35A5AB58E3696BEB), UINT64_C(0x4853B281DDA019FC), UINT64_C(0xE2BE761AC0A2A2B2), UINT64_C(0xF19C34FEB56730E3)}}, {{UINT64_C(0xA12D25CE8A30241E), UINT64_C(0xC9F4F5661EAB73D7), UINT64_C(0xCED72C4611ED0DAA), UINT64_C(0x2E92E985D5442344), UINT64_C(0xDD44DA4AADCE78F5), UINT64_C(0xADDC61D363CE6FE5), UINT64_C(0x3BEB69CC9111BFFC)}}, {{UINT64_C(0x45213B462015558B), UINT64_C(0xEBFFFB20E0DEC870), UINT64_C(0x002B11CAF2CBFCC2), UINT64_C(0x2F1E43F1B4C73299), UINT64_C(0x5F4502666276606C), UINT64_C(0x0C4050DFDD9F72BC), UINT64_C(0xF430AFA76BC3E0A3)}}},
+	{{{UINT64_C(0xE0D2E7660940EBC9), UINT64_C(0x0575E032018B17BB), UINT64_C(0x1C7F34AD4939175C), UINT64_C(0x43E147E0DD0B1472), UINT64_C(0x3C60EE897352C2BA), UINT64_C(0x72E8DECF27547DD0), UINT64_C(0x17A1CD1D6482BB54)}}, {{UINT64_C(0x25DD43B848128B3F), UINT64_C(0x7DF2F0CAE34EA7DD), UINT64_C(0x2EBBDC81CA99FFF0), UINT64_C(0x872155E61C895979), UINT64_C(0x50E39DDD0845C7A6), UINT64_C(0x398C2BB2D89B907A), UINT64_C(0x38063F91B3B536BE)}}, {{UINT64_C(0xDCE9F5DAD9BB0165), UINT64_C(0x9FE2E0C9DD4C5F89), UINT64_C(0x456335CD260A925B), UINT64_C(0x4AAD25C51308E88E), UINT64_C(0xD1AD0F94B8A4DDDD), UINT64_C(0x627085A5CE1CA82A), UINT64_C(0xB6604E855A7DAEF4)}}},
+	{{{UINT64_C(0x2A149FAFBF843B23), UINT64_C(0x4D4C00AB582AC7F2), UINT64_C(0x341A22A3B981BF2F), UINT64_C(0x47C03B632CE1A654), UINT64_C(0x6A212F2CF868A407), UINT64_C(0x961D351497416320), UINT64_C(0xFB85430BC7099EC9)}}, {{UINT64_C(0x679C9107290A9E59), UINT64_C(0x9214734E94A06DE3), UINT64_C(0x5B1FB95CF3CBEDB9), UINT64_C(0xEDD7BE0DC6BCE324), UINT64_C(0x76AEDE7D1C1A82AB), UINT64_C(0x25B7C21503BDF749), UINT64_C(0xF7894910D096AB70)}}, {{UINT64_C(0x34F887BC4950858D), UINT64_C(0xF24FE3B6012BF4C3), UINT64_C(0x9AECC5F1E4B03C99), UINT64_C(0x481323342DCBEF18), UINT64_C(0x8A157114BE5D66E2), UINT64_C(0xF2E87E70962848C0), UINT64_C(0xDE305CBAC65A06F1)}}},
+	{{{UINT64_C(0x066BD48BB555A41B), UINT64_C(0xDFD1FBDD0D067DE2), UINT64_C(0xE40B8A98BC477DD6), UINT64_C(0x3DA32AE41D0693B3), UINT64_C(0xA20FCEBAA26E1556), UINT64_C(0x116150980A930194), UINT64_C(0x8E119200109CECDA)}}, {{UINT64_C(0x4B8EA0552FFB9726), UINT64_C(0xDF76EBA50A4047E4), UINT64_C(0xC690E0C050D2460D), UINT64_C(0x99B18EDCE009204A), UINT64_C(0x76AC77F23F47B863), UINT64_C(0x96C2407929052F5B), UINT64_C(0x73F6B4A06F6DC742)}}, {{UINT64_C(0x36469CA1A49C4CF7), UINT64_C(0x15F03CCF7878A599), UINT64_C(0xC320BA021AF59E15), UINT64_C(0x284901C8CEF3B331), UINT64_C(0x6C521DD21520B7B8), UINT64_C(0xB9DFD5DE9EF2939C), UINT64_C(0x5F06B870FE44A085)}}},
+	{{{UINT64_C(0xCEB6EF9EA3B10CAD), UINT64_C(0xDF86312843DF7C8F), UINT64_C(0x6DD8235BDCD528BE), UINT64_C(0x908BFDE02889059F), UINT64_C(0xDF3123E2E504578E), UINT64_C(0x461D57EE9E3A3245), UINT64_C(0xDDEC2D46F94CEBBF)}}, {{UINT64_C(0x2A21B43B9145768F), UINT64_C(0x043FE79A8F9DAE96), UINT64_C(0x39649BFF1972BCBB), UINT64_C(0xDC533B85E3DCF6D2), UINT64_C(0x94FDBE22D0ED592B), UINT64_C(0x4EB87F1D8E2214FF), UINT64_C(0xD8D4C71D18CF6D6C)}}, {{UINT64_C(0x2076DC68B139396B), UINT64_C(0x7FD061750B2DF932), UINT64_C(0x1D472B508A01BE22), UINT64_C(0x17F092D3278DAD4C), UINT64_C(0x82F40DD9A5672477), UINT64_C(0xEBEB8303BFE5E9B8), UINT64_C(0x0159053269C78720)}}},
+	{{{UINT64_C(0x21CDA666C8D96345), UINT64_C(0x606E9ECAA25836CD), UINT64_C(0x04F0546E885BD984), UINT64_C(0xB6959AE41DD5FEF8), UINT64_C(0xCF8C9B55CC9DFFF6), UINT64_C(0x716B062B9B8099B9), UINT64_C(0x13EC87C554B128B4)}}, {{UINT64_C(0xFFE696D1F75AACC2), UINT64_C(0x9D42F78C99387FC5), UINT64_C(0x618FA876C0947380), UINT64_C(0x22F5334199CE62DB), UINT64_C(0x1AC0DB6C5E35E3E0), UINT64_C(0xFB8E600D8B4762FC), UINT64_C(0x0BC107058F0D1EA1)}}, {{UINT64_C(0xA6E80F9187B8E402), UINT64_C(0x44F90FBDD69DFCDA), UINT64_C(0x7F347D32B039F4C0), UINT64_C(0x4B4B934A92164D06), UINT64_C(0x67E1A4DE98E08BFB), UINT64_C(0xB4C98115A110AC8B), UINT64_C(0x0AC5723BA8FFF0A1)}}},
+	{{{UINT64_C(0x411F4526916DA513), UINT64_C(0x23E01F2FC04F5CF3), UINT64_C(0xA8A113AE9208664D), UINT64_C(0x61CFC0854E33082D), UINT64_C(0x8DE6E5327F2688EC), UINT64_C(0x70DB3B4E48A86F2E), UINT64_C(0xD6626973240ADE20)}}, {{UINT64_C(0xBDA6B317FFBD997B), UINT64_C(0xA0F39FA1B5649E26), UINT64_C(0x7B4745CBF0D258CB), UINT64_C(0xB5C9E1904A7791B1), UINT64_C(0x940923EC4C25F555), UINT64_C(0xF4C6AE98F1B67CD3), UINT64_C(0x7962116BCD4E0F16)}}, {{UINT64_C(0x02B037B7FC63494C), UINT64_C(0xC4C4F5FB014292BC), UINT64_C(0x2A064C40AB17A6A1), UINT64_C(0x05424AD28EF942BC), UINT64_C(0x9AEAD9A5C5B55800), UINT64_C(0x172004DC5462E5A8), UINT64_C(0x01A19600F9438BE9)}}},
+	{{{UINT64_C(0x988D58FA302491E3), UINT64_C(0xEBC77CF76C67AB38), UINT64_C(0x25F5A3BC2F657647), UINT64_C(0x8D69505D5F4BFE0D), UINT64_C(0x9FC3FB6645503F47), UINT64_C(0xE1BC1FA86B184A88), UINT64_C(0xABB234F5508DD833)}}, {{UINT64_C(0x585348E1B9A05B48), UINT64_C(0xA2D357AC5F164DC8), UINT64_C(0x3A3E9D21F4D38EC8), UINT64_C(0xE560A0B85EC6D3CA), UINT64_C(0x4F73433F59CD4062), UINT64_C(0xD9D87CAB14E349B7), UINT64_C(0x858CE7FEB964F5EF)}}, {{UINT64_C(0xE79BAE94731E2F51), UINT64_C(0x021E2610FFF8BEDA), UINT64_C(0x64B4DA04E98BB175), UINT64_C(0x2A674C306E74BFE9), UINT64_C(0x7766C493C1C1FF38), UINT64_C(0x534A4AFC00D04697), UINT64_C(0x76E783AF17A05359)}}}
+	},
+	{
+	{{{UINT64_C(0x7E7577254EB731B4), UINT64_C(0x17159FFF1FB4E239), UINT64_C(0xE65E67749B145C82), UINT64_C(0x12E618D840619FE2), UINT64_C(0x86C707B83E57B828), UINT64_C(0xC80CB31B24A20631), UINT64_C(0xCCA6185AC75169CF)}}, {{UINT64_C(0xCE6539F44B255818), UINT64_C(0x74825895DA00368B), UINT64_C(0x1A9C9E841A30917C), UINT64_C(0x0E4F7D9D85469E1B), UINT64_C(0x3187B35CC005664C), UINT64_C(0x4763AA0E9B0A8A06), UINT64_C(0x1BD872C4B26AC221)}}, {{UINT64_C(0xAB9E56F362060AD1), UINT64_C(0x92BFFFE0AADB387C), UINT64_C(0x6E0FB7EFBF173D8F), UINT64_C(0x45759634E2C48654), UINT64_C(0xDC2FD28B6EE08A14), UINT64_C(0x884BA0B2CEAED63A), UINT64_C(0x34CA1E5488319C51)}}},
+	{{{UINT64_C(0xBC3578F97A93762B), UINT64_C(0xB565434F69A72D52), UINT64_C(0xF20544DDCCA4022C), UINT64_C(0xD8A66588A7D1E41F), UINT64_C(0x7C799D7BAF823475), UINT64_C(0x542F1660E4219FC9), UINT64_C(0xA7D1F60843FAF615)}}, {{UINT64_C(0x5ABBFAAB54063CCC), UINT64_C(0xDBFE3AD9BADA4985), UINT64_C(0xE87E59FFD5F1C5BD), UINT64_C(0x6F89956B0E419C2A), UINT64_C(0xC21CCD8951DCE6ED), UINT64_C(0xD4A1BA83C991F047), UINT64_C(0x85AF86E2D28E0A6E)}}, {{UINT64_C(0x24CDF606E6534929), UINT64_C(0x81C0F6445FF19C78), UINT64_C(0x1870E05C5FB8FD6A), UINT64_C(0x0FD561A3DAD99E23), UINT64_C(0x4070063DF3D6AFC7), UINT64_C(0x1EE9F4519BA591AD), UINT64_C(0x512D9892AD31178A)}}},
+	{{{UINT64_C(0x5D04433C49ED48A8), UINT64_C(0xE3B5EFFA8580BC37), UINT64_C(0x1AADDAFB0E1B2FA6), UINT64_C(0xDF8B2EA851483A2A), UINT64_C(0x13CF639F0C733448), UINT64_C(0xC61A3A23BF84AA05), UINT64_C(0x3E64F68DC2430D6B)}}, {{UINT64_C(0x2A51BF502C5876B1), UINT64_C(0x914F6B833751C0DD), UINT64_C(0x8E632CE597BE1342), UINT64_C(0x5D62587B43D5AB0F), UINT64_C(0x20AED34F24269671), UINT64_C(0xB7E14E18BAF7E87D), UINT64_C(0xF5EB753E22E08425)}}, {{UINT64_C(0xF57E23D878832483), UINT64_C(0x01FD53DED6B29510), UINT64_C(0x52C8CA36E2AAD5CC), UINT64_C(0x0572CAD3A8C55DC5), UINT64_C(0xAD364FA12254A2E3), UINT64_C(0xE5D56B6AC38B9D62), UINT64_C(0x5DDDF036E07E7A91)}}},
+	{{{UINT64_C(0x4051DA71724D8295), UINT64_C(0x7F66D478E4318D13), UINT64_C(0x760711ACF94F42CF), UINT64_C(0xA5ABC626230D7D13), UINT64_C(0x0BD6B5F6DA078A66), UINT64_C(0xA971396D1D0BD78B), UINT64_C(0x87623D64BD960F23)}}, {{UINT64_C(0xEE0841A9977DB53F), UINT64_C(0x5DF123C1A53F4D03), UINT64_C(0x16F4E72F62C2E1F9), UINT64_C(0xE34811A9D1E2EC11), UINT64_C(0xE2BEC8096E896D2F), UINT64_C(0xD36F9B1744A6AD65), UINT64_C(0x564BAC7FF5DDF709)}}, {{UINT64_C(0x75E06CCFB0AE5478), UINT64_C(0x8AF959F7CDD5AD04), UINT64_C(0xB9A705E9E38C8310), UINT64_C(0xD74AC7B921F0DD06), UINT64_C(0x464AB8C2B37C410C), UINT64_C(0x0A50C06812A8F440), UINT64_C(0xC2299DE1D9531384)}}},
+	{{{UINT64_C(0x3848B41E2C3F77CB), UINT64_C(0xB452522767309689), UINT64_C(0xE03908FF1B899FD9), UINT64_C(0x0248A6FB67CF3BF2), UINT64_C(0xA05256598F3731D9), UINT64_C(0x7D2F2BDC8530D800), UINT64_C(0xC72A3007AD08A134)}}, {{UINT64_C(0xAD5E5BE741D65F73), UINT64_C(0x4013183D4AE4206E), UINT64_C(0x102483CB50C1CADE), UINT64_C(0xA70D632539DB43D3), UINT64_C(0x6A2C1F02B90EB49F), UINT64_C(0x6FE30DBF5E66A18F), UINT64_C(0xAC4EEB93A82AA53E)}}, {{UINT64_C(0xF929479991AB26C8), UINT64_C(0xFD71C0B7CA890967), UINT64_C(0xAF74213C209642AD), UINT64_C(0xDE4000F63BA43EE5), UINT64_C(0xBA03DEC7449DDA48), UINT64_C(0x3A842CF207160704), UINT64_C(0xC4CDB8952AED2538)}}},
+	{{{UINT64_C(0x43295AFFD3613D47), UINT64_C(0x173B7B7E68AB56F3), UINT64_C(0xAD35FB980629692B), UINT64_C(0x85C21EEA937061EB), UINT64_C(0x21B787A746250197), UINT64_C(0x3C46C3651631E927), UINT64_C(0x6DA4B5DC6F2D5A46)}}, {{UINT64_C(0x88CB67CC16E6D18C), UINT64_C(0xD1E81B30D5200105), UINT64_C(0xD114741BB6EA6DB1), UINT64_C(0x13D19B1C9C6308AA), UINT64_C(0x4D7BE4FB79C31674), UINT64_C(0xCB873E050F77F2E8), UINT64_C(0xF7C8D80CC2BF86EC)}}, {{UINT64_C(0xB2D69D96485F0A9E), UINT64_C(0xF10CA96437183CC8), UINT64_C(0x068CD3BF7E9FA951), UINT64_C(0x07573F4957BCE074), UINT64_C(0xFC2CE1C70424A9B8), UINT64_C(0xBAE51F743BDC894B), UINT64_C(0x3FA186812770F204)}}},
+	{{{UINT64_C(0x9216FE2E17AB20E5), UINT64_C(0x2F67274DEADECF3A), UINT64_C(0x6057519F43487097), UINT64_C(0x7B8980B29A65A454), UINT64_C(0x62B0EB08A59351F0), UINT64_C(0xC9BFD733F4404129), UINT64_C(0xAC2CD641CA250FB8)}}, {{UINT64_C(0xEA68CDD0F2BA7D26), UINT64_C(0xA258D3D2A4A4E0BE), UINT64_C(0x0D02E450135C19F4), UINT64_C(0x6589283AB475E53F), UINT64_C(0x1BFA0A2B6C432D8C), UINT64_C(0x379EC13704BC2914), UINT64_C(0x831562C52459BFD7)}}, {{UINT64_C(0xEC9B51CFAB5A6602), UINT64_C(0x1A7399994E3F2475), UINT64_C(0x5DA743F75584F4C4), UINT64_C(0x3C310381A3C62D3E), UINT64_C(0x6F758CC4EDBAFB24), UINT64_C(0x6C6E939E2377A5F4), UINT64_C(0x3B9A2713F620F8B0)}}},
+	{{{UINT64_C(0x57676B366EEEC506), UINT64_C(0x57D2DD6CAD545DA5), UINT64_C(0xF05BF19DE39CB770), UINT64_C(0x0DFB1F03388C5FED), UINT64_C(0xFFA52126C96E5565), UINT64_C(0xD187B3A4A220DBCE), UINT64_C(0xAC914F9EB27020E4)}}, {{UINT64_C(0x513F4AB98D2E5F30), UINT64_C(0x09816AE97DADD944), UINT64_C(0x2AA2CE64AF6950D8), UINT64_C(0xA18FCF5936B4B90F), UINT64_C(0xE6DC116C816ADCD7), UINT64_C(0x1072B549B9E33DDF), UINT64_C(0xD9E3134EC4584D66)}}, {{UINT64_C(0x622A2D6885D4997F), UINT64_C(0xDD4779F3250438FF), UINT64_C(0x600DD235B3474997), UINT64_C(0xF69961BD106A06E6), UINT64_C(0x046726E716A4A14F), UINT64_C(0x89B8F88C16F3EFCB), UINT64_C(0x2C84BE086641250A)}}}
+	},
+	{
+	{{{UINT64_C(0x066E46707A1E400C), UINT64_C(0x7724CDC990B551E8), UINT64_C(0xB3E4F5FA512513A0), UINT64_C(0x8EF4DAC3500553F1), UINT64_C(0x49F2CB4CC767E8B5), UINT64_C(0x8B4ED7F9143C9583), UINT64_C(0xE646D092B7822B94)}}, {{UINT64_C(0xC9D185DD52BC3C26), UINT64_C(0x88B734BA16EC837F), UINT64_C(0x6142B0516D4BA5A7), UINT64_C(0x1F445B3D72F2DE75), UINT64_C(0x5C9F4631A15846F6), UINT64_C(0x0B18D169EA9BDAEC), UINT64_C(0x85D2998AF6751BA1)}}, {{UINT64_C(0xDF27AF30D0B7367F), UINT64_C(0xD22E12226D253C33), UINT64_C(0xD7ECBBA9B795F489), UINT64_C(0x527A3D2A3BBA9E1A), UINT64_C(0x84BD83DD79DB2680), UINT64_C(0xD392A37822022B94), UINT64_C(0x5A1D45C090CECA45)}}},
+	{{{UINT64_C(0x11DA0CAC443DDF31), UINT64_C(0xA6000966E1718609), UINT64_C(0x71F8959C3A7173CB), UINT64_C(0x7737AC2157818805), UINT64_C(0x1486C253FB5E2A92), UINT64_C(0x01CF595EE6268A46), UINT64_C(0x271166A5F84FC0E8)}}, {{UINT64_C(0x43306937FBA856BD), UINT64_C(0x598080CB179BE80A), UINT64_C(0x60FC6470393B2FFB), UINT64_C(0xFC0D5C98A8E4A1C6), UINT64_C(0x530FBD31FF5078AB), UINT64_C(0x608449E51B8862BA), UINT64_C(0xDB6ECB0355AE15DA)}}, {{UINT64_C(0x0AC4BE063D7F8145), UINT64_C(0x6964578B01EC65D7), UINT64_C(0x24C50DDAF0957572), UINT64_C(0xABFB7AFBA8E7971B), UINT64_C(0x472E82E8CDF74567), UINT64_C(0x3E5EF3803EDFFD5E), UINT64_C(0xC27A10430379B96A)}}},
+	{{{UINT64_C(0xBCBCBB6EA23C5D49), UINT64_C(0x166508906BA87959), UINT64_C(0x90D13C61CC088099), UINT64_C(0x1D03AFE921D6B41D), UINT64_C(0x95F5CFEA520C27AC), UINT64_C(0x57E20BDFE2201599), UINT64_C(0xDD1B349CBDF05840)}}, {{UINT64_C(0x170CD66262E37159), UINT64_C(0xE7F08CEA8E43EB0D), UINT64_C(0xB6511D553AF085BC), UINT64_C(0x550E0330B94CB5F5), UINT64_C(0x11057AB7E77B8D3A), UINT64_C(0x0820E6AA886F4159), UINT64_C(0x130D4D6C5B6B8132)}}, {{UINT64_C(0xA84705CFAA3056E5), UINT64_C(0x74216FC5962CE9DE), UINT64_C(0x1E17321E43FBF219), UINT64_C(0x2011D7FBF6254EF3), UINT64_C(0x5243B58D0901F7C1), UINT64_C(0xA0803C7EBA13CD91), UINT64_C(0xEB5EE0BB2E290401)}}},
+	{{{UINT64_C(0xFB2F98059C7BB2ED), UINT64_C(0x675B33EBF4CA49BD), UINT64_C(0xDB6C1404C72A1B0A), UINT64_C(0x8CF728C094F9EA4A), UINT64_C(0x9D34C6EB6A03376D), UINT64_C(0x78408EB8DA485C05), UINT64_C(0x8BF607B295681701)}}, {{UINT64_C(0x537AD2822CEB3D28), UINT64_C(0x46B2D07A40337AE6), UINT64_C(0x154BA9BC68739C1E), UINT64_C(0x3A26617D15D7CCA9), UINT64_C(0x314B2E0D286B9710), UINT64_C(0xA08BAFD4D363A610), UINT64_C(0x80C2638C7DC2AF52)}}, {{UINT64_C(0x079E115665A32EEA), UINT64_C(0xE7BEF8D7D2BDBDC4), UINT64_C(0x73B2563B79FD99A5), UINT64_C(0xF4681A9BCD98593B), UINT64_C(0x62CE135E4646BA08), UINT64_C(0xC4C586AF74946566), UINT64_C(0x6FBE46E891D817DF)}}},
+	{{{UINT64_C(0xCD0CDE7EF3187140), UINT64_C(0x9CDC93B92CA4B70A), UINT64_C(0xEAAB665696E507A7), UINT64_C(0x68F1B0C773CC9728), UINT64_C(0x3184F7E0B16B8C5B), UINT64_C(0xCFB0D376108AB39A), UINT64_C(0x0C53EFC98536A772)}}, {{UINT64_C(0x7803B52A824C2F1E), UINT64_C(0xA85D717132E6399B), UINT64_C(0xA200D431EBD25349), UINT64_C(0x2407D7AD265EE811), UINT64_C(0xBC894D29620B1AAD), UINT64_C(0x4E6CD41171D99A9E), UINT64_C(0x09178D86C8FA8399)}}, {{UINT64_C(0xE5C20B8A70502FC4), UINT64_C(0xEC758CF70BB34B21), UINT64_C(0x8E540AF8BA1EAD91), UINT64_C(0xEE0A05869F5BFAB0), UINT64_C(0x06C000FABB3D06B9), UINT64_C(0xFE57BFEC7DA6EEA0), UINT64_C(0x4CB260E5C6A806D7)}}},
+	{{{UINT64_C(0x197D1D238A2593A1), UINT64_C(0x12A9863E93AB38FB), UINT64_C(0x7EFCD5D23A4CCE77), UINT64_C(0xF1392F6C7477B132), UINT64_C(0xC32F7BB5A53BA69F), UINT64_C(0x412C0026EFFD63E0), UINT64_C(0xD3EE8E4EF424AB20)}}, {{UINT64_C(0x7B14C0B2D64E5174), UINT64_C(0x86352A611F2E58C4), UINT64_C(0xF17034AA58A06C1E), UINT64_C(0x483F1BF31870C3EC), UINT64_C(0x05C16C7EB3B0D5E3), UINT64_C(0x85D626EFA4CAB199), UINT64_C(0xFD16B2F180F92BBF)}}, {{UINT64_C(0xA1793EA949AEBCD1), UINT64_C(0xE95F66BFC18549A9), UINT64_C(0xE5BD0A56F933630E), UINT64_C(0x99B208690B762F75), UINT64_C(0x52BFE15325448401), UINT64_C(0xCA084B4BD6255E7D), UINT64_C(0x8480E3D0D70E4896)}}},
+	{{{UINT64_C(0x96C0431AF3ADCB48), UINT64_C(0x5294C9A7A8DBA904), UINT64_C(0x51DE70D765A16389), UINT64_C(0x1749B8A1B02A41A5), UINT64_C(0x89EC6F3E47B71B26), UINT64_C(0x2C0D80F5D9CE0DFA), UINT64_C(0x43C59D831AEE3C39)}}, {{UINT64_C(0xA594BFB6D4D76F49), UINT64_C(0xFD08E8F5B8227D68), UINT64_C(0xE1BDAE78AE1D9630), UINT64_C(0x066715DC1379029C), UINT64_C(0xB24D3278C79689DA), UINT64_C(0xC98339E84FBC5D4C), UINT64_C(0xC8478DCEA1048C77)}}, {{UINT64_C(0x1700A6AF156584BA), UINT64_C(0x2DE3A30515659639), UINT64_C(0x9A565BB45B11C905), UINT64_C(0xAC22C6749619DE4D), UINT64_C(0x8F711D55A269FB6D), UINT64_C(0x590240AB364947BA), UINT64_C(0x16469478CEBBB31D)}}},
+	{{{UINT64_C(0x95E4B8F31770D2BA), UINT64_C(0xF138744F65242EA0), UINT64_C(0xB078CAD06E090036), UINT64_C(0x178B8417D3A3D5B3), UINT64_C(0x5D4C738FD7C7AE54), UINT64_C(0x789844676454AD6C), UINT64_C(0xFBF34235D9A39261)}}, {{UINT64_C(0xAD8E451A7FFF772F), UINT64_C(0xD59F8605BB75FFBE), UINT64_C(0xF3F4606F75CC1930), UINT64_C(0x96700C8AD4F47558), UINT64_C(0x62A2406421EFD2D7), UINT64_C(0xD0F979DFE8F1CEB4), UINT64_C(0x0280BF1D1D76008E)}}, {{UINT64_C(0x08628F15B37F4460), UINT64_C(0x1D2B59FFD9939168), UINT64_C(0x91A508D63B021509), UINT64_C(0xEB75D20331EF59CA), UINT64_C(0x756215A0FFE15322), UINT64_C(0x69AB18DD0B0CC108), UINT64_C(0x361536A4A901FA46)}}}
+	},
+	{
+	{{{UINT64_C(0xC0761C219DD9A54D), UINT64_C(0xBEDD1127FCB86A39), UINT64_C(0xD976B67D0E4F04C9), UINT64_C(0x3DA042CF27C017A4), UINT64_C(0x9AF2593F11800C97), UINT64_C(0x49448AE67960E741), UINT64_C(0xD3B60B7744FD85BD)}}, {{UINT64_C(0x275E74ED961676FE), UINT64_C(0x2DF77383EF339AF6), UINT64_C(0xBF319634407E05E6), UINT64_C(0x4583B407B0534618), UINT64_C(0x68555011BED6B718), UINT64_C(0x083D02124B52E3D0), UINT64_C(0xA908324F780AAF94)}}, {{UINT64_C(0x02FD1B6144B8AAE0), UINT64_C(0xFA56A98932BB8946), UINT64_C(0x4D9BCAFA6519AA0D), UINT64_C(0x21BEC3243D7E4E53), UINT64_C(0x51066AF6771604C9), UINT64_C(0x0DC31C5FAF19A150), UINT64_C(0xA17784B53D760E04)}}},
+	{{{UINT64_C(0x25B27AF1A73EC9C3), UINT64_C(0x73E4B66AD9F70FA7), UINT64_C(0x94935807724F58CF), UINT64_C(0x9DA0CC01C3FCD579), UINT64_C(0x7D210597C906EFB7), UINT64_C(0x732BE703E8D61E97), UINT64_C(0x6FD29BF6D0B69ECD)}}, {{UINT64_C(0xB3CA658AC667128E), UINT64_C(0x5837CA0036AC7872), UINT64_C(0x75CF1CC969858535), UINT64_C(0x03809A1159F3BE80), UINT64_C(0xCED97338719F1B9B), UINT64_C(0xDA0FBE902A5F6881), UINT64_C(0x4D8C69B4E3871E8C)}}, {{UINT64_C(0x9C933BC3302C5B4D), UINT64_C(0xD51326BB490FCE5F), UINT64_C(0x7423049B2551DF4B), UINT64_C(0xED3EDFBD5294C6BD), UINT64_C(0xE01C04C9F23C4E1F), UINT64_C(0x7E257D876CB8E76D), UINT64_C(0x8C31B967C157EC1E)}}},
+	{{{UINT64_C(0x3B5C3BD07DDEE82F), UINT64_C(0x1BE8E52DD312F972), UINT64_C(0x5F8657CF8761174F), UINT64_C(0x3FBFEA17D9ECBD83), UINT64_C(0x79FD78FE2C4F7739), UINT64_C(0x0DE920FB0450EC95), UINT64_C(0xBFC9B8D95D9C4732)}}, {{UINT64_C(0x78818BD425E1B4C3), UINT64_C(0xB0D00E0C41C40E2C), UINT64_C(0xEF81FB0F7CE9ABCC), UINT64_C(0xF73574ADC7E9FA45), UINT64_C(0xD99D2EFB0B2561D6), UINT64_C(0x8F316E96CD0AA2D8), UINT64_C(0x088F0F14964807CF)}}, {{UINT64_C(0x4794C7A7FE953216), UINT64_C(0x823727688C4F2778), UINT64_C(0x2D42B42FBFC70EEE), UINT64_C(0x939126D7026B7195), UINT64_C(0x17F9B19257658F43), UINT64_C(0x1848F0C34AA3EFD1), UINT64_C(0x5FAD90042452C747)}}},
+	{{{UINT64_C(0x1F0A8498945D5A19), UINT64_C(0xC35D47AB39C6C213), UINT64_C(0xEE81275C02824F3F), UINT64_C(0x7C90B80A3BE77C89), UINT64_C(0x631A28AA93A8491B), UINT64_C(0xD6E816C0B3445397), UINT64_C(0x22878BE876D0E454)}}, {{UINT64_C(0xA3EECB8A46DB3BF6), UINT64_C(0x0F85340F29554577), UINT64_C(0xBB9147A7798689A0), UINT64_C(0xDDA3C73698465D74), UINT64_C(0x4F17504B209532D7), UINT64_C(0x356F4D86E4356D57), UINT64_C(0x70C2E8D45338876E)}}, {{UINT64_C(0xA23101886AB48263), UINT64_C(0xBA6E764806997929), UINT64_C(0xFD26AF6ED0245D3C), UINT64_C(0x1419957F05D02244), UINT64_C(0x2DE66005987B2F87), UINT64_C(0x03905E1A5DCC9E50), UINT64_C(0xE5F63F5B3E4735E4)}}},
+	{{{UINT64_C(0x0EDCE5A0AD293980), UINT64_C(0xEAAA32D721006901), UINT64_C(0x9239E464AF59F06D), UINT64_C(0x59199C29D6B43C45), UINT64_C(0xF4111E1E2B74BF25), UINT64_C(0xA7B5ECB0F8D83EFF), UINT64_C(0x9BAA22B989E3951A)}}, {{UINT64_C(0x0AF78DB807B33AC1), UINT64_C(0x8E1205A3B4354CE8), UINT64_C(0x224610371DEFC7BC), UINT64_C(0xE6D697EF63305A01), UINT64_C(0x39C1CD8051028B1A), UINT64_C(0xED7A928EE4B47ABA), UINT64_C(0x31BD02A7F9990176)}}, {{UINT64_C(0xCA4E67A5EB92646D), UINT64_C(0xDFD3E8E589742FC3), UINT64_C(0x4B2188CE29B7F842), UINT64_C(0x530E76742C09988E), UINT64_C(0xEFA6E2EED5282BFE), UINT64_C(0x8BB04C61DFBF60AF), UINT64_C(0x073DEFAFE5CB05B3)}}},
+	{{{UINT64_C(0x8BF9DAB7AF075566), UINT64_C(0xE56D84E29A5F56F1), UINT64_C(0xA7302D3A4C45AF64), UINT64_C(0x8156B658CF3644A6), UINT64_C(0xF9CF96BE52FB4080), UINT64_C(0x92038CAA2F08F33E), UINT64_C(0xCFAF2E3B261894FE)}}, {{UINT64_C(0x27F2A0DBC224CE3F), UINT64_C(0x89D0ED05009592EB), UINT64_C(0x7C95C2501743F958), UINT64_C(0xBDD63DA9A88A4787), UINT64_C(0xACFC7EE82886755F), UINT64_C(0x4B020F38113B9024), UINT64_C(0x3C5AACC6056E6463)}}, {{UINT64_C(0x4FED8EF2923D6D60), UINT64_C(0x43C255094F10DB8B), UINT64_C(0xF3522FD12215AFDE), UINT64_C(0xBB853A5371E328CA), UINT64_C(0xBDC56CD132FBF7A3), UINT64_C(0x1A5B2731C0C7B2BD), UINT64_C(0x74CE8CC1F512CEE5)}}},
+	{{{UINT64_C(0xACE03FF3AA2EF760), UINT64_C(0xD7543B95767B1C3B), UINT64_C(0x7A9A3D51CE6AA940), UINT64_C(0x434F8D1A7CBAC3F4), UINT64_C(0x3F280DBD47A864AC), UINT64_C(0xAB6607EBD5CA1EFF), UINT64_C(0xC4DF5C405B07EDD8)}}, {{UINT64_C(0x9A3DC92DFA4F095B), UINT64_C(0x1E045AE36A57CDBD), UINT64_C(0xA5FE7B7FF2973789), UINT64_C(0x0AA6E35E37C03130), UINT64_C(0xB53BF200D8210D7B), UINT64_C(0x7B68D84AFB856EDF), UINT64_C(0x9B5C49B72C6DE378)}}, {{UINT64_C(0x791311DFCC6D4B09), UINT64_C(0x0FF585F7BE93F912), UINT64_C(0x38F4949B91AA9073), UINT64_C(0xD95EAAD5863C6A77), UINT64_C(0x7DFA8EADD8294FFE), UINT64_C(0x43A243E76478ADBB), UINT64_C(0x5CC148E840546B15)}}},
+	{{{UINT64_C(0xBE51857164010F4E), UINT64_C(0xD663E0B144B0536E), UINT64_C(0xDF584FACABB14887), UINT64_C(0xFAF175A3AC1CAEDE), UINT64_C(0x6D5F992A3CB43FB8), UINT64_C(0xC4AA285178A4310B), UINT64_C(0x69C99698BD56BFF2)}}, {{UINT64_C(0x0373D6372A4D972E), UINT64_C(0x15813D5BB2E95838), UINT64_C(0x68A34A7BF7D18D89), UINT64_C(0x31F45C81A5CE5D75), UINT64_C(0x5A71F96910670B43), UINT64_C(0x14EB3B07C1EA9726), UINT64_C(0xDF008EAFED447CDB)}}, {{UINT64_C(0xAC6817D445B03506), UINT64_C(0xD85FE4E3377F50BF), UINT64_C(0x7DDA87AFA4F110D4), UINT64_C(0x87C752DB45D65874), UINT64_C(0x505567EB3FF3FA99), UINT64_C(0x267F050C19E7CBA3), UINT64_C(0xB220FB7CB36D3098)}}}
+	},
+	{
+	{{{UINT64_C(0x850379F5A00C2F10), UINT64_C(0xDD7DB320B4FD3502), UINT64_C(0x46A14074E560E8EF), UINT64_C(0x60F34624F2F017EF), UINT64_C(0x4E3CA08EC92CED1A), UINT64_C(0xFC2A15D8BC6B7C4B), UINT64_C(0xCC8F3F3527B007DF)}}, {{UINT64_C(0x4C59F8AC4861FE83), UINT64_C(0x6DCE8D48D2CD0314), UINT64_C(0x77C136A8457D2BFA), UINT64_C(0x9C228E18D7ED3336), UINT64_C(0xBC916AB1E4CB8E21), UINT64_C(0xE3A3D37803705F70), UINT64_C(0x9F3365488F17AD2A)}}, {{UINT64_C(0x3DFB1D380C7E78CF), UINT64_C(0xBE781A4F081CE322), UINT64_C(0x41686C48160D2B22), UINT64_C(0x268017B469592ECD), UINT64_C(0x77854D9B5839D076), UINT64_C(0x184A19FF82FEC52E), UINT64_C(0x306B6D1DF76BD2EE)}}},
+	{{{UINT64_C(0xD3EAB0710960E4BB), UINT64_C(0xF946C668A78AB9CF), UINT64_C(0xDF5DF32E85553B0E), UINT64_C(0x93CB3646A43C4B98), UINT64_C(0x3C418DBE710ECD55), UINT64_C(0x7EDAAF59818B6F54), UINT64_C(0xC44E8D290911C1EE)}}, {{UINT64_C(0x2CAFB38B1269B509), UINT64_C(0xA6649E2737C52AFE), UINT64_C(0x1CC58B5B2EF02CCF), UINT64_C(0x95EA134E1E0AEACE), UINT64_C(0x65A83B9FC237A57E), UINT64_C(0x9E8C76E3ECCAC9C4), UINT64_C(0xCA07DBE9BDBAB54B)}}, {{UINT64_C(0x1FC1055B57548E6E), UINT64_C(0x362C485A3A77C77C), UINT64_C(0xF48484CBA7215E4E), UINT64_C(0x0E0B99C5ABE3D7C3), UINT64_C(0x310B96CA915B0DD5), UINT64_C(0x637A8D7EC6B8AD3E), UINT64_C(0x0BFE36256C1D4F31)}}},
+	{{{UINT64_C(0x61D297F3CB0D7807), UINT64_C(0xB844EE441A5F59CE), UINT64_C(0x40E9E0728553BB2D), UINT64_C(0xFCB76DFF90F87E56), UINT64_C(0x6864012D57AA72CB), UINT64_C(0xEE88F9678B44065C), UINT64_C(0x3D74B852177603D5)}}, {{UINT64_C(0x443F9C947748B68E), UINT64_C(0x426C03856D98F44D), UINT64_C(0x45AB29DE34B84462), UINT64_C(0x7D2E18DEC16D1BB8), UINT64_C(0x219B1546439DF621), UINT64_C(0xA8EC32EE0F8FEC6D), UINT64_C(0x632AD3891C517522)}}, {{UINT64_C(0x2FC659D54C1AF686), UINT64_C(0x9E979F215FC35EE9), UINT64_C(0xF3C16607A0212B9E), UINT64_C(0xDF50A546FD56BC4B), UINT64_C(0xCA94CF0E311FF07B), UINT64_C(0x651C1E3A6C04CCCB), UINT64_C(0xEB97F43D7F6E488E)}}},
+	{{{UINT64_C(0x2A19D9D236869267), UINT64_C(0x9A01628DF94FE553), UINT64_C(0xCC39C8458D76C6DC), UINT64_C(0x7F3A04BA405FE6C2), UINT64_C(0x30312500C77DDDC6), UINT64_C(0x0B6F0A50E9DEFEE6), UINT64_C(0xFB5918A609060458)}}, {{UINT64_C(0xECD7159253AF6B2D), UINT64_C(0x58C483D62D61C7D1), UINT64_C(0x4BFB6494398C1858), UINT64_C(0x8AF7DB8094643DC1), UINT64_C(0xD93A8A1557758FA3), UINT64_C(0x69E853562AF1E2D7), UINT64_C(0xD226BDD84346AAA5)}}, {{UINT64_C(0x9F99B598400A8D3E), UINT64_C(0xC99241E37E1A794D), UINT64_C(0x5310B45049D7018F), UINT64_C(0x3F8185C779E00786), UINT64_C(0x54E69E32DB9F2F59), UINT64_C(0xAD9093C7220DC19A), UINT64_C(0x93C0873CF21DD44C)}}},
+	{{{UINT64_C(0xCFC2D0A5ED0CCD20), UINT64_C(0x7E88EB9ADB85DBC0), UINT64_C(0x4A8E98E0A29EE26D), UINT64_C(0x137396EA8BB39F88), UINT64_C(0xC5AC8B2FB3511F1C), UINT64_C(0x9D81C090E5BCBC9E), UINT64_C(0xE1DFE344CDD58729)}}, {{UINT64_C(0x9E80F61F45E465B7), UINT64_C(0xFF925699C531BAD5), UINT64_C(0xDB244C85E92E4B79), UINT64_C(0x4A22097D1E64FCE9), UINT64_C(0x6B9EFFF24E374857), UINT64_C(0x51BE70A10BC6E2AA), UINT64_C(0x66853269067A1CB9)}}, {{UINT64_C(0x35F6AF3C3CBE78D6), UINT64_C(0x44E4098C77926763), UINT64_C(0x539493F7F013B299), UINT64_C(0x7672C79644696A1C), UINT64_C(0xFE6807CADA8DECA7), UINT64_C(0xE4CDCC007320EB9D), UINT64_C(0x7CEBA54AF783313B)}}},
+	{{{UINT64_C(0x1FF716DDFA6114D3), UINT64_C(0x44A69E515F5037EC), UINT64_C(0xBA97CC7734541449), UINT64_C(0x88B54BB71540C4CA), UINT64_C(0x156CAE37BCE41E54), UINT64_C(0x84EAFF3D2CE84363), UINT64_C(0x72A4F454C58BA4C3)}}, {{UINT64_C(0xBB0CEB530DCAF3FC), UINT64_C(0x20FA72D536578DCD), UINT64_C(0xB74C709B44084C63), UINT64_C(0x5608E6DC6262D34E), UINT64_C(0x26410DD38D8ABAC8), UINT64_C(0x39911A819B8D82A5), UINT64_C(0xBDA15FE03AD0D9BC)}}, {{UINT64_C(0x85B54AAB98DEFA48), UINT64_C(0x7B96225838235AEB), UINT64_C(0x9385761BF8A9E20D), UINT64_C(0xAB9E455B9E1E3D54), UINT64_C(0x99FF9A0405A8C50F), UINT64_C(0x5226F9F7C724CE76), UINT64_C(0x3E0DD562F5007CA0)}}},
+	{{{UINT64_C(0xD2ADBF587F9DC60B), UINT64_C(0xBDE0F9D814F7D846), UINT64_C(0x242F50CCDD241B77), UINT64_C(0xEE6360A889CB6D72), UINT64_C(0xD5ADF4971395C0E3), UINT64_C(0xE0E4957D58147C7D), UINT64_C(0x3AA097D0C1657168)}}, {{UINT64_C(0xF4B56B672267D03A), UINT64_C(0x52A54F557088C44A), UINT64_C(0x94A46967C49E7F32), UINT64_C(0x801FBFAA871D6CFC), UINT64_C(0x48F48A5D8E57AE99), UINT64_C(0xBF9C85E240B95C0E), UINT64_C(0xA41018999D41CAE9)}}, {{UINT64_C(0xFEB07FC52E262443), UINT64_C(0xBEEE7677F05B7291), UINT64_C(0x0C1CCE255705302E), UINT64_C(0x7ED9E164974EF860), UINT64_C(0xD9C54380BFAB2986), UINT64_C(0x5B0CF7C86384571E), UINT64_C(0xDBAD68A6F378F101)}}},
+	{{{UINT64_C(0x706BEB0C7B2889B4), UINT64_C(0xA36478B7F8994553), UINT64_C(0xF21E5BD43421447C), UINT64_C(0x80A7E4AADD9D2DA9), UINT64_C(0x0D4DA1660CA0C7C1), UINT64_C(0xF5C165A57002022C), UINT64_C(0x51C7C9E518F68FE1)}}, {{UINT64_C(0x1B6D521B62586502), UINT64_C(0x5E16A0F2CB3183EC), UINT64_C(0x64997F578B4E0CAA), UINT64_C(0x364B18047BD4FBD7), UINT64_C(0x2540EE08E47EC56C), UINT64_C(0xF74A6DC19080B75A), UINT64_C(0x6EC793D97D6E596B)}}, {{UINT64_C(0xA0A8F88A8DB09AFA), UINT64_C(0x5C2E36EEB6E6CBBE), UINT64_C(0x64CE2F335BCF9008), UINT64_C(0x584165024464BE21), UINT64_C(0x08483AE025B820DF), UINT64_C(0x5C16B91380B9D88A), UINT64_C(0xDABBCE01B0FB83E2)}}}
+	},
+	{
+	{{{UINT64_C(0x0116789D60A4BEB9), UINT64_C(0xBB9C512B2CD9B9C8), UINT64_C(0xEBDC8CF8B6D108C7), UINT64_C(0x29BA971AD85651E9), UINT64_C(0x9EA7E1CF78C94508), UINT64_C(0x45E350AF01E2852D), UINT64_C(0xE6CDADF6151DCF6A)}}, {{UINT64_C(0xD2C454BB42B8C01B), UINT64_C(0xD60859E0C493D54C), UINT64_C(0x8C61038E1E686454), UINT64_C(0x16C18B180DBAE4BD), UINT64_C(0x6B23369093A5603A), UINT64_C(0xE89295F3DE1C227A), UINT64_C(0x42F0B588AB63C5F1)}}, {{UINT64_C(0xADB293048EBDE47D), UINT64_C(0x4ED9E7DD8136BBBB), UINT64_C(0x7BB1FD79CFA4125D), UINT64_C(0xEBAFF715BD15E172), UINT64_C(0xDA647384BF7AB971), UINT64_C(0x49A983AE62A4398E), UINT64_C(0x4A0C1B5D1DDCD826)}}},
+	{{{UINT64_C(0xF0F1974CC5B596D8), UINT64_C(0x5B54EE8093F44719), UINT64_C(0xF3D65440BA933F6F), UINT64_C(0x526D73B8D6E53652), UINT64_C(0x53507763829AEB83), UINT64_C(0xE47D6AD4387550ED), UINT64_C(0x21D56DFC786E483B)}}, {{UINT64_C(0x788A75E18B73BB39), UINT64_C(0x72E79EBA84CF265A), UINT64_C(0xC1ECD27C02A4D2E7), UINT64_C(0x06CEF71BF7DF6D44), UINT64_C(0xF91CAE3B68A8D9EA), UINT64_C(0xD141199EFEFA86E8), UINT64_C(0x0B36AB2214E6F62F)}}, {{UINT64_C(0x4594650050E95F42), UINT64_C(0x5AC3FE6AD206D4CB), UINT64_C(0xEBCFB31748AD9C9D), UINT64_C(0x5CC4A759301A22C3), UINT64_C(0x5E2E0E5941D6092F), UINT64_C(0x83F8310D604A40F3), UINT64_C(0x817FBD84647B0653)}}},
+	{{{UINT64_C(0x29D79065CBDCE61C), UINT64_C(0x0849CB562FFDECB2), UINT64_C(0xD23AC8EF5D3D1460), UINT64_C(0x915C36B8348B31B1), UINT64_C(0x83D4822836B2EA69), UINT64_C(0x3EDBEC6F0B7D2686), UINT64_C(0xAF4F39D1A7821C08)}}, {{UINT64_C(0x9123BE6E84E64841), UINT64_C(0xFD7CE9E246365BF7), UINT64_C(0x01357DA3208AC02B), UINT64_C(0xD6422AB4231989CD), UINT64_C(0xB7E91B856479B8AA), UINT64_C(0xEBBCC8C0442157D2), UINT64_C(0xDC787D87D09C0528)}}, {{UINT64_C(0x318A6CC189144C0D), UINT64_C(0xE2F8E8D3990FAAA2), UINT64_C(0xBB1F468ECD1CEF3F), UINT64_C(0x3C40F9EC55413019), UINT64_C(0x9698DA0555B7C6E3), UINT64_C(0x0B5D0830D745F92C), UINT64_C(0x958B38F50025AE63)}}},
+	{{{UINT64_C(0xE8EB99F626C7BED5), UINT64_C(0x0615326B15F39CD0), UINT64_C(0xBF4205D9D53DCD86), UINT64_C(0xF0752209DF636E71), UINT64_C(0x69A4744ABB1EAA0B), UINT64_C(0x4572DF3EA2FB17CE), UINT64_C(0xC4F6F73224A7F347)}}, {{UINT64_C(0xFB7ED86AD63081B4), UINT64_C(0x1B2ECD4CDC74A20A), UINT64_C(0x0386997563831B30), UINT64_C(0xA802A15F5B4D2B1E), UINT64_C(0xAAF13E9172A15D1F), UINT64_C(0xCCD36BA6DA906687), UINT64_C(0x34E829D7474E833E)}}, {{UINT64_C(0x90AB75FD686E7BED), UINT64_C(0x7D6112213DE106B8), UINT64_C(0x7B4E0133507B8906), UINT64_C(0x2AACC077E9D7B7FB), UINT64_C(0x8EF976FA7E7BE168), UINT64_C(0x090F372EB0E218AE), UINT64_C(0x60802B19054DF5AD)}}},
+	{{{UINT64_C(0x234CEA19B19C9B27), UINT64_C(0x625CA14C37A5F525), UINT64_C(0xCABC21248B16D726), UINT64_C(0xC32A5C658C40F9F6), UINT64_C(0x56B2A98D5B918470), UINT64_C(0x974CF34A07143140), UINT64_C(0x0C8F8A94F6314A6C)}}, {{UINT64_C(0xFD484455770BCCFD), UINT64_C(0x407CF5835DB740C9), UINT64_C(0xB1689D12E59B5A21), UINT64_C(0x9DD5E915BE338E0D), UINT64_C(0x0E9EF99F395A50CE), UINT64_C(0x62B55EE4D833B178), UINT64_C(0x4BE3F2289C534012)}}, {{UINT64_C(0x1CDEE96446BCF792), UINT64_C(0x4A1B44903E8174C8), UINT64_C(0x011B603F2995728A), UINT64_C(0x176DB4129F0AA6E6), UINT64_C(0xACC2533D64111510), UINT64_C(0x30B42E6DDDF9A5B2), UINT64_C(0x48E36A6A20E2634F)}}},
+	{{{UINT64_C(0x53BB99B906C4B858), UINT64_C(0x962EA7724D1550CA), UINT64_C(0x5804DA7D31F5A826), UINT64_C(0x00275048F239322A), UINT64_C(0xBB83EE4CB63E1132), UINT64_C(0x865251331191CBB1), UINT64_C(0xB7CAF9E7D1D903DB)}}, {{UINT64_C(0xF506E3B0577D7A9D), UINT64_C(0x05757A132B0B3BBB), UINT64_C(0xF4B646D61FBC57C5), UINT64_C(0x2CB7EFE9393F712A), UINT64_C(0xD5D5EA4995EF7797), UINT64_C(0xC23D4FBBE4C620E6), UINT64_C(0x8456617C807F2A0A)}}, {{UINT64_C(0x64C7A6105E518B69), UINT64_C(0xEDE0156E263D0EC5), UINT64_C(0x90F090BB1790619C), UINT64_C(0x499C169F0BB0B7CE), UINT64_C(0x7230EDC70998B29F), UINT64_C(0x07788C4889AE1A4C), UINT64_C(0xA4F19911E0F7763D)}}},
+	{{{UINT64_C(0x464995FB35396143), UINT64_C(0x0064A8B4BD1B99DC), UINT64_C(0x2A35452293E8E415), UINT64_C(0x3B2192C42F77D492), UINT64_C(0x1F05E0AA38E866B0), UINT64_C(0x06B232ED246B58B0), UINT64_C(0x447EDB3ED60974E4)}}, {{UINT64_C(0x0AF541B338869703), UINT64_C(0x4E486959FE038342), UINT64_C(0x5714EFD6B39DB4BE), UINT64_C(0x85D9E4B8048F3B4B), UINT64_C(0xE6C217796368B496), UINT64_C(0x94E35C4211FEBDA8), UINT64_C(0xEA591C32D46D1A50)}}, {{UINT64_C(0x8F81F3CC13B7FE75), UINT64_C(0x2FA6721B3CC6C88B), UINT64_C(0x0BA27D0BFF25CD1D), UINT64_C(0x8C45972D7A7FDDCC), UINT64_C(0x106B1C1428535F78), UINT64_C(0x3242B9CFF8855E3A), UINT64_C(0x9F91DDD98A75D124)}}},
+	{{{UINT64_C(0xC63A768FF2FEF780), UINT64_C(0xDA174218D2832970), UINT64_C(0xBB126ACE598E4EC6), UINT64_C(0xF0427617F675645F), UINT64_C(0x3FBE4FCE74B04C23), UINT64_C(0xA414B3C91B00C9F9), UINT64_C(0x4D982F31D3B3CC44)}}, {{UINT64_C(0x3DB1D40E8B24CCE0), UINT64_C(0x589D5A21C07133E7), UINT64_C(0x3998446E9358E0BB), UINT64_C(0x7166080E39CFB172), UINT64_C(0xBF8450B46883F764), UINT64_C(0x288F71E8434FCFE7), UINT64_C(0xD39F1E521A81E32A)}}, {{UINT64_C(0x6C8484063B3F1E9D), UINT64_C(0xD48B40BC938BB3F5), UINT64_C(0x187CD15D91E3E52F), UINT64_C(0x7E000F2E7C265E78), UINT64_C(0x157EA06221DD9BDB), UINT64_C(0x966C3C04EE9E57E0), UINT64_C(0x3D07DD5A5CCEF132)}}}
+	},
+	{
+	{{{UINT64_C(0xD978C6F13528AF6F), UINT64_C(0xAB440001FE294B74), UINT64_C(0xF0039CAE7742501A), UINT64_C(0x00FA2A677CBE937E), UINT64_C(0x75FDA1378EAF3E4F), UINT64_C(0xADEED8CCD90EE281), UINT64_C(0x16A8CE100AF22F72)}}, {{UINT64_C(0x2669FAE17CBF63DD), UINT64_C(0x7A1867861729E39E), UINT64_C(0x403682E92B3D5F82), UINT64_C(0x99056A794D75E418), UINT64_C(0xB2D20008F501A4FD), UINT64_C(0xF6918B78FF1589EF), UINT64_C(0xF41C870A3437F5A2)}}, {{UINT64_C(0x4D215EC027A1CEBF), UINT64_C(0x341C9F54734554D4), UINT64_C(0x4B25FE7AE4DE2AE7), UINT64_C(0xCBFA76B31150ED06), UINT64_C(0x0528734EF44EE89E), UINT64_C(0x6437479EFFD10828), UINT64_C(0xA7DD9B54CDA2DB3F)}}},
+	{{{UINT64_C(0x91C840AE57BE353C), UINT64_C(0xA833465A5EB3FB26), UINT64_C(0x13346E34A89F07EB), UINT64_C(0x0E875DF2F6208960), UINT64_C(0xC8BFBC44CE563B5F), UINT64_C(0xFCB5ACFEDF9D5F7F), UINT64_C(0x7CF68D47DC691B22)}}, {{UINT64_C(0x7D37F7C2D76A103F), UINT64_C(0x2132728A128FD87B), UINT64_C(0x100E637DB2AD8CCF), UINT64_C(0x17B511D5A4C13FEB), UINT64_C(0x280721CA5CCD28A5), UINT64_C(0x1305FD84BD52B910), UINT64_C(0xB9646422729791EC)}}, {{UINT64_C(0xBB1892FE5BD9BADA), UINT64_C(0xFACED2021C2BAD5D), UINT64_C(0x81E2759F7575BAB5), UINT64_C(0x6C76B6C410356DDA), UINT64_C(0x2ABD31103B3AA22F), UINT64_C(0x5BA8E26C648D608D), UINT64_C(0x72CAA4CDBB449FCD)}}},
+	{{{UINT64_C(0x2F83FCCDF5BC7462), UINT64_C(0xA87C01F3DDAD6F01), UINT64_C(0xF403AC57F11713A6), UINT64_C(0x5BAAB073EDB47CEF), UINT64_C(0xC7D6F0D6A16C184E), UINT64_C(0xA4C4F3EF2C915B17), UINT64_C(0x26C3F7E86A8F4145)}}, {{UINT64_C(0xAE81A6DB0B646514), UINT64_C(0x2305F84059FCA8B9), UINT64_C(0x4B7C6CD73DAB69F0), UINT64_C(0x8696DF2F0DE3FAEC), UINT64_C(0x1B975D774018ABB8), UINT64_C(0xECCC69EE35BC45DD), UINT64_C(0x478252EB029F883A)}}, {{UINT64_C(0xA0BD86C0CB1EBEDF), UINT64_C(0xE6FD0974FC257B76), UINT64_C(0xA588C34A0913B9BD), UINT64_C(0x1111433BC1C283D3), UINT64_C(0xA8A55F8D550C787D), UINT64_C(0xE9331DD088D00FB0), UINT64_C(0xAF9632DBBBE01A78)}}},
+	{{{UINT64_C(0x9D66BF85B8B2CE15), UINT64_C(0x3874117542533570), UINT64_C(0xB8986800169EF812), UINT64_C(0x9775204EFD3C18C9), UINT64_C(0x09DC2CD510B3612F), UINT64_C(0xA12E614559AD4B8D), UINT64_C(0x1DDAA889657493AF)}}, {{UINT64_C(0x7187D700B1E77A08), UINT64_C(0x0C94AF4CF2F14D2E), UINT64_C(0xDC8429E00835DBF9), UINT64_C(0x0F8A4D92B16A6EC6), UINT64_C(0xB403D0C48D02A721), UINT64_C(0x52B3AB5B9BEA5A5A), UINT64_C(0x6242739E138F8900)}}, {{UINT64_C(0xED9AD045E9D53325), UINT64_C(0xD750301D0015C5D6), UINT64_C(0x630BCA053AEBD3B2), UINT64_C(0x61EDD75F265AC3B7), UINT64_C(0x081C817403887BCF), UINT64_C(0xF4866E78D272D021), UINT64_C(0x07D050400CBD5B90)}}},
+	{{{UINT64_C(0x7A7C215D316B2819), UINT64_C(0x3423DACB65EFEB9D), UINT64_C(0x86A058C3C569ED83), UINT64_C(0xB7E5CB61BC084358), UINT64_C(0xA279422AFF132C4D), UINT64_C(0xB9D7EFCA9FC46373), UINT64_C(0xE3319A5DBE465F43)}}, {{UINT64_C(0x9251D36870B39DA7), UINT64_C(0xD87ACB6D7984B754), UINT64_C(0x0D3F6C77EB272EAD), UINT64_C(0x6F9F791CF2FB47DE), UINT64_C(0x86B975E885807FD8), UINT64_C(0x314B5B6A3604F010), UINT64_C(0x8CD453867BE852F9)}}, {{UINT64_C(0x110B8A3A2129AB7B), UINT64_C(0xAB49BE511A5E0A7E), UINT64_C(0x540C0F7AE05F3909), UINT64_C(0xC89FFD0A7176DC09), UINT64_C(0xCDF4F861462D6294), UINT64_C(0x949192972A1B18E2), UINT64_C(0xB0045F605FD55F10)}}},
+	{{{UINT64_C(0xF97C1E6B3858F79B), UINT64_C(0x8C44F0477C4938CA), UINT64_C(0xE3A3C1B311BBF3E8), UINT64_C(0xB95A1D4D9234C091), UINT64_C(0x969B8D1C64531AF2), UINT64_C(0x3C328B51E78DF3CC), UINT64_C(0x5A1BD6C34E88816F)}}, {{UINT64_C(0x972E312393A9336F), UINT64_C(0xB121020F0CC5CED8), UINT64_C(0x8412104B45D7B5FA), UINT64_C(0xC83491708068B1C1), UINT64_C(0x6D80F97FE51BD85F), UINT64_C(0x8981814B84FCFE81), UINT64_C(0x1D4FABBB93CD4810)}}, {{UINT64_C(0xECC6C865AA5CA628), UINT64_C(0x5B93A366A70EBA17), UINT64_C(0x6777DDF43B951F4A), UINT64_C(0xABAA8B34421E62A8), UINT64_C(0xFDD495968E5354D7), UINT64_C(0xD6EE5CA969C0F19F), UINT64_C(0x60E4CDBAC8B2A65A)}}},
+	{{{UINT64_C(0x8A1F11D45AEF599E), UINT64_C(0xC3C38D91243B09C5), UINT64_C(0xB02793D2EEC7BD08), UINT64_C(0x58FB2C005A6039B3), UINT64_C(0x44DE8ACF5EB27FED), UINT64_C(0x3E0CD6E6C698B5DE), UINT64_C(0x2F96ED4777180D2C)}}, {{UINT64_C(0x6567DE8BF96D0E36), UINT64_C(0xD59CD36A2B6C9B6D), UINT64_C(0x8D98788DF5D37637), UINT64_C(0xDB13FCF8951899FC), UINT64_C(0x0811F5C7B40FA090), UINT64_C(0xA6560513A37AA527), UINT64_C(0xC6F553014DC1FE56)}}, {{UINT64_C(0xC2B6C9E8F2DA4AD6), UINT64_C(0x192EDA073660EE87), UINT64_C(0x27AAC2AF53B33A74), UINT64_C(0x17FAE1C07A4625F6), UINT64_C(0x26FB51EB06808392), UINT64_C(0xA6DD41FDAC18298A), UINT64_C(0x097AC7EE5A497BFD)}}},
+	{{{UINT64_C(0x327F6DEF794945D6), UINT64_C(0x2FF52F52FE38CC88), UINT64_C(0xB8478A0228AD9A81), UINT64_C(0xFBE91B07CD282E5B), UINT64_C(0xCDC11165E2A0BC9A), UINT64_C(0x240FD7B857E40360), UINT64_C(0x67F1665FA36B08B5)}}, {{UINT64_C(0xC084CE588AD2C93F), UINT64_C(0xC8A394DB722E8FF4), UINT64_C(0xE5F278AD2EDBB489), UINT64_C(0x8D1D07986B2D5B87), UINT64_C(0xF264C5589E0265E5), UINT64_C(0x81F094E4074DD2C9), UINT64_C(0xC539595303089FDE)}}, {{UINT64_C(0xBB257F9A63F5241D), UINT64_C(0xF5A3BA92E6E198CF), UINT64_C(0x4E5926228664FF06), UINT64_C(0x1EE2DAFCAE592C12), UINT64_C(0xA998034B1AF9E239), UINT64_C(0xB798C675E9AF2A54), UINT64_C(0xA4AF233FA19B2F30)}}}
+	},
+	{
+	{{{UINT64_C(0x12183492F83E882C), UINT64_C(0xC20B4D58203B5E6C), UINT64_C(0x1CD15E1AC96C3EFE), UINT64_C(0x2CBBB14BABD5A5BE), UINT64_C(0xF45D0543B37E1E24), UINT64_C(0x4BC47D6781589F03), UINT64_C(0x7917BE0A446CADC9)}}, {{UINT64_C(0x7653F2BE29B37394), UINT64_C(0x3DA30CB0A6C064CC), UINT64_C(0x0FCB493A857BCFBA), UINT64_C(0xE30AB146AC86BC58), UINT64_C(0x93D5BC12709D5336), UINT64_C(0x6689DE5C3B6EAFB0), UINT64_C(0x55189FAEA076BA99)}}, {{UINT64_C(0x87C8BF78435DBC45), UINT64_C(0xB1146C57C2387E08), UINT64_C(0xD47BB91F85C0DE6D), UINT64_C(0xCF43BD39693119CE), UINT64_C(0x31BDBAD75D756219), UINT64_C(0x4F62F4D0D1228F1E), UINT64_C(0x71AEB60197A95A70)}}},
+	{{{UINT64_C(0x0099EF986646CE03), UINT64_C(0x6B07A155F8130E61), UINT64_C(0xDE077B75BEF1729B), UINT64_C(0x57ED0526C46F08E1), UINT64_C(0x98961A299AF52FDC), UINT64_C(0x273297B8E93AE09D), UINT64_C(0x11255B50ACD18595)}}, {{UINT64_C(0x7457919DB4A6ACDD), UINT64_C(0xF7B3708A5784451D), UINT64_C(0x3D92605B0BD01283), UINT64_C(0xC82BBDC2E82F40CC), UINT64_C(0x680C164D872AB96E), UINT64_C(0xF7883C17A6A9921F), UINT64_C(0xC366478382A001F0)}}, {{UINT64_C(0xD778D3619EE2E2D7), UINT64_C(0xEDF19F042C2ADCBE), UINT64_C(0xDEA10323A1A6EC2F), UINT64_C(0x6EA31CBBF48C41F5), UINT64_C(0x85C6F09170C60F9E), UINT64_C(0xF2CC5565B5656078), UINT64_C(0xDAFE1054EB5277E3)}}},
+	{{{UINT64_C(0xBF5C9AA072E40791), UINT64_C(0x50DCF0B72D6A0776), UINT64_C(0xBDA47F445F9B2EAA), UINT64_C(0x13BBFC49A929FA96), UINT64_C(0xDD0006A78B539DC7), UINT64_C(0x1BA3DEEF39C74F16), UINT64_C(0xBFA0A24C34157C33)}}, {{UINT64_C(0x850220BEB6A3B482), UINT64_C(0xEA233164D4D6C438), UINT64_C(0xD8F450A03BB5DACD), UINT64_C(0x5BD208FED6B8B5A9), UINT64_C(0x8ED35C476FD218E6), UINT64_C(0xA0DD80A2ED2B4394), UINT64_C(0xA6CCF3325295B729)}}, {{UINT64_C(0x0BDA58CD263864CC), UINT64_C(0x4C59E0592D73BDC0), UINT64_C(0xFC69F357ED15FB62), UINT64_C(0x6A0D8E98EFC4D910), UINT64_C(0x7780F01599A68439), UINT64_C(0x5BEB7DF8857F023F), UINT64_C(0x029DD9574D3899A3)}}},
+	{{{UINT64_C(0xC1F68F15FAC38939), UINT64_C(0xF141B3DD5A2F8010), UINT64_C(0x388574F7AC290A35), UINT64_C(0x1E95FED2DC8F3B27), UINT64_C(0x451257AC7D7EC3DE), UINT64_C(0xFC33E664E55AC625), UINT64_C(0xD3968D34832BA566)}}, {{UINT64_C(0xA5980291BC026448), UINT64_C(0xA360FCB212524DA4), UINT64_C(0x5CA63BBCA7DF4827), UINT64_C(0xC8E9F733FCC395C8), UINT64_C(0xE9BD465F70CF566E), UINT64_C(0x6D111372F916835E), UINT64_C(0xC066CF904D9211E6)}}, {{UINT64_C(0x79B8CEFBDCF9291B), UINT64_C(0x3561977005C2D3F0), UINT64_C(0x48B273B35CEEB5AB), UINT64_C(0x7EEACB0CE2133DE4), UINT64_C(0xAE4FAA7C5136D158), UINT64_C(0x7B844FC8B43A0D24), UINT64_C(0x1B4883C0BF408DD4)}}},
+	{{{UINT64_C(0x96B9763A38B48818), UINT64_C(0xA229A6D23CC4288F), UINT64_C(0xBAFF00E27FCF5ED3), UINT64_C(0x38131CD16AEBF9CA), UINT64_C(0x41DFFABD58F33750), UINT64_C(0xEE6AF861C83B13AD), UINT64_C(0x274FE969C142E71B)}}, {{UINT64_C(0xFC70EBCC99B84B5B), UINT64_C(0x00B8E1A57D78191C), UINT64_C(0xFE402D46CCD06CBF), UINT64_C(0x5BEEBEB3C233E8EE), UINT64_C(0x4EABD14E7BB4AB21), UINT64_C(0x1259AA679578B742), UINT64_C(0x6D6D01E471D68435)}}, {{UINT64_C(0xD18BDB179FA7A7D5), UINT64_C(0x0E1794583B958555), UINT64_C(0x9D2A1AF814053CA5), UINT64_C(0x19B387AEEC4C4986), UINT64_C(0xC740DCE7CCD329E1), UINT64_C(0xCE1E8D8C6FE2D547), UINT64_C(0x5140895C3BF3636F)}}},
+	{{{UINT64_C(0x56755C465815AE38), UINT64_C(0xDD50ADC3E85611DB), UINT64_C(0x12D907633999B188), UINT64_C(0xE238B6AFFDF7509C), UINT64_C(0x05D397F5E725BCFD), UINT64_C(0x5F60B944C97450D7), UINT64_C(0x8867FC327AC325B6)}}, {{UINT64_C(0x632EDC4413763EFF), UINT64_C(0x7F28892C0B3341FB), UINT64_C(0x5C2F18B34B83AB3A), UINT64_C(0x61BB22779AA106D1), UINT64_C(0x72A5CFAEFD720BBC), UINT64_C(0x7DB6EF43E565637F), UINT64_C(0xCEB7C67B58E772F5)}}, {{UINT64_C(0xDF870A86B67705EB), UINT64_C(0xA6FDD06DECA78972), UINT64_C(0x4A0C66E41CEB53FD), UINT64_C(0xE093D978AE8BF23F), UINT64_C(0x34A16FB59628C3CD), UINT64_C(0x7E99C8EBAE55FD9B), UINT64_C(0x8A08BE9D69172302)}}},
+	{{{UINT64_C(0xB22793DA56ECC1DE), UINT64_C(0x12674E1097438F31), UINT64_C(0xEC04A14229B4F878), UINT64_C(0x3EC17CFFE5D2272D), UINT64_C(0xA7E0CBB0486ABB46), UINT64_C(0xDC081D22EF8528AA), UINT64_C(0xCBC361E5E63D0F41)}}, {{UINT64_C(0xC3B78AAFCAD5DBAA), UINT64_C(0x7BFA0111505FC1ED), UINT64_C(0x46891963ED66D92C), UINT64_C(0x1B8C0D8C2982284E), UINT64_C(0x747268509330F1F2), UINT64_C(0x085B6F03DD0FF056), UINT64_C(0xA8C8DB85581E660E)}}, {{UINT64_C(0x7F283FBC3F88FCE9), UINT64_C(0x66C9A853F67B9D39), UINT64_C(0x73DD94F6B22F95B0), UINT64_C(0x720C3B24CEA0C709), UINT64_C(0x899A65B62471521D), UINT64_C(0x0A72C3313E921315), UINT64_C(0x1E4F2D078EA9CA60)}}},
+	{{{UINT64_C(0xF442009A6264AD0C), UINT64_C(0xE8B113BF2B8593BE), UINT64_C(0xF7BDDC1D111905D4), UINT64_C(0x5624E62CFE3E940E), UINT64_C(0x9241D6D3CCA01227), UINT64_C(0xBCC70EDB7AB6CB65), UINT64_C(0xFF9FAFBB750B1CC7)}}, {{UINT64_C(0x02F65DF297FEA84B), UINT64_C(0xE82117C84A890B0E), UINT64_C(0xB480D1A92A859301), UINT64_C(0xC59C604EBEE8CB2F), UINT64_C(0x3F4E803C437010B8), UINT64_C(0x4514247B3FFF47BF), UINT64_C(0xC4C5DCB9F0DA13D6)}}, {{UINT64_C(0x1732BBF1155D37C8), UINT64_C(0x6348F4F9F0FFC28F), UINT64_C(0x6B36D2783E5FD861), UINT64_C(0xD9C84782A72FF5AC), UINT64_C(0x967F569E2DCE9A6C), UINT64_C(0xE32ECBE118C1214A), UINT64_C(0x69247E764C4469D0)}}}
+	},
+	{
+	{{{UINT64_C(0x7A8AF700CB5253B3), UINT64_C(0xFDCD31CA60520695), UINT64_C(0x3AE15E25744393EA), UINT64_C(0x85B825792BA5AE1D), UINT64_C(0xB57112B95A710B73), UINT64_C(0x133A038C55C5145A), UINT64_C(0xF7559C92A16FEF4B)}}, {{UINT64_C(0x7A70C3E68D9BA896), UINT64_C(0x1E40475DD32C33D0), UINT64_C(0xD2E706E084E473A4), UINT64_C(0x579510BDDDC9382F), UINT64_C(0xA69A5F901E34B727), UINT64_C(0x9DFD7DCFB8235E78), UINT64_C(0x1D9DC18014F0A342)}}, {{UINT64_C(0x32C62BB354DA9EA1), UINT64_C(0xC9F25977CEB0DF7F), UINT64_C(0x13D857D1A2E12BEC), UINT64_C(0x64D4224C1D35D475), UINT64_C(0xF843503AE66B3F7A), UINT64_C(0xB661B9AEC321EB45), UINT64_C(0xDCCC2D556369ADFE)}}},
+	{{{UINT64_C(0x34364FCDFAF403D7), UINT64_C(0x1DACD9EA4FFB7D7B), UINT64_C(0x43B4F521A3426CBB), UINT64_C(0x36DF2409FA510521), UINT64_C(0x85A8AD72852BCA07), UINT64_C(0x1A9D04AAA27F7E69), UINT64_C(0x1A815E19FC0C6C3A)}}, {{UINT64_C(0x0BFAB6147BB65BB3), UINT64_C(0x2D78A36DC0D33CED), UINT64_C(0x8A5FB726A8859206), UINT64_C(0x54EBB1AD34386172), UINT64_C(0x071D05AA11E82DA2), UINT64_C(0x7F847ADAAC4870F5), UINT64_C(0xEB812BC93CB2690B)}}, {{UINT64_C(0x0F9DD72808864744), UINT64_C(0x91E50AD53AA584C8), UINT64_C(0x264CC16025F8484D), UINT64_C(0x9435FFAA93CA28FE), UINT64_C(0x26D40A1FA443C5A1), UINT64_C(0x07BF283F70FE4E20), UINT64_C(0xA978EE3805658896)}}},
+	{{{UINT64_C(0x98CB317CCF7CACCC), UINT64_C(0x78D7D3410D9CF850), UINT64_C(0x782EFCCA68C8D7F0), UINT64_C(0xF5F544B5FE9E812B), UINT64_C(0x95A3A7B7F232E7C0), UINT64_C(0xF1543E91327B44FE), UINT64_C(0x27D118D76645EDF4)}}, {{UINT64_C(0xAF690547CD7ABC2C), UINT64_C(0xA989F64680FB53C8), UINT64_C(0x91AF28BE0CBE079E), UINT64_C(0x29DAA2F96CF0CCEA), UINT64_C(0x63C91FAED0A3B85A), UINT64_C(0x2C7B7A8B20BAD4B6), UINT64_C(0xF494FAFB8D98CE78)}}, {{UINT64_C(0x3C69AB5E2B723B92), UINT64_C(0xF9CD015E51E3BFBD), UINT64_C(0x9EF6A92DA062C0B6), UINT64_C(0x1F53E12F052D5192), UINT64_C(0xA92D2F5C007B032E), UINT64_C(0x55443DA26C3AA4EB), UINT64_C(0x5D8AA8044338DB45)}}},
+	{{{UINT64_C(0xDD080C0D7002F55A), UINT64_C(0xF025F4F8F142D6D9), UINT64_C(0xD28C20B326229382), UINT64_C(0x28D06A1558FD0B5A), UINT64_C(0x5D97FBD8E4704B99), UINT64_C(0x2FA63ED55581F454), UINT64_C(0x3AB793601AC0FDC3)}}, {{UINT64_C(0x7813ECE526099FD1), UINT64_C(0x6C45776DBA89C791), UINT64_C(0x0D739C8D28212CE2), UINT64_C(0xDA84826E09FDDAF6), UINT64_C(0xD90B29439EF9931E), UINT64_C(0xCFEFC9095E616E73), UINT64_C(0x3050D16802F47494)}}, {{UINT64_C(0xF3221869B034BFBA), UINT64_C(0x1F508DEEB5F898EA), UINT64_C(0xEC10CFFDC9BF9F6E), UINT64_C(0x117D2A0ECC7D52FF), UINT64_C(0x99557A3E819A8C7C), UINT64_C(0x7576CB54E6F7D592), UINT64_C(0x50D9D060BF414AC6)}}},
+	{{{UINT64_C(0x910898F8F9F6394B), UINT64_C(0xB36248B8CEA88B0E), UINT64_C(0x27D9EC4BC99254C1), UINT64_C(0xAD950D6AE3FCCB48), UINT64_C(0x1EF39B5B385D4CF9), UINT64_C(0x76D1D620F288A16F), UINT64_C(0x9FDD059E1193903C)}}, {{UINT64_C(0x4E7B5DE9EFB5EDF8), UINT64_C(0x10B53E290B9769D1), UINT64_C(0x2F8F7B4DF3A916BD), UINT64_C(0xDC9524AFAE99BCA8), UINT64_C(0xE4F69504F15481D5), UINT64_C(0x48F0951931ECF112), UINT64_C(0xBFF876A18F51B1B0)}}, {{UINT64_C(0xC5B6B70984AE0CCB), UINT64_C(0xA13122993AB122C2), UINT64_C(0x47D5AE1B97B95F6C), UINT64_C(0xA7FF86BCB59B4B6F), UINT64_C(0x27A00833A8477A6F), UINT64_C(0xDFB741CB095EF008), UINT64_C(0xCB2E81B8091C8EF0)}}},
+	{{{UINT64_C(0xC1932E2A746C1C37), UINT64_C(0x61F2903AD529AEA4), UINT64_C(0x425E2A717AC918F1), UINT64_C(0xC7F39E0EA57D197F), UINT64_C(0x5C0BAA2A58AE89DA), UINT64_C(0xDC28654836DD9165), UINT64_C(0xB5F0BAAA9EC9E6E3)}}, {{UINT64_C(0xC0F7C4662BDBDA04), UINT64_C(0x5B0FBE5393B51059), UINT64_C(0xB3BD96B16D552DD9), UINT64_C(0x2C0206C5DE495B31), UINT64_C(0xC09014D3A9B2A6E0), UINT64_C(0x6A3152A2F490045C), UINT64_C(0x208C108C5DEA05F6)}}, {{UINT64_C(0x788FAA13A68F610D), UINT64_C(0xC3837F08F5A2EE64), UINT64_C(0x0D544A2DC5340507), UINT64_C(0x0481B6E8B201EE54), UINT64_C(0x584C9CAAB1B19A14), UINT64_C(0x92BE43E4988C449C), UINT64_C(0x96C4CFD92AFF4DC1)}}},
+	{{{UINT64_C(0xC66E38B6865237EA), UINT64_C(0x068A93A13039F27F), UINT64_C(0x7C9E549A6D510A95), UINT64_C(0x0571AC1D6FBF216E), UINT64_C(0x3BA91C2A0C782429), UINT64_C(0x1202EC7E434D8CB2), UINT64_C(0x8F901BF76058B461)}}, {{UINT64_C(0x04EF0AC050849588), UINT64_C(0xCA81E0D2DDEDD318), UINT64_C(0xD1A509AF5417CEB2), UINT64_C(0xE9683BB6420AC065), UINT64_C(0x635F613F7F46E345), UINT64_C(0xE829148A95766DAF), UINT64_C(0x5F9F1D1176D147C9)}}, {{UINT64_C(0x7E3D3DF8F481D602), UINT64_C(0xAF7A51E11FE10621), UINT64_C(0xB73ED26608B65384), UINT64_C(0x86CEC4A9F56FCBD3), UINT64_C(0xB33287479C80DEA0), UINT64_C(0xF38341F60777A480), UINT64_C(0xEEE036E6D5977E41)}}},
+	{{{UINT64_C(0x8AD24AE1D77E9709), UINT64_C(0x159377751DC0047B), UINT64_C(0x71F86AE325334C6A), UINT64_C(0xAC29A15E9BAF9626), UINT64_C(0x6002796E33425AF6), UINT64_C(0xEA78CFC253A53108), UINT64_C(0x4C733E0AFAE0EAB6)}}, {{UINT64_C(0xA64B7443A97C99B9), UINT64_C(0x80BAC14E9E450203), UINT64_C(0x55533AD1BB515526), UINT64_C(0xC169E1A0A56A3EFD), UINT64_C(0xDF9EED7DA0A66E38), UINT64_C(0x2C937DDCE3D9B3E4), UINT64_C(0x8552089F6E36B402)}}, {{UINT64_C(0x058105AA3731F0A9), UINT64_C(0x9FFFA5792DD9948B), UINT64_C(0xF0D2C6FBB81B26A1), UINT64_C(0xFADB9B3792FF11E2), UINT64_C(0xB769C1CCF258053B), UINT64_C(0x73FD5E7C634101E7), UINT64_C(0x7AC5889E3A91853B)}}}
+	},
+	{
+	{{{UINT64_C(0xC98E4BF95F5CC82E), UINT64_C(0x45E12AD80C3C3ED6), UINT64_C(0x9B06D4F2E5B2CC90), UINT64_C(0x97B43B8442C90655), UINT64_C(0xDBF72D7992C1F737), UINT64_C(0x8CF47767B41C1710), UINT64_C(0xE713FCE7BFB9E9E9)}}, {{UINT64_C(0x0E9F54AE99FA5134), UINT64_C(0x13343002FD8DE40D), UINT64_C(0xFEB360DC282B7931), UINT64_C(0x70F96FFE5519810B), UINT64_C(0xCC0D27777B31539C), UINT64_C(0x824108FF505304EA), UINT64_C(0x598236632B67AD59)}}, {{UINT64_C(0xF0F27439AD1E24C4), UINT64_C(0x125C989E5B164A83), UINT64_C(0xFE8689F0D927EE7F), UINT64_C(0xF8E1CC65FA76BB8F), UINT64_C(0x32D6A9121A0395CF), UINT64_C(0xC6157389C7B24620), UINT64_C(0xE94773A4B900F76B)}}},
+	{{{UINT64_C(0x336EB45546BEA5C2), UINT64_C(0xBB5982CFAE0D509A), UINT64_C(0x770EE16A69BD8394), UINT64_C(0x47DACF9E1880D8D5), UINT64_C(0xCC5F02B891635184), UINT64_C(0x7D900B6C9A5A5B1E), UINT64_C(0xDAB8A768897DA8EB)}}, {{UINT64_C(0x3B28C7BE598851A6), UINT64_C(0x49960101D4F4D73C), UINT64_C(0x80BDE03C2569C508), UINT64_C(0xACD0D4F9B9BC9112), UINT64_C(0x86D2A15F3B513A22), UINT64_C(0x1C28F2AA4943DF29), UINT64_C(0x29623AD033387023)}}, {{UINT64_C(0x291090F2A75783FC), UINT64_C(0xDD3DF4A54428B0E4), UINT64_C(0x36F1A5DD825329FF), UINT64_C(0x155B9873CB16F190), UINT64_C(0x6D2CD66ECC85F34C), UINT64_C(0x0D432186026507EA), UINT64_C(0xD441D8EA679BFF5D)}}},
+	{{{UINT64_C(0xCD2CEB1784084416), UINT64_C(0x856F924CF1C49516), UINT64_C(0x7A265B76536C04BE), UINT64_C(0x4499949411B59CD4), UINT64_C(0x794007B795720DC8), UINT64_C(0x34E142D3DF83910F), UINT64_C(0x8F53878BD478D384)}}, {{UINT64_C(0x9FD9B072EAEB9C2F), UINT64_C(0x0DE116F87EAFD8A2), UINT64_C(0xE816EF8C42F9B2FD), UINT64_C(0x018BDE37916721E0), UINT64_C(0xB7A2375DA22ECB47), UINT64_C(0xD0657EF94281CDE3), UINT64_C(0x51054565CD7AF830)}}, {{UINT64_C(0x8748C2D7A7C431DA), UINT64_C(0xEDE5A9502522C66D), UINT64_C(0xC499A5F7285CFC82), UINT64_C(0x421085790C7FC1E3), UINT64_C(0xBC7D2463A2077565), UINT64_C(0xB183D3E29D80D578), UINT64_C(0xE1B361A2B9D4580B)}}},
+	{{{UINT64_C(0x697230B334BDCED3), UINT64_C(0x93B80C6A3E108385), UINT64_C(0xD97C57F19C9ECE34), UINT64_C(0xE0C862EBF2759270), UINT64_C(0xAC132C72BCF14181), UINT64_C(0x0563FF3BE362FD3B), UINT64_C(0x672CCAF47283B762)}}, {{UINT64_C(0xD7191E3FA2B7BF16), UINT64_C(0x9D87F838633520DA), UINT64_C(0xF86EBED3DDE55362), UINT64_C(0xB221B2CE14D8836A), UINT64_C(0xABB0AED72A3DB7DF), UINT64_C(0x0DE528C665B73872), UINT64_C(0x89C259644982CBB6)}}, {{UINT64_C(0xA12DE0A6D62D79A3), UINT64_C(0x2503B6F0DB42044F), UINT64_C(0x501FB5718F20BFAF), UINT64_C(0x482339AB23BB56A7), UINT64_C(0x4826BC32EA443B0E), UINT64_C(0xC6C85543ECB24948), UINT64_C(0xCCF00EFCFFD9B591)}}},
+	{{{UINT64_C(0x5E799A2DE4DBBA25), UINT64_C(0xC362D818AAEA4271), UINT64_C(0x13C9AEBC88F4DF55), UINT64_C(0xEFBFB33F142A1637), UINT64_C(0x6296BB684A411E8E), UINT64_C(0x44BECDC8181734B4), UINT64_C(0xCC9573D17F9D4643)}}, {{UINT64_C(0x17F85F8BCFF38A7D), UINT64_C(0x6429A14BF730CAF1), UINT64_C(0xA5DB97126874F4BA), UINT64_C(0xF6ABA827CC9BF22A), UINT64_C(0xCB89C9772A62B56D), UINT64_C(0x6838F177E541FEE1), UINT64_C(0x698815DADD438FE3)}}, {{UINT64_C(0x3C03825DC25C1FD5), UINT64_C(0x33955AD7F4C3A0CC), UINT64_C(0x8255CF7278531184), UINT64_C(0x07AEFD8A8A970EC0), UINT64_C(0x6774DE78F6CCAF3A), UINT64_C(0x534DBEE5F18E7EE4), UINT64_C(0xBAC640EB8E90E2D4)}}},
+	{{{UINT64_C(0x01C9FD89438ED1AD), UINT64_C(0x8D2073CD79D7B6A6), UINT64_C(0x592AF52210E6205E), UINT64_C(0x9763D07E72384AC3), UINT64_C(0xA4AA5F79EB5CCC07), UINT64_C(0x3F4ED2945A952F31), UINT64_C(0xC7120178056FDC69)}}, {{UINT64_C(0x9A361ECD2DF4B09A), UINT64_C(0xBE9AA5644EAB7D92), UINT64_C(0x942A8C34ABC0B3FA), UINT64_C(0x46454BC31A2473CE), UINT64_C(0x4BCDFF7366E00C92), UINT64_C(0x412F121B8F99AB32), UINT64_C(0x970B572E33551EE1)}}, {{UINT64_C(0x7F9FAE6675398097), UINT64_C(0x0F349E41E16317ED), UINT64_C(0xD1D8ACF070400AD6), UINT64_C(0x4F15FE32B78FD1CC), UINT64_C(0x308013D1510BD79E), UINT64_C(0xC01560304D77D61D), UINT64_C(0xC42593F2A0B30349)}}},
+	{{{UINT64_C(0x546CA4CACBD0A6B5), UINT64_C(0x9BDA5584787921D6), UINT64_C(0x0CBE5E18E5253C80), UINT64_C(0x40F987DD01B32C3F), UINT64_C(0x4BB6DFA4DBB9AA75), UINT64_C(0x55F0B891890B628F), UINT64_C(0x25B7DF4874E59002)}}, {{UINT64_C(0x23BDED3188ED5F95), UINT64_C(0xF5209DC428DCA930), UINT64_C(0x616E6CC68F25ABCC), UINT64_C(0x1A1D9993C4F3764E), UINT64_C(0x4A5533431BD9A57F), UINT64_C(0xCD77F02AB6D0D196), UINT64_C(0xA66079103E52E006)}}, {{UINT64_C(0x23C92E5B645A33CF), UINT64_C(0xBD201C9A659FADD3), UINT64_C(0xF89B72D0EE335E1E), UINT64_C(0xDDC89831F3B9274A), UINT64_C(0x23ADB892E793A18F), UINT64_C(0xFB8144EBE1319C43), UINT64_C(0xC4FFB4AD27D34229)}}},
+	{{{UINT64_C(0x4EAB088645F72700), UINT64_C(0x24B5F77B2FF0A1A4), UINT64_C(0xF564D743EBDD8C2A), UINT64_C(0x3F414160A6D67114), UINT64_C(0xCD776F6DE6495DF6), UINT64_C(0x11AFF7C2B43DF5BA), UINT64_C(0xBB1E64C324192830)}}, {{UINT64_C(0x97F70C5725034073), UINT64_C(0xE374891C62A68F1E), UINT64_C(0xDBCC2FED8EB2EB22), UINT64_C(0x1DC8F220D3A53E97), UINT64_C(0x48FACE43931D0628), UINT64_C(0x014F5D2ABECD9EEF), UINT64_C(0x1DA7E092653CEB96)}}, {{UINT64_C(0x36C9B777B827F75E), UINT64_C(0x93A87D6C1777AEA9), UINT64_C(0x4AC416DFFA9E8C92), UINT64_C(0x98F31E8CAB4A73CE), UINT64_C(0x650A58B0B627DC45), UINT64_C(0xCDBBBF6BC0721B6A), UINT64_C(0x9864CBE39AAAC36B)}}}
+	},
+	{
+	{{{UINT64_C(0xA27593318D00BC94), UINT64_C(0xAD31586F3C6C7262), UINT64_C(0x4E8BEDEA68F52958), UINT64_C(0x6CB3F9CE6707FCCD), UINT64_C(0x6F7F4B1BE8B7E35D), UINT64_C(0x352687B41AEE2CBB), UINT64_C(0x1D77845F7B39B8A5)}}, {{UINT64_C(0xD4B1F3995EAF9554), UINT64_C(0xC23C3250F70FE9E7), UINT64_C(0x10E3BF62E5D1BA00), UINT64_C(0x9C25CEC45E422F5C), UINT64_C(0x6A17CC4D5B7A1803), UINT64_C(0x7C5F636D0E0CB4E6), UINT64_C(0x9F40B12A4CF347AD)}}, {{UINT64_C(0x352673F4F9F9B9F5), UINT64_C(0x1094B8AC118B36D6), UINT64_C(0xE39A86FD7AD4DC19), UINT64_C(0xA80ADA7D41213E6E), UINT64_C(0x717081C5D9AC44FA), UINT64_C(0x841FAAAC224C37C5), UINT64_C(0xF18DB5DCADB18114)}}},
+	{{{UINT64_C(0x48697F88251E3696), UINT64_C(0x5804C89BC40AB0A6), UINT64_C(0x51A2BD8F261A5978), UINT64_C(0xF8A2DFCF4C7F900B), UINT64_C(0x34DB642AEBD00E7A), UINT64_C(0x2A79FB63DF0EF9C5), UINT64_C(0x392A69AF2F64A4EA)}}, {{UINT64_C(0xB50C0F01CC331B6C), UINT64_C(0x8391414BF2E6A5ED), UINT64_C(0x2FBC34FE5ED81506), UINT64_C(0x254BCA980A8078D6), UINT64_C(0x9AE3D727C778A438), UINT64_C(0xC1DE1AB4DFFEF7A4), UINT64_C(0x45901F73B9440A96)}}, {{UINT64_C(0xE66F4E5AB6315777), UINT64_C(0xA9BBC1F06453F001), UINT64_C(0x9BAEAA80562129FF), UINT64_C(0x8211666861DB9014), UINT64_C(0xD98740DFB2871AAB), UINT64_C(0x5C3563A10B1A3E9F), UINT64_C(0x37C3E90A4785A345)}}},
+	{{{UINT64_C(0x433F1189FACFE46E), UINT64_C(0x5BCFDCA6F4644674), UINT64_C(0x06BF72AC385422EB), UINT64_C(0xCFE1D454B02DCE99), UINT64_C(0x04C65F7218DD8CDA), UINT64_C(0x748596EA145DC26F), UINT64_C(0xC53DC6B5BDB315B4)}}, {{UINT64_C(0xCCBE5BE749AD7197), UINT64_C(0x405D627E91918B5E), UINT64_C(0xA5360B57C889C9EA), UINT64_C(0xF1B30B272E5650C1), UINT64_C(0x157524268742290D), UINT64_C(0x3ED1FD3791334A07), UINT64_C(0xB9D7A0701DB01955)}}, {{UINT64_C(0x75F43450B8C9B1C9), UINT64_C(0xBC7C9B517C99F78F), UINT64_C(0x47AB644BF7FB6D1B), UINT64_C(0x34BB9E7CE97EEFFA), UINT64_C(0xD2FC3A32D610DCDB), UINT64_C(0xDDF864654AB50B6A), UINT64_C(0xD41314E2FA6231DB)}}},
+	{{{UINT64_C(0xD6CFE551C56597DC), UINT64_C(0x8D5781AF92A925EB), UINT64_C(0xF640D383EFE16F4E), UINT64_C(0xF78B414A61BB4311), UINT64_C(0xC636C9E3B4F80440), UINT64_C(0x5F43A6A03C6672F3), UINT64_C(0x47A9DEDE417037B5)}}, {{UINT64_C(0x201A7E287DBB612B), UINT64_C(0x4764895C3C7DBB92), UINT64_C(0x3CF7CAD50C86E6C0), UINT64_C(0x9F74AF55ED526985), UINT64_C(0x0F2B969FF2C78D79), UINT64_C(0xD48151C6530BB2BA), UINT64_C(0x764A1FE165A57506)}}, {{UINT64_C(0x78F0387C5C456734), UINT64_C(0xF88DEC44D37EA43F), UINT64_C(0x3199FF5BCE41D385), UINT64_C(0x2673FDCCEB91CC20), UINT64_C(0xDEA56EFAB99CEA9B), UINT64_C(0x05C12A78F033D5AF), UINT64_C(0x1DBAC3DE2F792AF3)}}},
+	{{{UINT64_C(0x484383A3BC1B5ECE), UINT64_C(0x796E0563C8854FF1), UINT64_C(0x8E99539A452795AF), UINT64_C(0xEB6A3001FFBA7C08), UINT64_C(0x98825B6B19FE9FB5), UINT64_C(0xC899AD81BE5E7950), UINT64_C(0xC89AC8D2F9D29B67)}}, {{UINT64_C(0x747C76BA329AB8F7), UINT64_C(0x4D9BB2A18C96E40F), UINT64_C(0xB582B81B5056E386), UINT64_C(0x97C9C68EDFA503D9), UINT64_C(0x1316B3C22BFB0351), UINT64_C(0xAB231A6C96FFDC50), UINT64_C(0x4EA527C8CB1C1038)}}, {{UINT64_C(0xC078EC6728420CA4), UINT64_C(0xADEE9C06DFFB6EC0), UINT64_C(0x2778F21E34E1B044), UINT64_C(0x1A65E88A676EAE47), UINT64_C(0x1343E87D07CA8AAC), UINT64_C(0x6516080AE3561D7F), UINT64_C(0x39ED112FB9AB6002)}}},
+	{{{UINT64_C(0x2DD632F20C05B4ED), UINT64_C(0x12D7E0199FAB2A03), UINT64_C(0x13DF133732956268), UINT64_C(0xB39F96AC2AED8550), UINT64_C(0x73DBB9751A92CA24), UINT64_C(0x0D21EF7437A16202), UINT64_C(0x9DE2A43077DE565D)}}, {{UINT64_C(0x890569B1211A4674), UINT64_C(0xC770FC3923E89C39), UINT64_C(0x4E8C373D127042C5), UINT64_C(0xDAC39F9A0072B908), UINT64_C(0x92F778D3457178D4), UINT64_C(0x5BF0F77C73075F82), UINT64_C(0x7691610C3A20F59E)}}, {{UINT64_C(0xB5A5D7700D5CE56C), UINT64_C(0x5F69A5B9A51A677D), UINT64_C(0x7036403A737B711C), UINT64_C(0xFE8522B0E39AE9F0), UINT64_C(0xDE00E90437F777C6), UINT64_C(0x503519B5954763E8), UINT64_C(0xC47E43D97CF248EE)}}},
+	{{{UINT64_C(0x4C7C4EAD5705FE96), UINT64_C(0x9954377EC35C8E46), UINT64_C(0x2D31EA3E5B990768), UINT64_C(0x5C580671C0F6949A), UINT64_C(0x7A6B215B09839D39), UINT64_C(0xCFA33683DF832F34), UINT64_C(0x6E12CC26AF39A8FD)}}, {{UINT64_C(0xF8AE46EC813A3BD2), UINT64_C(0xAED403A7D3B59366), UINT64_C(0xE1B83DE2029D5B87), UINT64_C(0xCDB8A1A8BDC4E43F), UINT64_C(0xCC3EA0DD7F768437), UINT64_C(0x0E0CC62A0AF4E47A), UINT64_C(0xCAF2CBC1A2096255)}}, {{UINT64_C(0x90FB4BA1CFBF1A77), UINT64_C(0xCF14E403A77EE20C), UINT64_C(0x9C15F8CA4C1A3334), UINT64_C(0x2F3FD39D47F6A70D), UINT64_C(0x66675A24A4DEA88D), UINT64_C(0x77F35F47C351F4BD), UINT64_C(0x5F4342EE6683FE66)}}},
+	{{{UINT64_C(0x245A784F7F28A78F), UINT64_C(0xB7A3952A9B507E97), UINT64_C(0x7BC1E18AC5E411BA), UINT64_C(0x2DC15E221251E3FB), UINT64_C(0x2DA95213F5E360F8), UINT64_C(0xEE9BA4DCD47B3AC7), UINT64_C(0xDFEAB7B3AF595265)}}, {{UINT64_C(0xEE34C5C8026FD3C6), UINT64_C(0xA2F6D977B08F3AC7), UINT64_C(0xC98C8D003BD017DB), UINT64_C(0x40E46922CFC5CF8A), UINT64_C(0xB17FAA935205EB60), UINT64_C(0x41C0F395C7A7C248), UINT64_C(0x29931D4B71EE44FA)}}, {{UINT64_C(0x97E75E8D3FC62D53), UINT64_C(0xCA5B8D0C32720D11), UINT64_C(0x9E38D95CFBA3D8BA), UINT64_C(0xFF12F783E68F926F), UINT64_C(0x72B6AD8B0A4CD393), UINT64_C(0xA6648AB13BA57278), UINT64_C(0xFBFFD1F446D04826)}}}
+	},
+	{
+	{{{UINT64_C(0x40AC087BB07861C5), UINT64_C(0x518F3BD37DB5AE82), UINT64_C(0xF88A5B94C68ECF94), UINT64_C(0xF9B441D1D32A378F), UINT64_C(0xB70FC07F1242C8AA), UINT64_C(0x1C386D3D4455089D), UINT64_C(0x1DB9AF7546B15821)}}, {{UINT64_C(0xF4DFD1B6551BC927), UINT64_C(0xB58669C04930733D), UINT64_C(0x23AA13DC72CD42AE), UINT64_C(0xC56AD643EEBDACE8), UINT64_C(0xA99D4E042651B3B3), UINT64_C(0xE5B6C69C4ECCB983), UINT64_C(0x37CD38245E6668A1)}}, {{UINT64_C(0x42BA80922C3D285A), UINT64_C(0x41E66B373D6D8466), UINT64_C(0x6ACEC7837877E7FA), UINT64_C(0xCCC7A837577FAE00), UINT64_C(0xD341E19F74CA84C5), UINT64_C(0x7BC7D5A9E7060B9A), UINT64_C(0x91CCE98FA30F060D)}}},
+	{{{UINT64_C(0x75158CE6D9F73AEA), UINT64_C(0xB01836A774914FF4), UINT64_C(0x946F090D4E424DC0), UINT64_C(0xFFACDA62C2C44483), UINT64_C(0x9E6B4867097A7DE3), UINT64_C(0x094D8DB61DA749A1), UINT64_C(0x09EDFD98F5EE8765)}}, {{UINT64_C(0x70E460FCFB37226D), UINT64_C(0xCA223B9D03969BF4), UINT64_C(0x782CB13D4D511247), UINT64_C(0x000AD293C7248D6C), UINT64_C(0x942E8ABE7591189A), UINT64_C(0x88D12BF52CDB1244), UINT64_C(0x368463EBBBCADF9F)}}, {{UINT64_C(0x0DDAEEA4B2315A44), UINT64_C(0x6AD67DA87C43A13D), UINT64_C(0xB64E1B5F27CA9923), UINT64_C(0x8DD97FB7B66CD48D), UINT64_C(0x3FB7CD596DCA760B), UINT64_C(0x87334A2D3523A4FB), UINT64_C(0x59DC250AF6CC41BC)}}},
+	{{{UINT64_C(0x83419E4B38074F45), UINT64_C(0x8D34D3F8E2E0771C), UINT64_C(0x116A00D2743B42E6), UINT64_C(0x7D84CC37C68B7DBB), UINT64_C(0x7C0B7A0F4DFAD2CF), UINT64_C(0x9E23F190E587CFD2), UINT64_C(0x7BAB499751CA9E3B)}}, {{UINT64_C(0xD53270861A8F12EE), UINT64_C(0x0EEDEE1F38D31B36), UINT64_C(0x10EBAD748BB31E4C), UINT64_C(0xBC8B6CB69BE5C9B1), UINT64_C(0xDF793D914A728660), UINT64_C(0xA4F2CC88C8597BC9), UINT64_C(0xBE4A2FDB4E7F0E73)}}, {{UINT64_C(0x54FF1143FD3FD31A), UINT64_C(0x71A2B34828B648CD), UINT64_C(0xC4270F112C522E1F), UINT64_C(0x654C069E6B835773), UINT64_C(0xA41B06D6189F8C01), UINT64_C(0xAE3CB1C5F7BCA34F), UINT64_C(0x135AFF373A5D0C1B)}}},
+	{{{UINT64_C(0xBAE566FF8A450E77), UINT64_C(0xDC90B0B40066A13A), UINT64_C(0xFA9CCC483A510CD7), UINT64_C(0x1A80E67CB1A20135), UINT64_C(0xE1F020801AEB0B63), UINT64_C(0x57DC8F4E447C7C34), UINT64_C(0x7ABE7D174C6F0F02)}}, {{UINT64_C(0x0EF115A3AB19A576), UINT64_C(0xF99B8F0474A064CA), UINT64_C(0x73EDC3999BB6B351), UINT64_C(0xF427D717855254B7), UINT64_C(0x2532E0CEF249F6C2), UINT64_C(0xE126C2EE34F59F68), UINT64_C(0x1EC2CAE80150F71F)}}, {{UINT64_C(0xBD23BF6DE3DFCBFB), UINT64_C(0x65C985EF628B4A43), UINT64_C(0x6458BD6779BD2D1C), UINT64_C(0x9E26BB72ECD1262A), UINT64_C(0x8369499219E64EA2), UINT64_C(0x9DA45186F0166416), UINT64_C(0xF3E282EFC09AA5D6)}}},
+	{{{UINT64_C(0x17862C5AFC005B7A), UINT64_C(0xB44661ADEA7EC4EF), UINT64_C(0xB0E30EF885FD3007), UINT64_C(0x5FEEC7E025C129D9), UINT64_C(0xAC4DF79EE1BC10F2), UINT64_C(0x49DB7FE9E19F3901), UINT64_C(0xC8624D9360D050AD)}}, {{UINT64_C(0xC2C74A576BF3260B), UINT64_C(0x6977BDE80248C010), UINT64_C(0x52DCF8F15532909B), UINT64_C(0xD29B9DFC6A5A82ED), UINT64_C(0x049C7B730C4FBF59), UINT64_C(0xDEAC63A89CD4337D), UINT64_C(0x1E07595AD2F2EBB3)}}, {{UINT64_C(0x9D32620C760601E4), UINT64_C(0x02175496FF8F3215), UINT64_C(0x7CDC9605AE181C84), UINT64_C(0x9CC477E6536942E6), UINT64_C(0x0B7B54C677A37F02), UINT64_C(0xDDC94565A363C2CC), UINT64_C(0x8DC0C0F0B155B6DC)}}},
+	{{{UINT64_C(0x00A0B0A4D3B7C84E), UINT64_C(0xA8ECF132C378CF2B), UINT64_C(0xB4B5DF192814BEAA), UINT64_C(0xE42D0AB7E7929F97), UINT64_C(0xFB17B60CDDF08A68), UINT64_C(0xC348C7D9C160814A), UINT64_C(0xF8A948844DB21778)}}, {{UINT64_C(0x60CDEFD88EAA2578), UINT64_C(0x4D02F717F56BD0E2), UINT64_C(0x81DBD87754E13169), UINT64_C(0x26E5F3121254C141), UINT64_C(0xDFBCEF87BF0DACDD), UINT64_C(0x85972E74E2EAB8AB), UINT64_C(0x1717621002B424B9)}}, {{UINT64_C(0xBA1EFFF30D74DA75), UINT64_C(0x36D9D8C5A8CB7E9D), UINT64_C(0xDF47CC57BEC8D2C4), UINT64_C(0xD439671D551BEA4F), UINT64_C(0x1835AA1A677AFF3B), UINT64_C(0x9237A0D21EAA7533), UINT64_C(0x55593AEB32A4438F)}}},
+	{{{UINT64_C(0x4992CC75E162DF70), UINT64_C(0xA5901E20C0618EE8), UINT64_C(0xDA5155C036B4626A), UINT64_C(0x5F7213B031BE67E4), UINT64_C(0x1D7BB2E72E04911B), UINT64_C(0x844665C015A33926), UINT64_C(0x2F59FC0298AE679E)}}, {{UINT64_C(0x51A3EA7BA1701FCC), UINT64_C(0xD7B187A5FA90EBD6), UINT64_C(0xB2E271A607ED4301), UINT64_C(0x2DC4180FBD4EC5F3), UINT64_C(0xD82FEAA8C1732A1A), UINT64_C(0x3670266F2F3FBE15), UINT64_C(0xCCFD3979E79CE810)}}, {{UINT64_C(0x410A850944EDFA59), UINT64_C(0xBEF79E66ED4209B4), UINT64_C(0xDC1C562EF3B9846F), UINT64_C(0x0F69AA0A5F682FEC), UINT64_C(0xF85778EFA5D43C4B), UINT64_C(0x725403D0486CE107), UINT64_C(0xD713378AB4126E9C)}}},
+	{{{UINT64_C(0x7582AB83570A54AD), UINT64_C(0x556B5C1DEE8E3BEC), UINT64_C(0x461E60F583FF454B), UINT64_C(0x887FC4E79220199F), UINT64_C(0xFD20776DADDF61CA), UINT64_C(0xC6EDD8EDD0616641), UINT64_C(0xAF9B14255F7E8700)}}, {{UINT64_C(0xFA73F15E49BBE3EC), UINT64_C(0xFF86DD3B788F8BC1), UINT64_C(0x1BE58BB24CC071B8), UINT64_C(0x36B10ADA6C260D24), UINT64_C(0x2097FDB985EC1C4E), UINT64_C(0x0AC85D47C212F6B4), UINT64_C(0x967191C07D78D10D)}}, {{UINT64_C(0xADC6D33FBB759A6B), UINT64_C(0x9A3D0A14FF0392BC), UINT64_C(0x1D7A11F73290923A), UINT64_C(0xBC39A3F39216B067), UINT64_C(0x8D52FB70EE2B9286), UINT64_C(0x35BF30C44B418124), UINT64_C(0xC91FFE14F5F85B83)}}}
+	},
+	{
+	{{{UINT64_C(0x0E3B11638843D0F3), UINT64_C(0xBA2A4B89297F27F1), UINT64_C(0xDD280C477236E863), UINT64_C(0x504DA7571949622A), UINT64_C(0x9D279E4FF77CD523), UINT64_C(0xEF894537DA41E0E9), UINT64_C(0xC55DDE45A24FF1B4)}}, {{UINT64_C(0x3318D8E21B587521), UINT64_C(0x54C88010B5D37778), UINT64_C(0xC0AC134AF522DD3A), UINT64_C(0x14099F677CD476B4), UINT64_C(0x0ED605EE644587E6), UINT64_C(0x18BA2CC80903494D), UINT64_C(0x5FF56AA0B2E16932)}}, {{UINT64_C(0x1415183C87933F0D), UINT64_C(0x1F09FCBBE72335A3), UINT64_C(0xE22A14389E7DC744), UINT64_C(0x2528AD44193F4250), UINT64_C(0x70F3F6F5092D9FB2), UINT64_C(0x9B39B22B0E5FC280), UINT64_C(0xC6600EE9443688FB)}}},
+	{{{UINT64_C(0x5251EC94E3A06C69), UINT64_C(0xEE96A26D7BE5E65C), UINT64_C(0xF5B9B4156F113D44), UINT64_C(0x95F5332D70F0968B), UINT64_C(0x95F67038299B7E46), UINT64_C(0x22690D04F49236C2), UINT64_C(0xCF35CA4728043B15)}}, {{UINT64_C(0x07F9CA3E1190A7C3), UINT64_C(0x8B4953D2413F971B), UINT64_C(0xEFFF5CAE596529C4), UINT64_C(0xBA7643B074672B8F), UINT64_C(0x9E83E9B0A80A3018), UINT64_C(0xAD33DC932FB55191), UINT64_C(0x52A4419643E68789)}}, {{UINT64_C(0xB650CE3DF155089A), UINT64_C(0x09A311875E0417A0), UINT64_C(0xF10B9E9D4676D27B), UINT64_C(0x11F6146F5F104976), UINT64_C(0x667926DD55966B38), UINT64_C(0xE8E02B29FCC57F75), UINT64_C(0x919CFF888109BE5D)}}},
+	{{{UINT64_C(0xF17778990D2D0ACD), UINT64_C(0x3DD23BDBCCE487FD), UINT64_C(0xA2B7D0DC413CA2B0), UINT64_C(0x535DDD7F278755B9), UINT64_C(0x152BCBDB924EBB8B), UINT64_C(0xF22D6671D0510465), UINT64_C(0x1BA04C787192B934)}}, {{UINT64_C(0xE9B1693F483560C1), UINT64_C(0xC9AFE08A5937D174), UINT64_C(0xE8126C47FFDC464D), UINT64_C(0xF11246281123596C), UINT64_C(0x7ABFEE7C76632D95), UINT64_C(0x0FE60C5523326628), UINT64_C(0x3F11729E304E1EB4)}}, {{UINT64_C(0xA1C83F19F9289773), UINT64_C(0x2F0D7ADF779B0676), UINT64_C(0xA7EDEBEFC105CE79), UINT64_C(0x2A82050F34861E42), UINT64_C(0x1300681C25B4CE8B), UINT64_C(0x5D4C937039FE112A), UINT64_C(0x1B171CED56FE9A75)}}},
+	{{{UINT64_C(0xB297A6EA05030A8C), UINT64_C(0xDD5D692419809C27), UINT64_C(0xE73FDC3308501AC9), UINT64_C(0x405352869FED7FAB), UINT64_C(0x7AB6C9B832EA5554), UINT64_C(0x8C882C51B967C7C0), UINT64_C(0x6FA0C6986EE07517)}}, {{UINT64_C(0x0ABAA4A15B8B5C4A), UINT64_C(0x0331F83C0EA3130C), UINT64_C(0xCCBCB8CF8624B280), UINT64_C(0x6F08445DADE85CD7), UINT64_C(0x0B76A546DC971D7F), UINT64_C(0x15A38C93761CFD48), UINT64_C(0xC4C495C9D04631DC)}}, {{UINT64_C(0x07E5C250D08CB7E2), UINT64_C(0x4440CE5F12278EB1), UINT64_C(0xD57110DEFD288094), UINT64_C(0xBD17507BC2A96E04), UINT64_C(0x0F5A41E7EB900170), UINT64_C(0x7737979B1F002519), UINT64_C(0xC794A503019D203C)}}},
+	{{{UINT64_C(0xAD5F4CEE89470EFE), UINT64_C(0x49CE9FE896188D93), UINT64_C(0x2FFB3E24783B3F4E), UINT64_C(0xA6D81E171BC7ED75), UINT64_C(0x8B47A333C3A3ABE6), UINT64_C(0x85C0B10A3527D6BB), UINT64_C(0x7CDDC9C31A9D1034)}}, {{UINT64_C(0xD80C78112C38CA37), UINT64_C(0x191110E249DDD2F8), UINT64_C(0x9A6C8472C88CCC51), UINT64_C(0x7A227B1E4D75B5A2), UINT64_C(0x90CF8E35ADC74B26), UINT64_C(0x27EDFE98D2306983), UINT64_C(0xEC922F26BDC7F48F)}}, {{UINT64_C(0xB85118B48ED06F1B), UINT64_C(0x46F7E6EEDE79C522), UINT64_C(0x2389CB2C364A9ABD), UINT64_C(0xA76302387926949B), UINT64_C(0xF6095C167A8040E8), UINT64_C(0xF82A0F0CD6B108EC), UINT64_C(0xFC99D911A5C4F8E5)}}},
+	{{{UINT64_C(0xD1AC34023FC32E11), UINT64_C(0x8C82E0AE2F547200), UINT64_C(0xB02154A7C7492BD9), UINT64_C(0xCE28AB6D3910B687), UINT64_C(0xE49D98B0126FDD06), UINT64_C(0x1C82B9F54207D3A7), UINT64_C(0xEF5BBE645C176F4C)}}, {{UINT64_C(0x0C3D17960D3E71EB), UINT64_C(0x5D9E90D7E84080E7), UINT64_C(0x35D85C83E6438BFF), UINT64_C(0xEFBB69CC1877E1F5), UINT64_C(0x2651247848931ED6), UINT64_C(0xD618B750DA4ECF96), UINT64_C(0xC076708717FBF676)}}, {{UINT64_C(0x958D398AF6461E33), UINT64_C(0x3D1B1981D1DA9A84), UINT64_C(0xF4C76E4EE677B3A1), UINT64_C(0xA690547D6FE21DF4), UINT64_C(0x190FF5E2D20316D7), UINT64_C(0xF6BE3197D753908B), UINT64_C(0x08B184F2DEEAD052)}}},
+	{{{UINT64_C(0x8080A5AC5EEC5126), UINT64_C(0x6D326D05DD13379C), UINT64_C(0x725137514B089233), UINT64_C(0xA574F954586C0066), UINT64_C(0xEA0AC7D356AB2365), UINT64_C(0xF2EDD27460BA3C89), UINT64_C(0xF200DDBAB9870FF1)}}, {{UINT64_C(0x50C8F1B2CA35E885), UINT64_C(0x46155D22F86E6E75), UINT64_C(0x16314F24B9A40955), UINT64_C(0x0C976A11CB411076), UINT64_C(0x839A08291ACA752F), UINT64_C(0xFF22FF2C420E3E2F), UINT64_C(0xAFD603E82B97470C)}}, {{UINT64_C(0x77DD358B0BE30186), UINT64_C(0x5F41F52F44C60CB7), UINT64_C(0x980934AC908189A9), UINT64_C(0xFEC9CDF1F2E34E16), UINT64_C(0x3BC8EA4841CA0D9A), UINT64_C(0x6480832A8D6DAC27), UINT64_C(0x9BD8C728F73D6D3A)}}},
+	{{{UINT64_C(0xBFADDEDDC810A3DA), UINT64_C(0xA04C78B6C2DD3A87), UINT64_C(0xB6D045BC7020BDE3), UINT64_C(0x6095935847AB9739), UINT64_C(0x3E7509EE3E3B046D), UINT64_C(0x3DC8669FC61B0F95), UINT64_C(0xCCEAEC0893C8D480)}}, {{UINT64_C(0x8A21F8C40B048A45), UINT64_C(0x360BB535073FCAEA), UINT64_C(0x403338E712C3590E), UINT64_C(0xC7207F2D5D0F3F48), UINT64_C(0xB57FFD9E05E0EA26), UINT64_C(0x7D68E4788B0020F6), UINT64_C(0xB1215541889CCEB9)}}, {{UINT64_C(0x1D793463F90A1213), UINT64_C(0x1293B013DF7EEF37), UINT64_C(0x960B84A99C1D18D5), UINT64_C(0x45C1BD6088BADB7A), UINT64_C(0x3B5656ED15C84AA1), UINT64_C(0x2F475DD1AF3CF4E2), UINT64_C(0x3ECEB1F7A5CBAA55)}}}
+	},
+	{
+	{{{UINT64_C(0xCA0079817464238E), UINT64_C(0x01B521103020D381), UINT64_C(0xA131B11CC4C6ED9F), UINT64_C(0xD06944EB5E35DC55), UINT64_C(0x2A029631A3B61848), UINT64_C(0x1017FAFCA0DD8379), UINT64_C(0x70AAA01782FCBBBE)}}, {{UINT64_C(0xC1C63B7A099945E7), UINT64_C(0xF2C1E9164ECC4486), UINT64_C(0x99AE02B133E35885), UINT64_C(0x22BF53E6186F0D3C), UINT64_C(0xAA248A02BC2FCA49), UINT64_C(0xE64900DD3DCAF922), UINT64_C(0xE8C313FF6A82074F)}}, {{UINT64_C(0x7C2E1416F6B37604), UINT64_C(0xCF2D77CCD22901A3), UINT64_C(0xDBC549131041474D), UINT64_C(0xBA502856D9D77483), UINT64_C(0x5CB44BC0EB31611D), UINT64_C(0x774E4CADA673207D), UINT64_C(0xF500986BCAAFD690)}}},
+	{{{UINT64_C(0xB6C5B358397CAF1E), UINT64_C(0x7C95A001922922A4), UINT64_C(0x2F4F3467E36BEDF0), UINT64_C(0x6DEDC333ABAA0AEB), UINT64_C(0x1C438EC5B366DC92), UINT64_C(0xB4F2600AB1768202), UINT64_C(0x1B7C22E69C45AF82)}}, {{UINT64_C(0xDE07B0DBE0924AD9), UINT64_C(0xCD06E030936A407D), UINT64_C(0x3505A966E1CE926C), UINT64_C(0x1DA98F51B50C108E), UINT64_C(0xA1A20CF7C78B921E), UINT64_C(0xB80C7E67D079449C), UINT64_C(0x205AA54834372DAD)}}, {{UINT64_C(0x3641594B24BC44DD), UINT64_C(0xB2C5A21C6F8D689B), UINT64_C(0xA5F50255FB996157), UINT64_C(0xBDB409E777006DCE), UINT64_C(0xFCF3EAA7BA80A3C3), UINT64_C(0xB9A775F9850D7637), UINT64_C(0x985C08629E68134F)}}},
+	{{{UINT64_C(0x0F1482B4819BF847), UINT64_C(0xD060D6C16AB5906F), UINT64_C(0x832BE7323FB1723A), UINT64_C(0x82EE45BF0346389C), UINT64_C(0x37DFB22276E71B2D), UINT64_C(0xB33345D70BE2761C), UINT64_C(0x81A06565A0627AA9)}}, {{UINT64_C(0xF0337750399A6282), UINT64_C(0x342FAFC8D2ED0436), UINT64_C(0x939AD322F71D3C53), UINT64_C(0x230E09BA66CA56D8), UINT64_C(0x91EA6DE89015A919), UINT64_C(0x9D700E78F2D52610), UINT64_C(0x8AA52EE8EAAF7860)}}, {{UINT64_C(0x5F61AF9247ADFA39), UINT64_C(0x3E57275CFE4FDAB1), UINT64_C(0x4F2369C52D988996), UINT64_C(0x6234498F48C56D66), UINT64_C(0xFF5551326A77ED10), UINT64_C(0xFE66D3890B61AD06), UINT64_C(0x1FFD075859A5176A)}}},
+	{{{UINT64_C(0x75A398788CE76258), UINT64_C(0xDFE23031D07494B9), UINT64_C(0x4401EC4A6D652043), UINT64_C(0xBCE8BBCCDB1A849B), UINT64_C(0xD4716EFE9EF81EBB), UINT64_C(0x19350EF85ECC937D), UINT64_C(0x260D932214273B9C)}}, {{UINT64_C(0xB71D7E21E77BF1A3), UINT64_C(0xED50199D689A544E), UINT64_C(0xA0AEAA9DA594194C), UINT64_C(0xE26D3B5171A60BE8), UINT64_C(0x76A8DF9728183A0A), UINT64_C(0x4376E323067449F1), UINT64_C(0xB2CB21AE25541C74)}}, {{UINT64_C(0x06F7D6CCAAE6A4DF), UINT64_C(0x591624E697FEDC2C), UINT64_C(0xC9A395B8B44BE7B2), UINT64_C(0xE02EA8920F179456), UINT64_C(0xB3340271557253A0), UINT64_C(0x0858CA0FF82E54EE), UINT64_C(0x9D99C50BEC39E38B)}}},
+	{{{UINT64_C(0x6B7A721589A0071F), UINT64_C(0x13F0E19DD29E7D2A), UINT64_C(0xDE573B3DEB34E551), UINT64_C(0x95665E37EF1F8EBE), UINT64_C(0x1EAF2D7777A8F7FF), UINT64_C(0x87AFA91E2E39A2C2), UINT64_C(0x04057B97DB68F613)}}, {{UINT64_C(0x938B9D5AE1C241F7), UINT64_C(0xE2D4689588A8E759), UINT64_C(0xB6497479585B45C0), UINT64_C(0xC1C08A75BA1EF167), UINT64_C(0x814D572EDD72685B), UINT64_C(0x464A35AB0E70F0A5), UINT64_C(0xC93C92B339AEA771)}}, {{UINT64_C(0x55510AD654AAFE40), UINT64_C(0xA19CB5BA9B999AE6), UINT64_C(0xA052ED3BA03B273B), UINT64_C(0x8A3E40D29BB79735), UINT64_C(0xFA3C43B2D2FFBB9F), UINT64_C(0xC29B318A9FBC4F94), UINT64_C(0xA3CC54494543C7A0)}}},
+	{{{UINT64_C(0x561917E2A5B8A87D), UINT64_C(0x0E2BEA5DB763A827), UINT64_C(0x19372A5BBA2FB642), UINT64_C(0xECCC5EFD5CC05010), UINT64_C(0x393F49C57DB1EF8B), UINT64_C(0xB1ADF87A0BC4AF06), UINT64_C(0x2EE4CCA34FE6B63A)}}, {{UINT64_C(0x13D1606686B8BA9B), UINT64_C(0xBB76EF137D97EFEC), UINT64_C(0x753A007B6046550A), UINT64_C(0x2EAF8F1DB40EC2BF), UINT64_C(0x91FD8BA3D8696ED2), UINT64_C(0xF203437DB313398C), UINT64_C(0xE1EC33BFE5079E11)}}, {{UINT64_C(0xF20E1E43AB1F7CB9), UINT64_C(0x04782B460A7B09F3), UINT64_C(0x3549A2FA5C805FE9), UINT64_C(0xB34C9D3D0EC61B5E), UINT64_C(0x23B47EF129E01E82), UINT64_C(0x7640B4F9A6A07321), UINT64_C(0x5F8820E1570E5387)}}},
+	{{{UINT64_C(0x058A10C00BDC81F0), UINT64_C(0x368E5F392566FE8E), UINT64_C(0x8CEC6BA595DAB14A), UINT64_C(0xE1B00D0032B31813), UINT64_C(0x9284D9923DD77AFD), UINT64_C(0xF0E7A76E13DD3C97), UINT64_C(0x5EE8E59BF7567578)}}, {{UINT64_C(0x4149EC89391B130C), UINT64_C(0x2CE89416182A47A4), UINT64_C(0x49C40B54555B576E), UINT64_C(0x79392BBECBDD2FD3), UINT64_C(0x1112E2DAB010AE73), UINT64_C(0xB7712AF293F4270B), UINT64_C(0xFC22A33D6095C65C)}}, {{UINT64_C(0xD5DA0DAC8CB4F675), UINT64_C(0x93B87BC2D6D3D1E3), UINT64_C(0x16F792E9A4A9DD2C), UINT64_C(0xAB39B1D8211EDCBD), UINT64_C(0xAB10C81C3D7A11ED), UINT64_C(0x61E9A58F1611FA74), UINT64_C(0x9546F6A5ADCB29E2)}}},
+	{{{UINT64_C(0x48DCB5BBD0F15878), UINT64_C(0x0EBABCF27ADB6BBA), UINT64_C(0x58578A979913E7B7), UINT64_C(0x76ED60884C0F34B1), UINT64_C(0xB2C75B0FC253F59A), UINT64_C(0x628DC0153F3C19B3), UINT64_C(0x5195A2BCEC1607AD)}}, {{UINT64_C(0x0B95F8B84DFE0F7A), UINT64_C(0x1056935C6B015292), UINT64_C(0x28C22925F9E314DA), UINT64_C(0x48EE4D6E4910A94B), UINT64_C(0xFC3694E3ED54B03B), UINT64_C(0xC4C26DBE5709C991), UINT64_C(0xC9CFCE463D765768)}}, {{UINT64_C(0xFE934A045C3C0E2E), UINT64_C(0x16946460D7E82CEE), UINT64_C(0xA49741904A51B4E7), UINT64_C(0x4EF0F72A526966EC), UINT64_C(0x6EC9A16CA4B727D5), UINT64_C(0xDE0471B2322B60C6), UINT64_C(0x1E2436031DF8F208)}}}
+	},
+	{
+	{{{UINT64_C(0xBD21C9227F52A44E), UINT64_C(0x8FC27F105A2E85BF), UINT64_C(0x2D7E35887781F626), UINT64_C(0x52D3930F56EE808A), UINT64_C(0x356DCB561A14F9DE), UINT64_C(0x362267F955984A4E), UINT64_C(0x211C3425F3415187)}}, {{UINT64_C(0xE28FCB75B0EAF9CB), UINT64_C(0xE627CC9EDF93D60C), UINT64_C(0x42DD0954412C9A5F), UINT64_C(0x8A6C60996036A728), UINT64_C(0x0D7538676471CE66), UINT64_C(0x9BED36F18E2302B3), UINT64_C(0x124C9B1D1DE9F4B6)}}, {{UINT64_C(0x46A8EB20977A0C87), UINT64_C(0xFAA6B715CA8ECA8D), UINT64_C(0xDFB93C741B771B8A), UINT64_C(0x834BEE7A631049E2), UINT64_C(0x8855A3EA77A4900C), UINT64_C(0xCCC9D633B6187019), UINT64_C(0x55DCC17919AF71A6)}}},
+	{{{UINT64_C(0x49E8F8D95E69B531), UINT64_C(0xEA0CE1E115EAFF10), UINT64_C(0x4499169087CD1EDD), UINT64_C(0x478084048ED55A57), UINT64_C(0x21617FEA558009F5), UINT64_C(0xBA624FE8ECF9990F), UINT64_C(0x8AC295056D1F4768)}}, {{UINT64_C(0x803257887529DFB0), UINT64_C(0x72FAC4A613F244C0), UINT64_C(0x1EB291ABB1AC0286), UINT64_C(0xA8FABABAB2915C53), UINT64_C(0x2591FDE4986E368C), UINT64_C(0x724A1F2A548C6B8C), UINT64_C(0x6B3B7E8F90409B67)}}, {{UINT64_C(0xC062F9C62137D156), UINT64_C(0x366C6FBC59719C1E), UINT64_C(0x9A919D395D36088D), UINT64_C(0xB3ADA2580F516451), UINT64_C(0x96F2AF57170D796A), UINT64_C(0xE9DFE1BB0DC587AD), UINT64_C(0xB1CBD82ED8E513EB)}}},
+	{{{UINT64_C(0xCE5415003FAE20AA), UINT64_C(0x6BEE95858A985DF5), UINT64_C(0x9EA1A942BC9870AC), UINT64_C(0xCB5710438D843C53), UINT64_C(0xCD51741A335DE200), UINT64_C(0xCA20C0009D1C084F), UINT64_C(0x0271D28E957E6DE1)}}, {{UINT64_C(0xC684CBF809E3BE55), UINT64_C(0xA93AC804DDA1C578), UINT64_C(0x72021DEA85489409), UINT64_C(0x1E68131264A450A9), UINT64_C(0xFF965BC111C6A216), UINT64_C(0x58A4B0F8526F280B), UINT64_C(0xD967BE8953A3ABD3)}}, {{UINT64_C(0x201352EBDBE338C9), UINT64_C(0xE1524A8AED269D8B), UINT64_C(0xDAABB4185A194504), UINT64_C(0xC76A53552DAAFEC4), UINT64_C(0x79D3EB9FF7114086), UINT64_C(0x78CEEEEC493017C2), UINT64_C(0x7B7E20256D551ED9)}}},
+	{{{UINT64_C(0xD44C5E6157DD066C), UINT64_C(0x8B8737AFD33634C8), UINT64_C(0x38B607A3AC88A42D), UINT64_C(0xB37FE4C89681E9B9), UINT64_C(0x57424942457A286A), UINT64_C(0x4B9D36AF75A8DEEE), UINT64_C(0x20F696A3670C0418)}}, {{UINT64_C(0x2E1340ADFA39E8B9), UINT64_C(0xE1EF03C19290850B), UINT64_C(0x42EE9B435EBD42C0), UINT64_C(0x73F116F249DE18B1), UINT64_C(0x9FA2214463B440B2), UINT64_C(0x0DDD36311543D94E), UINT64_C(0x1AE042A991BA3C1B)}}, {{UINT64_C(0xC509E343DB0E9C2E), UINT64_C(0x21F7EB2E993826C5), UINT64_C(0xDF3EE0C511A0B640), UINT64_C(0xD407ED41D4CFA008), UINT64_C(0x73B01AE8BCE6CBC3), UINT64_C(0x80292242884EE74D), UINT64_C(0x7C22190EF8669CC6)}}},
+	{{{UINT64_C(0x45BC322F85BB47AA), UINT64_C(0x15F39E2562554A58), UINT64_C(0xB5757B96B65AE211), UINT64_C(0xF4C42DCE46FBED4B), UINT64_C(0xAF68D801F018AEC4), UINT64_C(0x894631205521C59C), UINT64_C(0x66BD8E089FEB7A91)}}, {{UINT64_C(0x9939EBE95C529EE7), UINT64_C(0x754428D89928EADB), UINT64_C(0x3808EC6058C78692), UINT64_C(0x11C52EAF877E7A5D), UINT64_C(0x812AE221CD8F6511), UINT64_C(0x289C6F890391FB59), UINT64_C(0xA97695B4966E9222)}}, {{UINT64_C(0xEB2B22761CBEBF52), UINT64_C(0x69209C297C411A46), UINT64_C(0x3AD2A6E79A8FFEA0), UINT64_C(0x537A2968C0947914), UINT64_C(0xEDBD8022B238EFE3), UINT64_C(0x371204B46ED6915A), UINT64_C(0x20F49281133C0887)}}},
+	{{{UINT64_C(0xC8F0A91226FF10F0), UINT64_C(0x3CB049A931BA2A65), UINT64_C(0xA9685F3FCEBBCB1D), UINT64_C(0x5AB38CB670EB79BC), UINT64_C(0x91B76304C382520B), UINT64_C(0x5AAB1AF8B07CCCF9), UINT64_C(0xEC8166A5ED5EFB57)}}, {{UINT64_C(0xD7DDC5698C8689B1), UINT64_C(0x7D91227C949B2E78), UINT64_C(0x2CFD6261323218E0), UINT64_C(0x4004DD5F658A11D2), UINT64_C(0x4F090D21B1908FB4), UINT64_C(0x3DB9DA6A1639E3D1), UINT64_C(0x09D86C0333A5256F)}}, {{UINT64_C(0x9C601E3B93074EAD), UINT64_C(0x96E058C83D86DB73), UINT64_C(0x08F9DC77126F3C4B), UINT64_C(0xFB25C8553A305E86), UINT64_C(0x227F9AC700190449), UINT64_C(0x510EC77766481DE8), UINT64_C(0xF86942521D596B3C)}}},
+	{{{UINT64_C(0xF6D83EAF06F043F7), UINT64_C(0x44D788AB648B52D5), UINT64_C(0xAFC8B567C664D571), UINT64_C(0x0CCEB29155D7644E), UINT64_C(0xC7B831AC471C89F2), UINT64_C(0x172FA614885451AE), UINT64_C(0x8FABF7EF6D7BFE51)}}, {{UINT64_C(0x1E5910316477EE27), UINT64_C(0x26AB5F299DD20FE6), UINT64_C(0x2591FA48079A8428), UINT64_C(0x055482ECF4A83BA2), UINT64_C(0x5F16B65B3B8FAC66), UINT64_C(0x88A7C9FD9E1948FD), UINT64_C(0x27DB819937789442)}}, {{UINT64_C(0x20668ACBA6B00CFC), UINT64_C(0x3BD1CAD322632F49), UINT64_C(0xEA01ED986745A420), UINT64_C(0xD4CA80826A58DEA6), UINT64_C(0xEFF6947C28D0269F), UINT64_C(0x13E3D88AAE15C25E), UINT64_C(0x7CD419EE51ADA241)}}},
+	{{{UINT64_C(0xC62936EE47FD9DD6), UINT64_C(0xE3B4CCE5F0E9EC87), UINT64_C(0xD701C815A50E3DB6), UINT64_C(0xD1DFF1F761DF105A), UINT64_C(0xE06E8A16E13601AD), UINT64_C(0x41E021AF3F91B761), UINT64_C(0x9156A4A933FA3F43)}}, {{UINT64_C(0x109DC46AE54BC01D), UINT64_C(0x9A99605577A64EB9), UINT64_C(0xA229D822B99F85A5), UINT64_C(0x56599364AB2DBAF0), UINT64_C(0x4A5E94EBF0A8BFB6), UINT64_C(0x46A1E0DBB23E39ED), UINT64_C(0x117B19587514227B)}}, {{UINT64_C(0x7932C6B067FF1DC4), UINT64_C(0xE7953D09D30B1AFC), UINT64_C(0xE6B5F9F976F8A609), UINT64_C(0xDAEE12ACBEF5B1E0), UINT64_C(0x1221AA4B3A66DDE5), UINT64_C(0x5DD8DE511DE7B89A), UINT64_C(0xE4BF4D3FD7D305F7)}}}
+	},
+	{
+	{{{UINT64_C(0x59D19E8FD423BDDF), UINT64_C(0x590A9D77042387EF), UINT64_C(0x866C1E315CBDD849), UINT64_C(0xD03515A6FDC637C7), UINT64_C(0x4A0037678072BE83), UINT64_C(0x9613119E0C2BD44A), UINT64_C(0x023ACA37B1A6893B)}}, {{UINT64_C(0xC7F5F368782282EA), UINT64_C(0x306644710898A8B5), UINT64_C(0x1ED681CD2F00A17A), UINT64_C(0xC0BFCEFD754E1128), UINT64_C(0xED03B6F29B9C6C70), UINT64_C(0x43D562817A2AD6AC), UINT64_C(0xE590EF4E7C0012E4)}}, {{UINT64_C(0xC1D1E278E43D1BB3), UINT64_C(0xD298C2425EA433DE), UINT64_C(0xF297902B3CA828B0), UINT64_C(0x33C2D71D5A22F742), UINT64_C(0x97D6DE97FE0F914E), UINT64_C(0x6650F7548A041A3D), UINT64_C(0xE3E74E54A0BE9C76)}}},
+	{{{UINT64_C(0x26C2F96763E62E2A), UINT64_C(0xF512661816EB2DAA), UINT64_C(0x6B6E753515FD2DD5), UINT64_C(0x674CC658DC36E275), UINT64_C(0x08600E76440BDDE4), UINT64_C(0xF00451694A091029), UINT64_C(0x454BCB6CEAC169FD)}}, {{UINT64_C(0xE7F4C92AB6481EB6), UINT64_C(0x2D6D8B77AFA09750), UINT64_C(0x53A3AEE6F4231636), UINT64_C(0xCD7DCF980D45DEEF), UINT64_C(0xB7F125EC4ADAC7AA), UINT64_C(0xE8A20AEC0320628C), UINT64_C(0x7418C7EEA2E35B41)}}, {{UINT64_C(0xF25FE6DBE6B64516), UINT64_C(0x581B09FCE5EAFA9D), UINT64_C(0xF92DE86CA4F4CA3E), UINT64_C(0x836CF382447F5162), UINT64_C(0xFE89FC8F8C243CA4), UINT64_C(0xD50703326809593A), UINT64_C(0x33271B5710FF5FA1)}}},
+	{{{UINT64_C(0x334D649ABDF40519), UINT64_C(0x333F8CB22D435258), UINT64_C(0x2C23EE15F6D137A5), UINT64_C(0x50CD44A38C3991B7), UINT64_C(0x4E0CCC1A75248B9A), UINT64_C(0x21EFB15C99A96B4C), UINT64_C(0x236D5040A9C50432)}}, {{UINT64_C(0x4D401C7FBD559100), UINT64_C(0x9275CF0E07507C52), UINT64_C(0x7E868339647C034A), UINT64_C(0xEB3AE6702355422F), UINT64_C(0xBCBAD61B7F3E0A16), UINT64_C(0x1BCB19CA6CBE1C83), UINT64_C(0xE668DC45E2945849)}}, {{UINT64_C(0xF74BD162BB8B00E3), UINT64_C(0x82F1B50ED013F47C), UINT64_C(0x8E3DAF8978713A68), UINT64_C(0xE72AF3085E78EA9F), UINT64_C(0xCFF3FA51321FF1A2), UINT64_C(0x3E785A26110C2F65), UINT64_C(0xF14BCF28C7793898)}}},
+	{{{UINT64_C(0xEEE44C65B219379E), UINT64_C(0xC6DB211381BBB607), UINT64_C(0x76A2E8D4C7428B7B), UINT64_C(0x98BB0B31BA62A03B), UINT64_C(0xB50C6BBC10E1729C), UINT64_C(0x66727B0187AA3CAE), UINT64_C(0xBF9D2F0FB90DCF6C)}}, {{UINT64_C(0xB5EC693501184DC6), UINT64_C(0x6B07D58D2A32698E), UINT64_C(0x51C017B366D8DA31), UINT64_C(0x9ADB157FE1E39BB2), UINT64_C(0xA9A8A8B06CBE44BA), UINT64_C(0xF46356E473E1BAA9), UINT64_C(0xD25A8F61D681C6D0)}}, {{UINT64_C(0xBBFC73483FBD7400), UINT64_C(0x9468376E0273C80F), UINT64_C(0xB4D8F0F0D2C33B12), UINT64_C(0xBB471949AE2B0BF7), UINT64_C(0xCF2FE033DF509D50), UINT64_C(0x5A679E46DECAA43B), UINT64_C(0x7D2F1EB80CD4072C)}}},
+	{{{UINT64_C(0xEBBA39D5FCB102C7), UINT64_C(0xFBF466EBA21D8AA1), UINT64_C(0x317F54CC2591A697), UINT64_C(0x1F76C6F95ADB5792), UINT64_C(0x5DE5042705A01AE7), UINT64_C(0xF42724F4479F2C52), UINT64_C(0x26AB54AE6D7A5BC8)}}, {{UINT64_C(0x6ADA217B5DC28106), UINT64_C(0xA3B2C7CADEAEB2AE), UINT64_C(0xC6111B0B1609453E), UINT64_C(0xFA7A7BEBCDDCC1CC), UINT64_C(0x1BD0E52DAB5C47AF), UINT64_C(0x31835C6DCF96F993), UINT64_C(0x7095BDEF27EA4E52)}}, {{UINT64_C(0x590CC3D095D71AF4), UINT64_C(0x0510499379AD63E9), UINT64_C(0x5F42909DD4D48818), UINT64_C(0x773B1E383CDFD3BC), UINT64_C(0x5BCE9536EBB3D368), UINT64_C(0xECB5058823074551), UINT64_C(0xF269F713435ABD20)}}},
+	{{{UINT64_C(0x44EE8ADAEC33B4E2), UINT64_C(0xB086300665163CEB), UINT64_C(0x569CE8F1476FB880), UINT64_C(0xA238B59507033289), UINT64_C(0x7BC26C81582CABF9), UINT64_C(0x0B5B568D51448501), UINT64_C(0xA9F5F1EF9C696F42)}}, {{UINT64_C(0x791409C3AC8FEC5A), UINT64_C(0xF446541516F28E95), UINT64_C(0x311B9606573F70E1), UINT64_C(0xA3C2FFD83E3C7062), UINT64_C(0x8FCCA6711C0033F1), UINT64_C(0x6752D07AEF988E80), UINT64_C(0x5E53E9A92525B371)}}, {{UINT64_C(0x0394D155978E6DF3), UINT64_C(0xC13AF682202A9997), UINT64_C(0xB92E6E13576CCC98), UINT64_C(0x5ED308CCC117912D), UINT64_C(0x7A9A5FCBFD5AFBA1), UINT64_C(0x66EDA806750B83DF), UINT64_C(0x675856BD937D3CD4)}}},
+	{{{UINT64_C(0xC9CE98A425A1C29F), UINT64_C(0xA48BAA703483CA6D), UINT64_C(0x68ABCAE77D822EDF), UINT64_C(0x1482CFCAD2E34550), UINT64_C(0x9817FBFB08B456E8), UINT64_C(0x79F258243194C5AA), UINT64_C(0x727F2172CD043D89)}}, {{UINT64_C(0x727CCA616AA53923), UINT64_C(0x80BB387C5AEE9BCB), UINT64_C(0x5FC0D90173FD4375), UINT64_C(0x7345DEAEDD7795B7), UINT64_C(0xD7FB0D1C0347D1C3), UINT64_C(0xA1B92958F0022EB5), UINT64_C(0x7365CF48F61B67F7)}}, {{UINT64_C(0x505409B6D26FCC60), UINT64_C(0xC4851AB7F2CD6CAE), UINT64_C(0xAED54E704679A394), UINT64_C(0x826266046C7947CD), UINT64_C(0x3086E1D462A22978), UINT64_C(0xF5CA64F9E776175C), UINT64_C(0x2B98E2071DC68894)}}},
+	{{{UINT64_C(0x074B22C3B562A5ED), UINT64_C(0x0648711216F5C7CD), UINT64_C(0xDE9E6F51F72C49BA), UINT64_C(0xBFDA63BAC10D0930), UINT64_C(0xA55AF532B0ACA479), UINT64_C(0x59EB77236F394722), UINT64_C(0x5CAD8744465C348D)}}, {{UINT64_C(0xA4A2119E5722B0C1), UINT64_C(0xF387B670264F343E), UINT64_C(0x381FBA6910F02C19), UINT64_C(0xD52C0A1DCFEC5BC0), UINT64_C(0x4D56378CB65F5DE0), UINT64_C(0xC802727E2BA34E47), UINT64_C(0xA215DA3159B5412F)}}, {{UINT64_C(0xE3261C7FFC9FB84A), UINT64_C(0x0A8626DF8CBEA55C), UINT64_C(0xDA49C12087EEC9BE), UINT64_C(0x2503B92A58C389AD), UINT64_C(0x0BB0F6B773C4E007), UINT64_C(0x6A3B8ECA0535361B), UINT64_C(0x3B3D273878399338)}}}
+	},
+	{
+	{{{UINT64_C(0x8DED535858499895), UINT64_C(0xA561A0AEFD565C99), UINT64_C(0x2CD9D6210D8502D5), UINT64_C(0x6C4D297EC2CC23CA), UINT64_C(0x143D18D4412371D4), UINT64_C(0xBDAD9043993D88B2), UINT64_C(0x6BA91E7AD5F28DBE)}}, {{UINT64_C(0xC3C2BB3F13A731F4), UINT64_C(0xC427D35CFAC5D0D5), UINT64_C(0x458ADB995099835A), UINT64_C(0xCAB26F3B8938BB55), UINT64_C(0x3D5A28CD8D0BD738), UINT64_C(0xEB95FA1D8B4B56DB), UINT64_C(0xD6700EFE7F3B4B87)}}, {{UINT64_C(0x7441AF45AA930260), UINT64_C(0xF1907FB73527E99D), UINT64_C(0x0177BEB0600B65F6), UINT64_C(0x72D3270DFC0D6DFA), UINT64_C(0x7EFD1E0C1916BB77), UINT64_C(0xE8AAE53084235947), UINT64_C(0x17519C64ED0463D4)}}},
+	{{{UINT64_C(0x6D962C920EA1E57B), UINT64_C(0x6A73D3BE37E6DDED), UINT64_C(0xC99752F499B622C9), UINT64_C(0x9025590B3EAF7B46), UINT64_C(0xA4A721DB23A310C8), UINT64_C(0xAB57819714A0535A), UINT64_C(0xEECB4FAD4048C156)}}, {{UINT64_C(0xEE7B79EC4470C466), UINT64_C(0x0C45C4E8F2E1383C), UINT64_C(0x25527D0F5D776575), UINT64_C(0x66D00CCEA3B3BC37), UINT64_C(0x0F495A8D812F5DEB), UINT64_C(0xA442EE02B8245D5A), UINT64_C(0xAFB04462A1162850)}}, {{UINT64_C(0x15750E22CD1C2CC6), UINT64_C(0x68EEF414D953DBE7), UINT64_C(0x4B7A03DA983E4A96), UINT64_C(0x24CD3F1F7FFA2532), UINT64_C(0x669C67EC69814913), UINT64_C(0x8A9053C29D6A1831), UINT64_C(0x8A32AD3A5AE9A600)}}},
+	{{{UINT64_C(0x2472B67BC0C613DE), UINT64_C(0x289D0150D4BE6F0B), UINT64_C(0x320F88847854E8ED), UINT64_C(0x329C6160E08292FA), UINT64_C(0xE2D4FB9D06D5B6DA), UINT64_C(0xD9E412DE087C2A48), UINT64_C(0x65683B54F0210055)}}, {{UINT64_C(0x144DC8C2EA8886C6), UINT64_C(0xAF97E966DD220D61), UINT64_C(0x85472599745EBA57), UINT64_C(0x5621A04723A9A71B), UINT64_C(0x284049A4BE8EFFE0), UINT64_C(0x828C25B0660FF16D), UINT64_C(0xD5B69BA56E96B095)}}, {{UINT64_C(0x6BD6C805D3E3B764), UINT64_C(0x6DFDA64225115C05), UINT64_C(0x40FC6788A2AE2F40), UINT64_C(0xD90A48C454CBE928), UINT64_C(0x939F13937D45A27C), UINT64_C(0x161F29A76E5C22E3), UINT64_C(0x65C07FC832177B20)}}},
+	{{{UINT64_C(0x5E0B5B4244FFA0B8), UINT64_C(0x5D370585B45096CC), UINT64_C(0xC7AB8D413E1AEF50), UINT64_C(0x72990120E5652A30), UINT64_C(0x16E3F09368AB32FB), UINT64_C(0x9FADBEFE128E6B8B), UINT64_C(0x85F366B14B7671BF)}}, {{UINT64_C(0x5FCB2F294090608D), UINT64_C(0x190425E2769AC304), UINT64_C(0x29A779069C4F0613), UINT64_C(0x5B7CACE71C57CF13), UINT64_C(0xF430897A4572FE0D), UINT64_C(0xF32F6359A64504D9), UINT64_C(0x0FA854FFA7485ABA)}}, {{UINT64_C(0x2256DB41C04AECEB), UINT64_C(0x64FEDC26B5C56FC8), UINT64_C(0x3EBF7832412EA4A5), UINT64_C(0x12D1C16FBE1AC933), UINT64_C(0x7ECE10D2E79A5A83), UINT64_C(0xD23C0942B62E4E99), UINT64_C(0xC318439D3E0A6B46)}}},
+	{{{UINT64_C(0x60AE3533C5F56F60), UINT64_C(0xBE6B9773BBB0AD93), UINT64_C(0xFB0C00769B34A38F), UINT64_C(0x875472E4B5BA8E9F), UINT64_C(0xC92CE5F30FA93931), UINT64_C(0x4FC06A9E7DBC12CA), UINT64_C(0xD7CA86558B473451)}}, {{UINT64_C(0xE9D101FF365A730B), UINT64_C(0xBF4B92DA451ABE70), UINT64_C(0xD56C7BFB5F94AEF7), UINT64_C(0x68435C108C3EF4C1), UINT64_C(0xBDAE7ED4CCB08576), UINT64_C(0xA6EAF24F372F7FBB), UINT64_C(0x0AB2C1F59B8AE31D)}}, {{UINT64_C(0x952A4AC317C674F3), UINT64_C(0x0C32B08372979B5D), UINT64_C(0x74787981147C9680), UINT64_C(0x6D1B1130745C7DE7), UINT64_C(0xCE19626F99F38DEB), UINT64_C(0xF062B3445086955D), UINT64_C(0xE134262EDD7AD09A)}}},
+	{{{UINT64_C(0x1063A1A78F10A4B9), UINT64_C(0x4142BB5278D0C7E5), UINT64_C(0x2517B197B224EF87), UINT64_C(0x5C5CD9200A9FF52B), UINT64_C(0x2EBA1823B91B5A48), UINT64_C(0x088C00E914A81A8E), UINT64_C(0xE5EC3ADCF134322B)}}, {{UINT64_C(0x580D6AB3E6E7E253), UINT64_C(0x9A6D9F0F5CD6F184), UINT64_C(0xEB15F7839A744F45), UINT64_C(0xCC72CB14B4B4F941), UINT64_C(0x933B20472DE0313A), UINT64_C(0x73D7A872543E58EE), UINT64_C(0xB1700C5501F0675F)}}, {{UINT64_C(0xD0F009B1F34A4C1E), UINT64_C(0x2E5DD726A3ADBF04), UINT64_C(0x5655A4FAE4ECF013), UINT64_C(0xA97BD782A0FB90CC), UINT64_C(0x85DE20EA421A550C), UINT64_C(0x0291631CEBCCE02E), UINT64_C(0x39F31569ECAD23F0)}}},
+	{{{UINT64_C(0xE5B70428E085F67F), UINT64_C(0x60555441D5143CAB), UINT64_C(0x882E4F4D0E8C2E0A), UINT64_C(0x2C1CB39D8D39A080), UINT64_C(0x18DF7A1642615BB3), UINT64_C(0xB8CF5250681F113F), UINT64_C(0x3017BA2677B72ABA)}}, {{UINT64_C(0x69CD2B6E95A3A876), UINT64_C(0x2EA004765012035A), UINT64_C(0x6874D531D6440EFA), UINT64_C(0xD0199D4ADE8F8D15), UINT64_C(0xB61E7F2170CBC71C), UINT64_C(0x57E4E112C4C3C546), UINT64_C(0x58955A8D1622BA4E)}}, {{UINT64_C(0xD4BD52E18D9DC34D), UINT64_C(0x6A2139B1C5D28EF9), UINT64_C(0x6B800B988FAF7728), UINT64_C(0x222FA5BE9EB9380F), UINT64_C(0x0DB4D5DB5446CA29), UINT64_C(0x0F9904C59FA3698A), UINT64_C(0xCDC09353B9054822)}}},
+	{{{UINT64_C(0x380064CD704E2F6F), UINT64_C(0xA5C8E9D458DE0EDD), UINT64_C(0x1FC0A8EB1A5977E0), UINT64_C(0x61032A19E322ECE0), UINT64_C(0x539A89DE948B9D16), UINT64_C(0x30262001C7543E7B), UINT64_C(0xE33DE4DDB588F6FA)}}, {{UINT64_C(0x1B4DAFBDB954EB94), UINT64_C(0xE29BBB436480584C), UINT64_C(0x57B931622C93E5DB), UINT64_C(0xE0F6453B968F9E3F), UINT64_C(0xC7F08F696C98F03B), UINT64_C(0xF55F4A505335B0EC), UINT64_C(0x028533EFB3FA9B5A)}}, {{UINT64_C(0x386C4FF7D4B09FC4), UINT64_C(0x0B9840012A072A37), UINT64_C(0x334EF5CD638A65CC), UINT64_C(0xD0D4F6E6D84A04EA), UINT64_C(0x9340D53653FF3657), UINT64_C(0x89BB7F6D93002343), UINT64_C(0x8D39C00222024FFB)}}}
+	},
+	{
+	{{{UINT64_C(0x5A3BC8E6827E8D86), UINT64_C(0x12504E43B3063F10), UINT64_C(0xF72FA85301B7D498), UINT64_C(0xB357348C8B0A75E9), UINT64_C(0xBB1EC4208E88F59D), UINT64_C(0x12561C043D3B5F0E), UINT64_C(0x9E5DED0C806B9747)}}, {{UINT64_C(0xD1F9BD0A62121D09), UINT64_C(0x55421759ECBE337C), UINT64_C(0xD2F63AD1ACC0EE94), UINT64_C(0xCDA5DFE93683FEBB), UINT64_C(0x6C9707F22F44F1BC), UINT64_C(0xEF0642D96CA5A360), UINT64_C(0xFC3107D9022DF945)}}, {{UINT64_C(0x233B52782833D8B2), UINT64_C(0xECA263E451F5EBDD), UINT64_C(0xFC12FC5311EAE069), UINT64_C(0x4C59A242DC9301D8), UINT64_C(0xE84F4FAE26897CB8), UINT64_C(0xEA8A46CEB6071A0A), UINT64_C(0x1E4415E7BD7F4D94)}}},
+	{{{UINT64_C(0x61E81320B44BE755), UINT64_C(0x5DB9DF213D55C7C7), UINT64_C(0xDEDCD2F43D2D5B4E), UINT64_C(0x6D37A9EC3BCFD828), UINT64_C(0x0AEF475A77DF368A), UINT64_C(0xF5894162C064FEF2), UINT64_C(0x956BC660142A7D22)}}, {{UINT64_C(0x78AAA10E27DAEC78), UINT64_C(0x3F723CB9B72B6E9A), UINT64_C(0x759007A740BADE38), UINT64_C(0x4A7AFC50C31B4017), UINT64_C(0x62CFD3D11FDADA96), UINT64_C(0x70D535DB36796BF0), UINT64_C(0x339447303ABF1394)}}, {{UINT64_C(0x7F4BD5F0AE32CE65), UINT64_C(0x82DAD74829444C99), UINT64_C(0xC7FB7A71520622BC), UINT64_C(0x32505381CE916414), UINT64_C(0x803A9507B59F3EDF), UINT64_C(0x45A7AC59B62C8EFA), UINT64_C(0x8797A7208F9AB7C7)}}},
+	{{{UINT64_C(0xC8533F44046E5D7F), UINT64_C(0x9B94D1793E349048), UINT64_C(0x36413459E1150192), UINT64_C(0x4582774FCDDBBCB8), UINT64_C(0xFC4E03081A795C79), UINT64_C(0x1EF68EF54042114D), UINT64_C(0x159295B23F18CD54)}}, {{UINT64_C(0x16FB7E2BA48A2C8C), UINT64_C(0x0B53E2D4572BB6D1), UINT64_C(0x142EE87BB0B22D75), UINT64_C(0xA90C9E2DC58888CD), UINT64_C(0x858D02EB9ED11537), UINT64_C(0xA4C75D444A7977D5), UINT64_C(0xF19B2D3D58A68D1F)}}, {{UINT64_C(0x1BDE3230768B17C9), UINT64_C(0xA038DEC0D34CBF31), UINT64_C(0xAF9937BB55B09FA0), UINT64_C(0x3E61C59FAA8FD914), UINT64_C(0xF097E73FBF96C0D8), UINT64_C(0x7617865CDFBEAB0A), UINT64_C(0x3EFAF1CACC36124B)}}},
+	{{{UINT64_C(0x6337E5B73EB8B90F), UINT64_C(0x35E03737F7A3F2A9), UINT64_C(0x731EDD87913FA9DE), UINT64_C(0xE219491EEC7F9928), UINT64_C(0x8A04DE236C6E6259), UINT64_C(0x700E8FDD309BB214), UINT64_C(0x9CE51E49F0BF8089)}}, {{UINT64_C(0x4FE7EC421301F17B), UINT64_C(0x5EE2A4B570A3BC5F), UINT64_C(0x53DB73C2B1B2A128), UINT64_C(0xAF24FA905E86BC8C), UINT64_C(0xC5608AB024B65FCE), UINT64_C(0x8003DF9ED8779E74), UINT64_C(0xA632E9E4A2CBBC5C)}}, {{UINT64_C(0xD052410CE43303A6), UINT64_C(0xEBD28125BCD241AE), UINT64_C(0x73E72B3D2F21A3C4), UINT64_C(0x4D37A5273C5F6AA0), UINT64_C(0xD8F54F3D5E3B4018), UINT64_C(0xA5BBFB90612B7F49), UINT64_C(0x1ADA2B6E7A6FB035)}}},
+	{{{UINT64_C(0x6332A4546C91C8B5), UINT64_C(0x8B3AC122B5AC9693), UINT64_C(0x5143B0BBBEC5E364), UINT64_C(0x454157CED5A365E2), UINT64_C(0xF04F9BAB64CF3E46), UINT64_C(0x2D43A04B40089712), UINT64_C(0x51932D72EDF1C7C1)}}, {{UINT64_C(0xCEAEF1655B2F8470), UINT64_C(0xE761AA8E3F36C24A), UINT64_C(0x90BCA27DA75DA6B4), UINT64_C(0x00AFB45CD371827B), UINT64_C(0x045EF46B5D84DB45), UINT64_C(0x639A5D962F98AE12), UINT64_C(0x669CBE672F2AC091)}}, {{UINT64_C(0x518479D7DE92FBA4), UINT64_C(0xEE47A9EC54E57CE9), UINT64_C(0x289F614A481543DD), UINT64_C(0x2E2C6CDB7874C62B), UINT64_C(0x1881E7FA37245E2A), UINT64_C(0xB1FB53AB7698F902), UINT64_C(0x9754615F4CA767FC)}}},
+	{{{UINT64_C(0x15851BB3183A4356), UINT64_C(0xB3787D436BF9A1BF), UINT64_C(0xF5B35746A3F0E120), UINT64_C(0x693FEF539302ABC3), UINT64_C(0x4A95FD2EE91E0672), UINT64_C(0xA884C7DE9433B12F), UINT64_C(0x2645234A6F287494)}}, {{UINT64_C(0x4E6FB56F5CDB8DFA), UINT64_C(0xB01E4A17DFC9E0EE), UINT64_C(0x77C10FE269D8383A), UINT64_C(0xC0321243DA932DAB), UINT64_C(0x68216FC8A3463AF0), UINT64_C(0xAE3EA48B39E3BE1D), UINT64_C(0x94230213B03E7B2E)}}, {{UINT64_C(0xDD1678E3669BA3EE), UINT64_C(0x4277A4BD4FD8FFCB), UINT64_C(0x49B23C2D48EBB726), UINT64_C(0xB3867A6C82FA6C5B), UINT64_C(0xBE3C298A2C10BD53), UINT64_C(0x5181B3E7CB4A8C19), UINT64_C(0x952D3EC00807F4FD)}}},
+	{{{UINT64_C(0x44AEB507CB22F28A), UINT64_C(0xDC17A77458B49A6B), UINT64_C(0xC61AC6232ED5AC03), UINT64_C(0x9CD71B9379DFC169), UINT64_C(0x68AC429CD97C48BE), UINT64_C(0x09C4798AE2C8983D), UINT64_C(0xE4765C0A5DF07577)}}, {{UINT64_C(0xA723C4DEB3367F33), UINT64_C(0x2D26BDF2B7E37D72), UINT64_C(0xD026ABBAAB5C70AF), UINT64_C(0x2541B039D609F7FF), UINT64_C(0xBAC83BE85223B72B), UINT64_C(0x1D4A9CB23D1C8D06), UINT64_C(0xEAE815CFB0DBD791)}}, {{UINT64_C(0x68CC2EC1437E0317), UINT64_C(0xD96D61D13F076C05), UINT64_C(0x3A81A1351C53B633), UINT64_C(0xBE3C7CB1C1AB879D), UINT64_C(0xB40DDAC0EDD58CE7), UINT64_C(0x02057C86426664F9), UINT64_C(0xB73B8745441417DB)}}},
+	{{{UINT64_C(0xDB487C35C2C33481), UINT64_C(0x3AA4FFAB636B6136), UINT64_C(0x3704E0CCD4DAEA3D), UINT64_C(0x9C0E839687149BBC), UINT64_C(0x57A58E7CA69DE811), UINT64_C(0x789181562D75D493), UINT64_C(0xC7453815AB1FAD68)}}, {{UINT64_C(0xE50F1579802C9B91), UINT64_C(0xE50D7FFC3F0B1DDD), UINT64_C(0x279873A01D5E06AA), UINT64_C(0xFB5B1B416A97E65E), UINT64_C(0x10F32F59824BCF42), UINT64_C(0xF760050701C81C64), UINT64_C(0xFF02663873B90DD4)}}, {{UINT64_C(0x6086250DCF230BCC), UINT64_C(0xAF52E94A15BF6CC1), UINT64_C(0xFB4A067C1304A134), UINT64_C(0xDEE6038E98BB0E27), UINT64_C(0xA6348955637C15D9), UINT64_C(0xF239071EE372EB90), UINT64_C(0x4D2E596FA5FF0064)}}}
+	},
+	{
+	{{{UINT64_C(0xCBDC53EA2E5B2DE2), UINT64_C(0xD5E594B352D38ACE), UINT64_C(0x0BD99737D960B0D9), UINT64_C(0xF35A7376ABD868F9), UINT64_C(0x59710118BF781668), UINT64_C(0xDA719F57928A043D), UINT64_C(0x01942F6983E46CD4)}}, {{UINT64_C(0xC5AB97FC8728BD76), UINT64_C(0xA104825956B4B5C1), UINT64_C(0x8E3132202809FC82), UINT64_C(0x1C2181AFDB63E9CC), UINT64_C(0x18043E066AA41C70), UINT64_C(0x34E4124044CED280), UINT64_C(0x4D9AB23505193CC7)}}, {{UINT64_C(0x54DFADEEBE94C6ED), UINT64_C(0xCBB2DECAFFF740A4), UINT64_C(0x1B98FE319A98D738), UINT64_C(0x1F419A50D57843B2), UINT64_C(0x00B56D6E8CDC40AB), UINT64_C(0xC956F7C2880DACEE), UINT64_C(0xD94D9320DAB21541)}}},
+	{{{UINT64_C(0x180BCD42AF9F0C3F), UINT64_C(0xC788DA21A46B94A2), UINT64_C(0x7A5551E55243C0FF), UINT64_C(0xB79AF9CB318AAE64), UINT64_C(0x232EC1DCE58C2938), UINT64_C(0x310BA8AD2E5C5D15), UINT64_C(0xD3D972494F792A3D)}}, {{UINT64_C(0x9DDEB4CA112A9553), UINT64_C(0xB7A12F1ED04EB54D), UINT64_C(0x4DCD3AAA9C9CF69F), UINT64_C(0xCF5F201FEB73C3A5), UINT64_C(0xE1CBA7D234EE3EDD), UINT64_C(0x1D04CD2E242F35F9), UINT64_C(0x48DF9D80DF75151D)}}, {{UINT64_C(0xD283CDA74C2F52B5), UINT64_C(0xD794262CA7285BD2), UINT64_C(0x30276BA8F3C5EBCF), UINT64_C(0x5F1D85325EF012EF), UINT64_C(0xCD481882DEB17685), UINT64_C(0x880A46CD3A7005E6), UINT64_C(0x5195FC4A4E0210A4)}}},
+	{{{UINT64_C(0x154ECC77DA81DD9A), UINT64_C(0x4FEDA6AC4BB03AA0), UINT64_C(0xD6CF527645842BBC), UINT64_C(0x35917E0B9AE34CD9), UINT64_C(0xA37C2CC175F8FF03), UINT64_C(0x74DCCAAACFBE7C9D), UINT64_C(0xA8F2DF07999AF81E)}}, {{UINT64_C(0xDDD06C4EA102A466), UINT64_C(0xA8632156E87AE190), UINT64_C(0x44A6FEC95DB8AEC4), UINT64_C(0x6904F81E49EDFFD2), UINT64_C(0xE50A1CD104110FAE), UINT64_C(0xD38A20478B65BAA3), UINT64_C(0x2B57D05DAEFBCC5B)}}, {{UINT64_C(0x89DEC468FB854BDD), UINT64_C(0x8E12B714D0204FC6), UINT64_C(0xAC16006257016123), UINT64_C(0x9254200ACC6BB64E), UINT64_C(0xC155F3436414BCBA), UINT64_C(0xE2899E4F8C92210E), UINT64_C(0x371DF46A56AB2D06)}}},
+	{{{UINT64_C(0xE31CE92BA86F4534), UINT64_C(0x9436B2A8592414F5), UINT64_C(0xF0ADD7DD7A4C6997), UINT64_C(0x3E2D4F647599AFF3), UINT64_C(0x5CC401A29FE0CE4D), UINT64_C(0xF6541A2377D97447), UINT64_C(0x54048F53F917B6AE)}}, {{UINT64_C(0xCB1B86B2205312EC), UINT64_C(0x9320779BA2231493), UINT64_C(0x17FCE4C718369AAC), UINT64_C(0x0F7187FAEAB01A86), UINT64_C(0xDA0A1ACA4617B1F1), UINT64_C(0x033FE2586342E68E), UINT64_C(0xFC14E790B6CA4361)}}, {{UINT64_C(0xEB6178CC5B6D45A6), UINT64_C(0x16BD1590DD6E6259), UINT64_C(0x6FBE6F5B32389F17), UINT64_C(0xF9D8AE0028F12DC0), UINT64_C(0x97B6425D547E920E), UINT64_C(0xFB5D1DF9AEDDA013), UINT64_C(0xEEC116B635B3459C)}}},
+	{{{UINT64_C(0x029F2231913D2491), UINT64_C(0x7F3466BDB5379972), UINT64_C(0x3BB7B30BAFB0C461), UINT64_C(0x6B45BDDB5917831F), UINT64_C(0x2B30202C196FEB2A), UINT64_C(0xC2B5705852F60866), UINT64_C(0x2C00FD491818C20B)}}, {{UINT64_C(0x65CA7672CDA37DAC), UINT64_C(0xE92AFE4C04C5A308), UINT64_C(0x5B1BEB5F1399F322), UINT64_C(0x4DCE7F68E7D67EA2), UINT64_C(0x52AF2F2B3CE08B01), UINT64_C(0x28B23750ECD124DF), UINT64_C(0x9B25D4BC810A4520)}}, {{UINT64_C(0x8679DBC698C8C076), UINT64_C(0xF49D499994AD8E46), UINT64_C(0xE146234C7DC6A7E2), UINT64_C(0x7B8203E7D74B7569), UINT64_C(0xB6BB21802584731C), UINT64_C(0xA49ECADAB0FB15EC), UINT64_C(0xCF65D287E5BC0330)}}},
+	{{{UINT64_C(0x99A35B7157A9D799), UINT64_C(0x3BA86DA1EB301F9C), UINT64_C(0xE140DA33EF91CE36), UINT64_C(0xF158CD8421C0E2EC), UINT64_C(0x44293DA438B0B11B), UINT64_C(0x4F10D3DB585B6A87), UINT64_C(0xF5DDD7310C615992)}}, {{UINT64_C(0x9FB72DCB86A74C21), UINT64_C(0xA8D66D14198CC8F7), UINT64_C(0x0E135C99F4B6C9C5), UINT64_C(0x883F638506396889), UINT64_C(0xA6B9079675330EDB), UINT64_C(0x37FA8B8F5FE0E1A5), UINT64_C(0x60E2FD961DCA1E6E)}}, {{UINT64_C(0xC85045AE1B6529B8), UINT64_C(0xFE10D68E904492AF), UINT64_C(0x93476A0194560134), UINT64_C(0x3F8E2865645084A1), UINT64_C(0xAE9830B5A92E1ED7), UINT64_C(0xAD86680C52155E32), UINT64_C(0xE55BC5CED05856AB)}}},
+	{{{UINT64_C(0xF1C6CB40366C395E), UINT64_C(0x318103B21A7B51D0), UINT64_C(0x6CFF33BC478A5E69), UINT64_C(0x839D8D1E0017C2FC), UINT64_C(0xD664D9EC6D740A5B), UINT64_C(0x53738B0EF1B03968), UINT64_C(0x73CA8FD1ED0A04FD)}}, {{UINT64_C(0xE94ACE93875AB371), UINT64_C(0xBCC2D602936DDAD7), UINT64_C(0x8C7A171F5424A750), UINT64_C(0xE58341ECFE09B366), UINT64_C(0x25A6CE61E5165F7D), UINT64_C(0x31E1966C83C495B8), UINT64_C(0x65B3E08CC5887B9D)}}, {{UINT64_C(0x93A4A1A58F6E7EAC), UINT64_C(0x646A21887C34AE77), UINT64_C(0x47186DC1CC462840), UINT64_C(0x11ABB285310E52CA), UINT64_C(0x09E50DF5154D694F), UINT64_C(0x8B13B26F568A5824), UINT64_C(0x2792E4A0C45070E0)}}},
+	{{{UINT64_C(0x80D37E93221482D1), UINT64_C(0x1E4B9AF659708B63), UINT64_C(0x0997AD279426A7D6), UINT64_C(0xDD5B76D480DD0EC8), UINT64_C(0xC73E76C0987239B0), UINT64_C(0xB2321EAB3E1D92E6), UINT64_C(0xA69C4A7EB1A910EE)}}, {{UINT64_C(0xFE46D6AA7833D9AE), UINT64_C(0x3D973EE6957572B0), UINT64_C(0xBEA01B44CCBEDCDB), UINT64_C(0x58926876342F29DC), UINT64_C(0xAE75585D2C0D518C), UINT64_C(0x48C77E008F58AAAB), UINT64_C(0x819E2FA21FAB2CC5)}}, {{UINT64_C(0x9D558942FCE3B101), UINT64_C(0xDAB246B8F1B31B7F), UINT64_C(0x4F8309D484A204F6), UINT64_C(0xA7084FCE86513D7C), UINT64_C(0x94C60739C9DB9F98), UINT64_C(0x13F980C541D92A61), UINT64_C(0xC8B259B3018B3CC9)}}}
+	},
+	{
+	{{{UINT64_C(0x7C468E149C16E981), UINT64_C(0xA38A286C7909DDBB), UINT64_C(0xA27CB22A92D47DB7), UINT64_C(0x2E5B0AB6DE614E68), UINT64_C(0x1AECF485658DC882), UINT64_C(0xED5C9089435B3844), UINT64_C(0x238928682D0D3111)}}, {{UINT64_C(0xAFC6698D472F2F31), UINT64_C(0x563B295242C56D76), UINT64_C(0xAB73844099205EBA), UINT64_C(0x7D0ED86CAE7DE5A3), UINT64_C(0xD5B965C3C3CCDF12), UINT64_C(0x51A8F2C31AD7B9B6), UINT64_C(0xA761DD8AC12F13E3)}}, {{UINT64_C(0xD51A8853B3F9BC27), UINT64_C(0x1A7ADB753B7E68A1), UINT64_C(0x6C6A91701D378E1D), UINT64_C(0xD7A93DF34B5FC368), UINT64_C(0x3C8EAB1BAB35755B), UINT64_C(0x0C435BF824889F25), UINT64_C(0x13A3686C3163BFA9)}}},
+	{{{UINT64_C(0x3DDA115DDF171AB7), UINT64_C(0x64B42DE17B1401F9), UINT64_C(0x5BA3C395019CA409), UINT64_C(0x70090D08169D1F46), UINT64_C(0x5E282BF410534A00), UINT64_C(0xDFE1165F8D90805C), UINT64_C(0x827A416CA7245615)}}, {{UINT64_C(0x045AF888433A36C4), UINT64_C(0x290F8BFA54CD8EE6), UINT64_C(0x87B3A608FD1419CE), UINT64_C(0x103CDAD22DB5E8C2), UINT64_C(0x874BF810B9E5BE98), UINT64_C(0xE42DE670F473155B), UINT64_C(0x22185847F746572A)}}, {{UINT64_C(0xF1E404FE4777404A), UINT64_C(0xC3A40B8C76A0BA3C), UINT64_C(0x5E74C6A718CD5C06), UINT64_C(0xE35B0196152C0F09), UINT64_C(0xCD258DE34CDA82C2), UINT64_C(0xCA2050D7084784DB), UINT64_C(0x25746767508C75A4)}}},
+	{{{UINT64_C(0x1954B2A5023FFA43), UINT64_C(0x24E8CF87B16A24D9), UINT64_C(0x6D1E541FF5402635), UINT64_C(0x23899FB573C94E05), UINT64_C(0x21418723BF765155), UINT64_C(0xAFBDD356151713A7), UINT64_C(0x49B790A9F2862E39)}}, {{UINT64_C(0xB7C8C1F4F527D2CE), UINT64_C(0x34001997AEC7609B), UINT64_C(0xF79706583AD8002A), UINT64_C(0x821B7183AC2374E4), UINT64_C(0x8AB6600FE0BF1F9A), UINT64_C(0xC9B2EBD567510615), UINT64_C(0xE1DE5ACDDAAEC7FC)}}, {{UINT64_C(0xDF1FFE10868193BE), UINT64_C(0x389A67B70F70F4BC), UINT64_C(0x2AB1BE85012BDFFD), UINT64_C(0x60F682CE7DEBC519), UINT64_C(0x34E45BE1F3F864C3), UINT64_C(0x987ED574E07B12D9), UINT64_C(0x4E9137D04A80F0E0)}}},
+	{{{UINT64_C(0x97230BAA1788FDAB), UINT64_C(0x4CAAF30860A7D045), UINT64_C(0xAD065EA2C7ECE99F), UINT64_C(0xD3BEF7BDBD39F106), UINT64_C(0xFAD96D2203FD92F5), UINT64_C(0xF38CAC4D9E0D6069), UINT64_C(0x419A0171FDA313BF)}}, {{UINT64_C(0x405D77FD8572F035), UINT64_C(0xACFF5AF99F2B282B), UINT64_C(0x8C90AF7257D3B23F), UINT64_C(0xD9B6A52AF2EE2235), UINT64_C(0x92C302430ECC2687), UINT64_C(0x34D5E3EC4F381408), UINT64_C(0xC087D7C3BD18BEA9)}}, {{UINT64_C(0xCB61E5AE83B2A82B), UINT64_C(0x1CEFC0DA2300CCFB), UINT64_C(0x2A2D90B6BAAD6B3F), UINT64_C(0xDC95851FAE8FD280), UINT64_C(0x9EBC22E161964042), UINT64_C(0x4FA4F03688988B1C), UINT64_C(0xD48744EE46CF2125)}}},
+	{{{UINT64_C(0xBF7E94138A2C5ED7), UINT64_C(0xF803BC8CEEF53610), UINT64_C(0xA55330E89356BD86), UINT64_C(0xA11AD6489A3A3805), UINT64_C(0xFBABA95918E894AB), UINT64_C(0x3E2BAFCAD3442E68), UINT64_C(0x0DD025661640AA64)}}, {{UINT64_C(0x3FC02E479E25CBDD), UINT64_C(0x9692D78C4D813A1B), UINT64_C(0x5DE8A0A6DAE8FCCA), UINT64_C(0xE764EA363DD91E9E), UINT64_C(0x99985DBC5E78AE0C), UINT64_C(0x7FF23E82A169B4AD), UINT64_C(0xAEB26ECBAEE1FC96)}}, {{UINT64_C(0x5BE77E8895508126), UINT64_C(0x5E22227C5BFAA672), UINT64_C(0x9C6971272498BE09), UINT64_C(0x20C7EB2D745FE65A), UINT64_C(0x792926B558B8EE3E), UINT64_C(0xD8CC9BDF3B682C63), UINT64_C(0x7816E093C346FDE7)}}},
+	{{{UINT64_C(0x4A8C502559A6F90C), UINT64_C(0x13B256E7ABE0EA37), UINT64_C(0x46753F675C722564), UINT64_C(0xFE235F7CD3FC17E9), UINT64_C(0xBCDB028EB028C4E1), UINT64_C(0x0F93A489FE88E209), UINT64_C(0xB966A2E063706A7D)}}, {{UINT64_C(0x74B6C228C4A30319), UINT64_C(0x311A6868EFECA6D6), UINT64_C(0xAD7F890610A70057), UINT64_C(0xC1DD61810808112B), UINT64_C(0x9FEB58E88A2A2462), UINT64_C(0xFF16F33821A252ED), UINT64_C(0xDA53E9617F882ABB)}}, {{UINT64_C(0x748B111A78C16884), UINT64_C(0x48B392C11AD9071F), UINT64_C(0x8C8741C6F216BBC1), UINT64_C(0xE7067ECB60139FE7), UINT64_C(0xBC2FC3AA6B633D91), UINT64_C(0xD1D5A25B19E349C1), UINT64_C(0xB57846997659346E)}}},
+	{{{UINT64_C(0xF5B6FFCA38C30E5D), UINT64_C(0x3E88A90F9915C905), UINT64_C(0x256C6A72FB200D75), UINT64_C(0x2D866500E509D4C7), UINT64_C(0x7E033CF8AE369E55), UINT64_C(0x0D954EFCF6EBEE4B), UINT64_C(0x5B275D3D557F0E28)}}, {{UINT64_C(0x8DEB17211B5CECF8), UINT64_C(0x04B7D6AD50FBDB2F), UINT64_C(0xC73BD32478C7B35E), UINT64_C(0xE4817E2497E7143A), UINT64_C(0xA712C405E109D6ED), UINT64_C(0xADBC905F67A168FE), UINT64_C(0xD20AB7073EDF9934)}}, {{UINT64_C(0xA083F4193C9FB89F), UINT64_C(0xB9B2BB6381E68FCD), UINT64_C(0xF8730450B82955F5), UINT64_C(0xA387160AF062D8A5), UINT64_C(0x4A1E27D97F066A51), UINT64_C(0x52E6D5F6C157F16A), UINT64_C(0xD98E203B1D185560)}}},
+	{{{UINT64_C(0x9AE116A96569F191), UINT64_C(0xDBABB3F0BCE4D6E2), UINT64_C(0x46D27630B9E1AF51), UINT64_C(0x30749A271DD36F33), UINT64_C(0x148AB47F70831510), UINT64_C(0xA5BCF5585681242F), UINT64_C(0x8B801845ED79BAE8)}}, {{UINT64_C(0xC6A4042FD3894AD1), UINT64_C(0xC39782F781D2B88B), UINT64_C(0xD99C9F2D34CACBE4), UINT64_C(0x8EF1D3828731AEAD), UINT64_C(0x2E1DD0BBC90F9549), UINT64_C(0x889E954064E8CABA), UINT64_C(0x8CD9C9761A8AB978)}}, {{UINT64_C(0x0F603DBCEA066CCE), UINT64_C(0x0FCB3F958C2F9E0A), UINT64_C(0x08716D048DB635A4), UINT64_C(0xB8A63E6BB4AB032B), UINT64_C(0x8D1825BFF6C6B7F2), UINT64_C(0xFD12EF69E8DBAF7E), UINT64_C(0x58A499A07EBA1B86)}}}
+	},
+	{
+	{{{UINT64_C(0x6BF31F53FFA0459E), UINT64_C(0x4E97F8742A1315CD), UINT64_C(0xB9DA48ABE2F50AE6), UINT64_C(0x351E526EBD787419), UINT64_C(0x935E10BA454521A3), UINT64_C(0x947E1E8F903CFA05), UINT64_C(0x0AA47D15A754EE5C)}}, {{UINT64_C(0x8DB2849EFD814825), UINT64_C(0x634C9C2A5D25C996), UINT64_C(0xB3819424DBB2604E), UINT64_C(0x9C8A2B6B33F3A4CD), UINT64_C(0xD8EABBBFDBE04F60), UINT64_C(0x3119A404498BCAEF), UINT64_C(0x24AB7A98B21CBD68)}}, {{UINT64_C(0x74F4FFC5DFFD607F), UINT64_C(0x810573C4CA9A75CF), UINT64_C(0xFC838ECC68BB96FA), UINT64_C(0xD816B0FE00C014A8), UINT64_C(0x165D1B1EE823E12F), UINT64_C(0x9B446B24FF859693), UINT64_C(0xA2A2DDE7A368B428)}}},
+	{{{UINT64_C(0xBC6F1326921FA2DD), UINT64_C(0x6D46D79E61CC10A4), UINT64_C(0xD3F37BAC4B3CE4BD), UINT64_C(0x3A39696652459B6B), UINT64_C(0x1D5A1ED488CE0F0A), UINT64_C(0x9C403E0B17FA050D), UINT64_C(0xEE1ABD004A2E661B)}}, {{UINT64_C(0x4197065C35CF3E3B), UINT64_C(0x47AE6513D5FBE334), UINT64_C(0xD22DF1CD34634790), UINT64_C(0xE967B17C45CBB1CF), UINT64_C(0xBA72223CDA7A173A), UINT64_C(0xD12DBEFE0A7375F5), UINT64_C(0x3B7F94DFD7ADCFE3)}}, {{UINT64_C(0x9CE16531174CDCDB), UINT64_C(0x83EC9AEE9B25D4B5), UINT64_C(0xA1ACC33ACBD8007E), UINT64_C(0x419B0499AECF6427), UINT64_C(0x7834F094FC323FE8), UINT64_C(0x9D858C0253F36754), UINT64_C(0x8B6707893D326B5F)}}},
+	{{{UINT64_C(0x0CD596A13F1E9B7D), UINT64_C(0x163A04F5BDD6734E), UINT64_C(0x959FA318B694F8BE), UINT64_C(0x553D2A3B15620C7D), UINT64_C(0x364C4D36F265FC2C), UINT64_C(0xB421F268CEABD44A), UINT64_C(0x564139ABFE2BD4C8)}}, {{UINT64_C(0x34B52461019D4633), UINT64_C(0x94225AB3F8863469), UINT64_C(0xB39B8296691FE981), UINT64_C(0x997CFB27DFDEC898), UINT64_C(0x98D4D6D00484B1C7), UINT64_C(0x5D0C612C350FE59A), UINT64_C(0xB431220D4157745E)}}, {{UINT64_C(0x9901E13471C76989), UINT64_C(0x3F1A112D11891D0F), UINT64_C(0x2FE5B583995959E1), UINT64_C(0xDDEAE63B80DDD3C6), UINT64_C(0x13F1E0F81575228D), UINT64_C(0x74DCEFB0B4E04AAF), UINT64_C(0x6C47C6222AE024F7)}}},
+	{{{UINT64_C(0x8C3D0CA736AAE0A2), UINT64_C(0xAE727B1991F48C2D), UINT64_C(0xD5512800AE8565CD), UINT64_C(0xA45C82BFDBB6CA0B), UINT64_C(0x55979545CA3C2AB2), UINT64_C(0xA9A26D5927D0EA5A), UINT64_C(0xB52E40183257FCEB)}}, {{UINT64_C(0xF255ED517CA9650A), UINT64_C(0x831BBDAA081E3EBF), UINT64_C(0xE3B8D38CF7CE49F8), UINT64_C(0xFD8FC8691D0B5BD6), UINT64_C(0x079B892BABA314A9), UINT64_C(0x00DBFA0CC9D907F2), UINT64_C(0x7105A086DC0A39B7)}}, {{UINT64_C(0x9FA01A7A0CF29141), UINT64_C(0xBAE00A0C584A9E36), UINT64_C(0xACF6FE3E5D3ED793), UINT64_C(0x02CDD3F4903C19D8), UINT64_C(0x98AC45D0C4E504E1), UINT64_C(0x0CB5EDA306286B4C), UINT64_C(0x2A03A0A9C9DF36A5)}}},
+	{{{UINT64_C(0x2B0C7E05D8C7D901), UINT64_C(0x0D06A7FF681AF318), UINT64_C(0x343B7FB88E3CAF9A), UINT64_C(0x703251F9FE20A12C), UINT64_C(0xDEDC40C5EB9F0257), UINT64_C(0xE0CECB208EA7F225), UINT64_C(0x5B250F0E6EEB6550)}}, {{UINT64_C(0x39807A1534806B6E), UINT64_C(0x66FBDED120AFA941), UINT64_C(0xA34BCB237DDC7493), UINT64_C(0xF9C4A61DDD3674E5), UINT64_C(0x94BB2FB896EF6CDF), UINT64_C(0x659539528CD90361), UINT64_C(0x0723C596936A5238)}}, {{UINT64_C(0x829E0AF512D70310), UINT64_C(0x5B2AE71C3D39EBF5), UINT64_C(0x21EA762F64FED588), UINT64_C(0xE265A5272E4D8F1A), UINT64_C(0xFC36B2F62B0AE719), UINT64_C(0x43E7953210626836), UINT64_C(0xE9099B75B4A74516)}}},
+	{{{UINT64_C(0x941F84CD5E17719D), UINT64_C(0x84E7545939BC73B3), UINT64_C(0x77FD66EFBF3C583E), UINT64_C(0x91383AB86CC46F1F), UINT64_C(0xFFACD35CD2A629F5), UINT64_C(0x9187F9DD411B9177), UINT64_C(0xA9CF1CF7B7EEA803)}}, {{UINT64_C(0xA4A3B105AAC47E5D), UINT64_C(0xA15EA755BEAD0A9D), UINT64_C(0x0B628C50CFBAE73D), UINT64_C(0x29B7A9109456CBC6), UINT64_C(0x924CD6D6A47FFC36), UINT64_C(0x8629F0B04AB630B5), UINT64_C(0xC74609C624DEA919)}}, {{UINT64_C(0xA145A6BC9079B229), UINT64_C(0xED567F499852EE62), UINT64_C(0x47B011C49208707F), UINT64_C(0x55D4D3B7C53BD346), UINT64_C(0xA117022DA80EBBB9), UINT64_C(0x9BEDE411474A1392), UINT64_C(0xA1EBBC1F5C8C924E)}}},
+	{{{UINT64_C(0xB227D4D77AF12FA6), UINT64_C(0x4417DD8A216690AE), UINT64_C(0x20E17EE48FC02FE2), UINT64_C(0xDCE37B4219704037), UINT64_C(0x7D2DE4BD9B95013F), UINT64_C(0x863E763D0BA20681), UINT64_C(0xA1BAFC0A556F5DC5)}}, {{UINT64_C(0x63F28EC7B410A78A), UINT64_C(0xCE110DCAC420A01A), UINT64_C(0x278B89FCD3FA4B5B), UINT64_C(0x85CE49E3054D7E5D), UINT64_C(0x1672C73D965195DB), UINT64_C(0x4307720A1BDB4C0B), UINT64_C(0x66FA8B359C77A7D9)}}, {{UINT64_C(0x6DC4E621267DB092), UINT64_C(0x6D65EDA6E12FFF7E), UINT64_C(0x2BC302BF8727FE38), UINT64_C(0xE0C4607FBB3FC23E), UINT64_C(0xE9AEE16303E7AD69), UINT64_C(0xED2F5BD72899ECA0), UINT64_C(0x8D81750726A65DAF)}}},
+	{{{UINT64_C(0x4FB9E93AED7462FE), UINT64_C(0xB08EBFE54B218DDE), UINT64_C(0xE5FC45AABB5283DB), UINT64_C(0x88E69BE38C367020), UINT64_C(0xFC1C12A11D350288), UINT64_C(0xE5CEBF265E306D2E), UINT64_C(0x58C8BB35742C7EFC)}}, {{UINT64_C(0xA432E89DCCCF7FA0), UINT64_C(0x9FE5A811F33DD020), UINT64_C(0x4ED29BA10D620512), UINT64_C(0x9D8B1EA63841C88E), UINT64_C(0xCAD1781F58F3303A), UINT64_C(0x02B388F3EF0BA9A0), UINT64_C(0x2B7587E74C6D3545)}}, {{UINT64_C(0xAD0008F0C3D68117), UINT64_C(0x727C12EB35AE1A6F), UINT64_C(0xE7894D01B1479FFF), UINT64_C(0xC55A9928C5449648), UINT64_C(0x587D1465A63F8558), UINT64_C(0xC7E56C7F65EC2A2F), UINT64_C(0xA6CF7454DF2DFBF8)}}}
+	},
+	{
+	{{{UINT64_C(0xAAC6EAEA123AE7CD), UINT64_C(0xEA88A1884D473C0C), UINT64_C(0x14269D901E76FEF1), UINT64_C(0x6947F1DEDB9935CA), UINT64_C(0x6F4A657588E8B248), UINT64_C(0x680542913FB14AD5), UINT64_C(0x2ABFF5D37600DAE7)}}, {{UINT64_C(0x69A814813A81A797), UINT64_C(0x827763E76A446ACB), UINT64_C(0xD8E759B1038394AB), UINT64_C(0xDDDF62DF587DE349), UINT64_C(0x1CF9239D49DFAEB8), UINT64_C(0xE7409E130D1C24FE), UINT64_C(0x3ECFEF9581D0707D)}}, {{UINT64_C(0x380029F2BC1FF695), UINT64_C(0x758FFE2F6D62C982), UINT64_C(0x59E2AC9AC729CE3D), UINT64_C(0xD4C906C4403F6D27), UINT64_C(0x69CE54D7C9EC8260), UINT64_C(0xC838471B97A2F1B4), UINT64_C(0xD796AA30CA33AB75)}}},
+	{{{UINT64_C(0xDE8D177A0F87C72D), UINT64_C(0xCE85AE7E5818C6D1), UINT64_C(0x2D21870077B5F8CE), UINT64_C(0x56DB2BD238248383), UINT64_C(0x513C8D85B949D8B1), UINT64_C(0xC410CE05C53FE9E5), UINT64_C(0xCEAF2FBD86F75263)}}, {{UINT64_C(0x750B432FE93806C5), UINT64_C(0xFC0218EB15D3D06C), UINT64_C(0xE2D045CAAD82612C), UINT64_C(0x595EDCFD581E0401), UINT64_C(0x948DBC66E3D573CB), UINT64_C(0x68721ACC14EACE71), UINT64_C(0xF68BEA26CAC4DCCF)}}, {{UINT64_C(0x73B1AE00E10DD617), UINT64_C(0x0C108A3C6AA61317), UINT64_C(0x8F234A226B544B60), UINT64_C(0x47EEBF6375860B10), UINT64_C(0xF08596627C368998), UINT64_C(0xCCECEDD02EF1473A), UINT64_C(0x0822CEE6D9C84B45)}}},
+	{{{UINT64_C(0x46D8576AFCB74DA2), UINT64_C(0x5B8E8771C29C433F), UINT64_C(0xA339287315AF6E2F), UINT64_C(0x22FB1F94C195481B), UINT64_C(0x57CA610F75B77DCC), UINT64_C(0x2A92753907DFCB3E), UINT64_C(0x916F14923EFF95EB)}}, {{UINT64_C(0xE1BB378E4B6CD291), UINT64_C(0x00B0A2A5E2B2F13C), UINT64_C(0x82B75AA8A0E60BCD), UINT64_C(0x93F65A7759027416), UINT64_C(0xF75C93CFFFA0882C), UINT64_C(0xDE40570C0CB92069), UINT64_C(0x13840C90D526C41E)}}, {{UINT64_C(0x31226BFF8354816A), UINT64_C(0x67FEDD303F085A56), UINT64_C(0xBF1B5139A8A2C155), UINT64_C(0x7DBBB887755630FC), UINT64_C(0x899AC4CE0449B420), UINT64_C(0x8A0AECBBF677A054), UINT64_C(0x0FB5C15372DA6998)}}},
+	{{{UINT64_C(0xBEDC2CAAA03CED48), UINT64_C(0xF6422079219A0315), UINT64_C(0x0665F2CA493563B1), UINT64_C(0xDB7A52380202DC7B), UINT64_C(0xD5E26EAB32E5D6BB), UINT64_C(0x988F1F5819B436FB), UINT64_C(0x5B15DC84AA4D69B3)}}, {{UINT64_C(0x97A52FEED54E5C24), UINT64_C(0xF677927471BE91A7), UINT64_C(0x8E4C4FD119BFDD57), UINT64_C(0x6B150BC3DE38F7B7), UINT64_C(0x21E26B76C2A7AF51), UINT64_C(0x9067D92300DC403B), UINT64_C(0x04E406A066802A58)}}, {{UINT64_C(0x4EE1DCD6636C4533), UINT64_C(0xCBF0E20E4BEC5B1F), UINT64_C(0x73B38C17DCA1CB68), UINT64_C(0x59FC946AE86AFE4E), UINT64_C(0x761A31EC1F3F7F92), UINT64_C(0xEB00DD61C7FCA347), UINT64_C(0xEF8AE369EAB1E381)}}},
+	{{{UINT64_C(0xA028E7D09A9CA9BB), UINT64_C(0xB7EDAA84FD5FCCF4), UINT64_C(0x56FC7CDBE9FB8635), UINT64_C(0x1B01CB299EDE3F5D), UINT64_C(0x99D7F93703A4B503), UINT64_C(0x28868B6FE8255842), UINT64_C(0x1D385D48B9C2D9BD)}}, {{UINT64_C(0xFD6606F4A822BE80), UINT64_C(0x68ADB5A0165626D0), UINT64_C(0xC6D1749920A20145), UINT64_C(0x6E02E9E97D430F41), UINT64_C(0x1D2A6BD649C243E1), UINT64_C(0x3910071B8C36367F), UINT64_C(0x2EDE1314DE298469)}}, {{UINT64_C(0xEF569F426F63E431), UINT64_C(0x9E5FD8F9C04A9917), UINT64_C(0x14A5E9EC8B9CA71C), UINT64_C(0x80C8C777F32CB265), UINT64_C(0x6DCD7480E8BD65AC), UINT64_C(0x110B9BA381880CCC), UINT64_C(0x8B5E32E000302C41)}}},
+	{{{UINT64_C(0xF4DC781875BEEC32), UINT64_C(0xDF341FFF0CCA525F), UINT64_C(0xF638E16E86425676), UINT64_C(0x29B1E59F2B4E8A63), UINT64_C(0x0011589717C4991D), UINT64_C(0x6464EBE041CD399D), UINT64_C(0x901CB3D9E65BB040)}}, {{UINT64_C(0x07F5F4572FB42307), UINT64_C(0x94D1F81B3B0F1B73), UINT64_C(0xB56F7B8FB695CF20), UINT64_C(0x55A794E07DB4792D), UINT64_C(0x77B09BC87936836D), UINT64_C(0xDFADB1887C402DA4), UINT64_C(0x65DC6C2F2699B61C)}}, {{UINT64_C(0xB9AE408A9F703961), UINT64_C(0x1541E04A1EEC5A65), UINT64_C(0xCFC3A8B5AB319FF1), UINT64_C(0x9C97056189F1B924), UINT64_C(0xFD7CAECE55EEF2C5), UINT64_C(0xBCED60BDA5A58C60), UINT64_C(0x6B676FBB01BE7A57)}}},
+	{{{UINT64_C(0xB036F9F214737972), UINT64_C(0x1D2448F0C8B7A387), UINT64_C(0xFED268A156ED339A), UINT64_C(0x87FF75CB375293A0), UINT64_C(0x00F1CC9E62F679F4), UINT64_C(0xA7DC722C3877D15A), UINT64_C(0xE9870636FB0ED492)}}, {{UINT64_C(0x8EFD8E59C16F5F3C), UINT64_C(0xAB42375732EAEEB4), UINT64_C(0xFFCCEA2DD9213CA1), UINT64_C(0x6B23EDFDCB062099), UINT64_C(0x34999B060EFC611F), UINT64_C(0x38B5D820DE8A2716), UINT64_C(0x138F6E7EB49A32B9)}}, {{UINT64_C(0x3D87D62689DAD94B), UINT64_C(0x4E72A713B05C1DCB), UINT64_C(0xBF43F60AD7728DED), UINT64_C(0x054FE8DEA2F3E9F4), UINT64_C(0x69DEBC0197179D30), UINT64_C(0x9412CCB17884F9E8), UINT64_C(0xFCDFA5948B7C9694)}}},
+	{{{UINT64_C(0x2C7FEDA63E485F70), UINT64_C(0x11C7646380AEB27B), UINT64_C(0xF9406ACF8FE32C45), UINT64_C(0x920B60202C68E1EF), UINT64_C(0xFC63B3E465A9F2FD), UINT64_C(0xDAC3593E53AA1C98), UINT64_C(0x2FB47B6A750E96B8)}}, {{UINT64_C(0xECEA373EF1950BB3), UINT64_C(0xB93181566944AC7A), UINT64_C(0x62EF7D8D6B3C2B55), UINT64_C(0xAAB9182B5D13F2DB), UINT64_C(0xC5A33BF07C4647F2), UINT64_C(0xAB284B35A2218F56), UINT64_C(0x0747AB75A46A6BC5)}}, {{UINT64_C(0x3CC2E193B4C13316), UINT64_C(0x8718D7D44501B597), UINT64_C(0x62347AE9B2410A8B), UINT64_C(0x1E798E8D707AA8E3), UINT64_C(0x2682D7B61610DA46), UINT64_C(0x3FCC94EEB437C6C6), UINT64_C(0x29BA40E2671D43C1)}}}
+	},
+	{
+	{{{UINT64_C(0x485B9236C86B85C5), UINT64_C(0x6AE05967A0DC4824), UINT64_C(0x378F2B397C9557DF), UINT64_C(0x56E05DD1F83EE1C5), UINT64_C(0x4F619D7C8BF82DF6), UINT64_C(0x12550A6D5F2A4C42), UINT64_C(0xFE8482A63C3EBFA6)}}, {{UINT64_C(0x6CCB8D4030142C82), UINT64_C(0xA5EE08B06623679E), UINT64_C(0x3705003EA51463EC), UINT64_C(0xC5A0D306089EB3B1), UINT64_C(0x58842A65BBCBFB19), UINT64_C(0xE1DB5E51E1192F68), UINT64_C(0x2C150E7110895EE3)}}, {{UINT64_C(0x65482B6D9B114E3F), UINT64_C(0xC976F2D9F82E1B5E), UINT64_C(0x7976D4239058AFED), UINT64_C(0xCDC9ABE6DB9382BC), UINT64_C(0x4902B8BEDB9BB45B), UINT64_C(0x6A4D9FBBF757B0E7), UINT64_C(0xCA3E2905A2864BEF)}}},
+	{{{UINT64_C(0xE2F323488F6D4C4C), UINT64_C(0x759F5FC931F63B87), UINT64_C(0x746D4C8867DA035C), UINT64_C(0xD990BE0AB6F1EFF9), UINT64_C(0xEEE5C407B48A8172), UINT64_C(0x0DACF378ED8A1113), UINT64_C(0x99B57CF3FA7FD1D8)}}, {{UINT64_C(0xB5F5BB6D95176405), UINT64_C(0xEF8D6B8963A92E83), UINT64_C(0xC1FBF0AC55B6B8A7), UINT64_C(0x060148DFE73FA126), UINT64_C(0xA98F3F1FBADB3756), UINT64_C(0x71D0AEA550F272F1), UINT64_C(0xC3EA4F09544A871F)}}, {{UINT64_C(0x2B5B08A866A03A84), UINT64_C(0xC9CD1C898EB830B9), UINT64_C(0xCAE78AB154F37E2B), UINT64_C(0xFF4384DE658E2F88), UINT64_C(0x623A70B1098FEBE9), UINT64_C(0x9E1E06A2C15BDE92), UINT64_C(0xA4B934F8380424D6)}}},
+	{{{UINT64_C(0xE15B09DA24322BF3), UINT64_C(0xACC42A573D561264), UINT64_C(0x502FC693CB2E1803), UINT64_C(0x239E0EBC397B4FBE), UINT64_C(0x8F5BBCBC57DDFB21), UINT64_C(0xD3BED4663788ECCD), UINT64_C(0x37192AA1218DF949)}}, {{UINT64_C(0x4D8A05BC92FFA3C6), UINT64_C(0x43A8C38C28123EBF), UINT64_C(0xC63516C80D547FE3), UINT64_C(0x18D8FA6BA8D5A5B6), UINT64_C(0x87224A87C0C5D8CE), UINT64_C(0x06E9E75BFA23EB5E), UINT64_C(0x11F0889689469A98)}}, {{UINT64_C(0x24A5E40ED5B208BF), UINT64_C(0x489BDB1C6ED93F36), UINT64_C(0xF93A45EADFD8C7B5), UINT64_C(0x32E0E8290C9AAA5C), UINT64_C(0x7EC82364FCA1F11D), UINT64_C(0x1CCA29B4EB396DD5), UINT64_C(0x8BB8C0832B6F1E5F)}}},
+	{{{UINT64_C(0x0581005F68E75666), UINT64_C(0x21EAB84D861D3495), UINT64_C(0xFA33A1E0832829F3), UINT64_C(0xF067C550B751D7AC), UINT64_C(0x6B21027E56793CF6), UINT64_C(0xF40EE66A6012073A), UINT64_C(0x70BFAA8C210FA953)}}, {{UINT64_C(0x9C1518E39E4B5998), UINT64_C(0xF9238F0B53024B8D), UINT64_C(0x4E3F69D91C281AFD), UINT64_C(0xA870871FC5CFB282), UINT64_C(0x8872128DAD63A529), UINT64_C(0x658DCCB30CCE3D3E), UINT64_C(0xF9373B9AFB7BAEED)}}, {{UINT64_C(0xBE467B429AB8D540), UINT64_C(0x7E4A008CB6FEE5D8), UINT64_C(0xFCB15A93B1B6F6FB), UINT64_C(0xC1A6ACE43F66E8CB), UINT64_C(0x087CAF48D9736CE0), UINT64_C(0x185647DDE19180BE), UINT64_C(0xA316EA1FD7B8E958)}}},
+	{{{UINT64_C(0x8922D4DBEDE58ED2), UINT64_C(0x817F4FEFC1D03F87), UINT64_C(0x56B0B26B0A1FE344), UINT64_C(0xEDA249FA96BEF40A), UINT64_C(0x864524A91B32684E), UINT64_C(0x58BAF0C736A18298), UINT64_C(0xD033A7DEF2F3E5A9)}}, {{UINT64_C(0xBB5BE3EDC43F4D6A), UINT64_C(0x997A326A39D9C89A), UINT64_C(0xE966C290C44F755D), UINT64_C(0x0654803820581066), UINT64_C(0xC97D473FC1DBAE49), UINT64_C(0x4488B4B2603AAC7B), UINT64_C(0x27AEA275E9BB98B3)}}, {{UINT64_C(0xF7BBE40FC9633E8B), UINT64_C(0xA61269C08429CA51), UINT64_C(0x4E893E6163EBD13D), UINT64_C(0x819DD898C855DD71), UINT64_C(0x58A49059EE20F9A1), UINT64_C(0x44E5C2B245BED937), UINT64_C(0x2B1AABAEB49C7A6E)}}},
+	{{{UINT64_C(0xF6A59E7281B88773), UINT64_C(0x5749E2F05D40C241), UINT64_C(0xB10705A56229E4E7), UINT64_C(0x619394D38F00C0B1), UINT64_C(0x352AAF5E32855994), UINT64_C(0x6C462787B8EA0D7E), UINT64_C(0x89297D9A179D4852)}}, {{UINT64_C(0x41EFF17E6EF43892), UINT64_C(0xB84817091EB221F8), UINT64_C(0xEB7B7682F5EB34A4), UINT64_C(0x176C536C6BEA4778), UINT64_C(0x2C896C81BB21F227), UINT64_C(0x2754654BF4D3D9EF), UINT64_C(0x9DD4662D7C28C87C)}}, {{UINT64_C(0xDBD1E17FDF1E4A72), UINT64_C(0x69FD6FA9C02F0BD3), UINT64_C(0x7EA940D1F0A7E432), UINT64_C(0xF6E7997B9C1D22D1), UINT64_C(0x46B3DEC5389904B6), UINT64_C(0x09EF8FB3399BAA53), UINT64_C(0x1B12953FF5BFA4B8)}}},
+	{{{UINT64_C(0x67E7FFF0020E1A6B), UINT64_C(0x8C9126A35C6A08D4), UINT64_C(0xA7D935B3C773D324), UINT64_C(0x3B0D26FAA646615B), UINT64_C(0xC3460C6D32A91F45), UINT64_C(0x668619E3E3DCDCF9), UINT64_C(0x3012813F30F3E263)}}, {{UINT64_C(0xFFAC6623DC2FC61A), UINT64_C(0xD6EA108DC252BFD2), UINT64_C(0xD1107ED7F5C0D231), UINT64_C(0x20D1E9C8A904F9AA), UINT64_C(0x451C810CF246941C), UINT64_C(0xA8E674F511D1E5B6), UINT64_C(0x5B4B94F08373FEAB)}}, {{UINT64_C(0x1A3E81257C922A8B), UINT64_C(0xA64C0CB613B44C0D), UINT64_C(0xDE63EC29102FBF1E), UINT64_C(0x7FBB4CA54057110A), UINT64_C(0x277523CAE26045AA), UINT64_C(0x5699282A84116764), UINT64_C(0x932520E1C963A448)}}},
+	{{{UINT64_C(0x91002D4E2849C230), UINT64_C(0xE3199BED0EFD8BA3), UINT64_C(0xA58DE2745E0C0828), UINT64_C(0x11ABAA4ACD40907C), UINT64_C(0xA97DB643912C87AB), UINT64_C(0xB184E86C72D23C17), UINT64_C(0xB03D202485F7AA36)}}, {{UINT64_C(0xB22B6B79BDE24ABA), UINT64_C(0xBAE2DCB78542325F), UINT64_C(0x03840AF5D1DB966E), UINT64_C(0x9190E9DA35A4D5B9), UINT64_C(0xF6A35C17927AFEB0), UINT64_C(0x091FA3FAA2691818), UINT64_C(0xC4CCFF6257023590)}}, {{UINT64_C(0x82FC42FB086A0AB0), UINT64_C(0x5D550619D78E6B1F), UINT64_C(0xEDC4FF4ECF7C96B1), UINT64_C(0x74C33946C3B3346D), UINT64_C(0x2698E3FAC9B27460), UINT64_C(0xC23C75F042B1A4C4), UINT64_C(0x3FE29EDB8572848B)}}}
+	},
+	{
+	{{{UINT64_C(0xEEA177619EC85940), UINT64_C(0x0C11FCA24DB7EF7E), UINT64_C(0xBF4F85B2450F37A9), UINT64_C(0x051316C329D256DD), UINT64_C(0x7BA04474DA920C8D), UINT64_C(0x8117F2EC9A0B2F7F), UINT64_C(0xD0A231AD0D208530)}}, {{UINT64_C(0x32F3288FC7AB641D), UINT64_C(0x8253C68BADE9F4FA), UINT64_C(0x0A33F0768F014BBF), UINT64_C(0x36BB93CE5EFF260C), UINT64_C(0x045680697FC71B45), UINT64_C(0x2444CCE72BC3A71D), UINT64_C(0x11F03E8D1379F3B6)}}, {{UINT64_C(0x2682BFCB11C7D064), UINT64_C(0x19AC6761616A31DA), UINT64_C(0xA9B0338144D91DEB), UINT64_C(0x3E45A71718754E38), UINT64_C(0x16268A1BAF739777), UINT64_C(0x1936355BFC36F163), UINT64_C(0xF37B603887BF703F)}}},
+	{{{UINT64_C(0x421F54789C16DF92), UINT64_C(0xA9F1874C642E3ED1), UINT64_C(0xFECFC16699F60FA2), UINT64_C(0x58A3D953BD1B8D33), UINT64_C(0x0214A36B8159682D), UINT64_C(0x9621D181A666F17C), UINT64_C(0x7C2C3AB3CF1AD8EB)}}, {{UINT64_C(0x15E6888C3E529F7C), UINT64_C(0x31AC197B66AB3553), UINT64_C(0x91C68E63B558A83E), UINT64_C(0x9592E3604AA7BC58), UINT64_C(0xA291363666C17D98), UINT64_C(0x534704909AC0C750), UINT64_C(0xD6D02724594A100D)}}, {{UINT64_C(0xF76C243CC6419E52), UINT64_C(0x38B3F7979599DFD9), UINT64_C(0x011B0085A6DE101A), UINT64_C(0xEE49C94CCA8B86D4), UINT64_C(0xC4E0CC9698B08B91), UINT64_C(0x5ED3885C08CBBAFB), UINT64_C(0xEEA42E7A5A3E9CF2)}}},
+	{{{UINT64_C(0xFA35C541B3FBB635), UINT64_C(0x0CA050016D05982A), UINT64_C(0x77EA5658EBCE496B), UINT64_C(0x5E38480FB9400275), UINT64_C(0x5B0EBD6A2CF29D30), UINT64_C(0x4ACDAE90C6394370), UINT64_C(0xBE94A29F56E05E0E)}}, {{UINT64_C(0x11C61F4A030659AD), UINT64_C(0x621D39074ADC4022), UINT64_C(0x1D5222FE0D8D551B), UINT64_C(0xC46C26832D02E8DD), UINT64_C(0x05AC689D4105ECE3), UINT64_C(0xCAF444D837BFF707), UINT64_C(0xFDA058475BA6D0E3)}}, {{UINT64_C(0xC6AF3E5D2AEF0E0E), UINT64_C(0x9A3EA32C6B23716D), UINT64_C(0x3BA6D76B1785722B), UINT64_C(0xB62335EFC0752F7C), UINT64_C(0x78912FD7B37C1641), UINT64_C(0xA830DE78817AE239), UINT64_C(0x1FD3D6DE7C87B76B)}}},
+	{{{UINT64_C(0x341098163CB7D458), UINT64_C(0xF72C12B645FF5BA8), UINT64_C(0x32E5DD70A318128A), UINT64_C(0x510A21B45F4727EF), UINT64_C(0xF8067853897CBAE1), UINT64_C(0x27402B8F93B7A80B), UINT64_C(0xE385F8208349DA98)}}, {{UINT64_C(0x912D054619589F6E), UINT64_C(0x574D6AA5B26E7C01), UINT64_C(0x148E61E79AE12BD5), UINT64_C(0xF13716FF5D13F914), UINT64_C(0xFE680BB81F7B2BE0), UINT64_C(0x7633C3E2569C82B0), UINT64_C(0x6C1F083873F8B369)}}, {{UINT64_C(0xC97102E5B2E48D1B), UINT64_C(0x89416F93F7FB103B), UINT64_C(0x86ED0B4829EAEDF0), UINT64_C(0xC6FB0CF98678F3F8), UINT64_C(0xCAF98F59AB202690), UINT64_C(0xFA7FC77A9057A658), UINT64_C(0xB1B9ABF115BDC9EF)}}},
+	{{{UINT64_C(0x4F6E26D850BE1674), UINT64_C(0xC434E4E47F6AB804), UINT64_C(0x89CADCFDF46E882F), UINT64_C(0x24B85BDC639AE2CC), UINT64_C(0x790B7CF4EA2244A5), UINT64_C(0xDCE037E0BB8FB1E4), UINT64_C(0xDD143352716CEE51)}}, {{UINT64_C(0x211C049B48E8841D), UINT64_C(0x11786BF26DCB97C6), UINT64_C(0xE4F0E421D6255BA0), UINT64_C(0xE68F8EF1477258A8), UINT64_C(0xFBC8B03E1EF5E437), UINT64_C(0x6BC51E1C91B3D118), UINT64_C(0xA259486D5B69073D)}}, {{UINT64_C(0xA801DFAC42613E5F), UINT64_C(0x11345C4D2F0D76F4), UINT64_C(0x0A6AD6A9D15D4DF5), UINT64_C(0xD1931C6097F37837), UINT64_C(0x0635F330EE767A12), UINT64_C(0x134C11FEA73C6612), UINT64_C(0xB7AB51385F07BA4F)}}},
+	{{{UINT64_C(0x4A4159CFC7B6F5DC), UINT64_C(0x888305A52B349369), UINT64_C(0xB06400EEB511C83B), UINT64_C(0x2738F37E19D79E42), UINT64_C(0x5795A94AD98E503A), UINT64_C(0x81C75262618DA30E), UINT64_C(0x06B6C692DCBA1939)}}, {{UINT64_C(0xC4D7242EE4D1B051), UINT64_C(0x00196274CCB3B350), UINT64_C(0xAE12D566DF0BBF54), UINT64_C(0x01049CBA4D66BE65), UINT64_C(0x3398DF84B3CEA296), UINT64_C(0x6C96B75A31C84047), UINT64_C(0xBB80159874174C7D)}}, {{UINT64_C(0xD157CD8B6A1AC2E5), UINT64_C(0x41C6E85BD86423BF), UINT64_C(0x4029F073450A7DD0), UINT64_C(0x80A96063B09EA3A1), UINT64_C(0x7BB159164FE8A253), UINT64_C(0xF79AA5E385A089AF), UINT64_C(0x85D28A6309EC85E8)}}},
+	{{{UINT64_C(0x51F0F7BE059F1AA4), UINT64_C(0x4E1E798F39ADCFF4), UINT64_C(0x9CC5EC96763FF801), UINT64_C(0x6893650A03987A80), UINT64_C(0xEEF75E24DF491965), UINT64_C(0xE97CDE89D63992E8), UINT64_C(0x8081D067682CC054)}}, {{UINT64_C(0xAAB9EF41AA8CEB71), UINT64_C(0xEE10B8173A4A4D7A), UINT64_C(0x0A445A93D81B1C54), UINT64_C(0x764D569DABE18057), UINT64_C(0x6B23E570BEAC0FF9), UINT64_C(0x11DD241806418694), UINT64_C(0x3D0B33C99F67DC8E)}}, {{UINT64_C(0x5F6BA7A759CF595A), UINT64_C(0xC9120682FB18341D), UINT64_C(0x4BBA0B41890988EE), UINT64_C(0xF822FABB4151D2E3), UINT64_C(0xFFC6917B190A14A6), UINT64_C(0xCE7A701B63889A46), UINT64_C(0x0D9A69A55E998F17)}}},
+	{{{UINT64_C(0x122C9637E48BF5A4), UINT64_C(0x20239FDEC19CCAF1), UINT64_C(0x78F0CCE5CDE9D5C4), UINT64_C(0x21FE6EBA98696208), UINT64_C(0xEC854E678BCF970A), UINT64_C(0x67F0128D00DD1DF5), UINT64_C(0xFA7260DB0B3FA846)}}, {{UINT64_C(0x0D6BD2895B34239B), UINT64_C(0x23E204C8BC52D2A5), UINT64_C(0xA278D514E55EF6CB), UINT64_C(0x321930466440C273), UINT64_C(0xF645DD4C08F4B12E), UINT64_C(0xE29984656E8C46AD), UINT64_C(0xE7B36EAE4ACD4470)}}, {{UINT64_C(0x570540B4AF83F6C0), UINT64_C(0x2A2DCC72BD7A4C6C), UINT64_C(0xBBC2F5FC9D6B6DAC), UINT64_C(0x91532668B3E01E1E), UINT64_C(0x6DBE80FC7C3E6E1C), UINT64_C(0xCCCC8CC3F7053043), UINT64_C(0x8EAEEDED822AFB35)}}}
+	},
+	{
+	{{{UINT64_C(0x57EA64A5716CF664), UINT64_C(0xE8518497EE426FD3), UINT64_C(0xA6A2CF44D94B4814), UINT64_C(0x980C301FF4AAC225), UINT64_C(0xBA17865383947B30), UINT64_C(0xC4FC6D1773D3F390), UINT64_C(0x61B9814622722016)}}, {{UINT64_C(0xDF07DD03A1DD0270), UINT64_C(0xA955290CA820F160), UINT64_C(0xB6F1B38F2205444B), UINT64_C(0x9AD780894E85E450), UINT64_C(0x2702F2CB0EFD73CE), UINT64_C(0xDE0D7EE33A6167C1), UINT64_C(0x6A811CC6553261A7)}}, {{UINT64_C(0x3EA27D83428B57C1), UINT64_C(0xD4A0DDB814777BA0), UINT64_C(0xB368D36296894399), UINT64_C(0x3668FC005554167C), UINT64_C(0xDE5C6ECB27620EAC), UINT64_C(0xDE385F4139FCA320), UINT64_C(0x78E8393AF9A1994B)}}},
+	{{{UINT64_C(0x415EF05742D0A427), UINT64_C(0x4886E8D2E95220A3), UINT64_C(0x1AA58BDD28CBF804), UINT64_C(0x38EC901BDAD7B4BA), UINT64_C(0xA935BBE3DBB28F37), UINT64_C(0xD7CD1A075FEE1841), UINT64_C(0x93B603FC0D3CDD8F)}}, {{UINT64_C(0x87CA54FD55EDD859), UINT64_C(0xA3D7A4CB05F64ED6), UINT64_C(0xE32BE53138668ED1), UINT64_C(0xBC80AEB31224FDAE), UINT64_C(0x5D0E8D4D69F1F532), UINT64_C(0x97A015905FE5A4F6), UINT64_C(0x514DA7A6690CE4C6)}}, {{UINT64_C(0x1F79B04DECE79351), UINT64_C(0x73E566321A2E175F), UINT64_C(0x1E8BA51B432AE276), UINT64_C(0x9745BB27F2D90A16), UINT64_C(0xCC163C9DF52CF686), UINT64_C(0xAFD02514403C67E5), UINT64_C(0xB4BA7DFB991BF6CA)}}},
+	{{{UINT64_C(0x93C7B9AF83DE4A55), UINT64_C(0x1C83C79BAD7B318D), UINT64_C(0x965B161808071F5B), UINT64_C(0x87BB740A92112EFB), UINT64_C(0xC8B384FF87655AB3), UINT64_C(0x53C2872DC6F253DB), UINT64_C(0x2EC20E199C7819D1)}}, {{UINT64_C(0xB565E46EA3B854B5), UINT64_C(0x19E8272D5AEC711D), UINT64_C(0xDC0665FD1BB5326E), UINT64_C(0xEB8F1C4A33280B83), UINT64_C(0xFC4A685C4A95B986), UINT64_C(0x3CBD583BDBBFA671), UINT64_C(0xD329402AB77544A0)}}, {{UINT64_C(0x9304B44B1EAB531B), UINT64_C(0x7AADE4907F0C9EE3), UINT64_C(0xA169BDDDB4AB5BAA), UINT64_C(0x361C24E4B2F6CD5C), UINT64_C(0xA90D9D819B91D41A), UINT64_C(0x3B54C470B345FB96), UINT64_C(0xC5C6DAF7AB6E6CA8)}}},
+	{{{UINT64_C(0xA640FA6518E62B35), UINT64_C(0x0A413913B11F9E55), UINT64_C(0x0D18864E8089B527), UINT64_C(0x5512749B565F52A8), UINT64_C(0x69C141C54793B5F0), UINT64_C(0x44A1AF86717F35C8), UINT64_C(0x2B9984B9C2B2CB9A)}}, {{UINT64_C(0x6461FB6074952322), UINT64_C(0xEB302D4072F7AF14), UINT64_C(0x10668E9B2FA8C600), UINT64_C(0xD90634CA6071FB7F), UINT64_C(0xBC2471D32B27CC24), UINT64_C(0x8590BA11210C3875), UINT64_C(0x352B447FCC5A9A67)}}, {{UINT64_C(0x4698536C52FE48AA), UINT64_C(0x4A5269FD5D262B7D), UINT64_C(0x30553CB08D50258B), UINT64_C(0x22E2195B6666CCBA), UINT64_C(0xC570EB1450C4DE54), UINT64_C(0x11994561EABBEF94), UINT64_C(0xA7A0041F0B4CA6DC)}}},
+	{{{UINT64_C(0x9F795D5415FA3200), UINT64_C(0x88C4ADAA557A9294), UINT64_C(0x1B68A542FFF063CC), UINT64_C(0x9E67AD8C26D68317), UINT64_C(0x36386396B2328654), UINT64_C(0x229B6E12C8EA5BF6), UINT64_C(0x05320C9748952E41)}}, {{UINT64_C(0xFFAE36B63900B460), UINT64_C(0xEE0C9354FF2F2B6A), UINT64_C(0xC8BB3810B810B065), UINT64_C(0xD7A22F144D6925FC), UINT64_C(0xF4457544E831C03F), UINT64_C(0x9123CC0EED2676B7), UINT64_C(0x77ACD67E0CD1CC3A)}}, {{UINT64_C(0x263A70D044880A17), UINT64_C(0x07F5CA2A95C73724), UINT64_C(0x4C652F3E72803DB8), UINT64_C(0x8935585C4A3F41C4), UINT64_C(0xC98CF806115C26B0), UINT64_C(0x043D731BE0645EB9), UINT64_C(0x7356868CBE3C3F00)}}},
+	{{{UINT64_C(0xCF2E9053007EC527), UINT64_C(0x918832388EF62937), UINT64_C(0x3BCEBEA445389E22), UINT64_C(0xE4C4E701A44B68E3), UINT64_C(0x6E8CF07E415A8722), UINT64_C(0xC1A4F95FAB62FD06), UINT64_C(0xB4D6A1BE542F24A3)}}, {{UINT64_C(0x1DE6A92E4AF6C9B5), UINT64_C(0x22769452484C83D6), UINT64_C(0x279688422B55B006), UINT64_C(0x63999FB2261973A5), UINT64_C(0x6287B029CADE8BE2), UINT64_C(0xEDFAA06897D464E9), UINT64_C(0x408319C6955511D8)}}, {{UINT64_C(0xAC1F9D073EF2505B), UINT64_C(0x0A74ABC68B66E5B0), UINT64_C(0xF6574A53558D8BDC), UINT64_C(0x9DB9E2B20AE30271), UINT64_C(0x06B544C4F8940D78), UINT64_C(0x08C60DE81D381396), UINT64_C(0x2492CB8E0B17D9EB)}}},
+	{{{UINT64_C(0x5AFF6BAED50A5632), UINT64_C(0x5864922B7D05C588), UINT64_C(0x04340EDF0F3B31B4), UINT64_C(0x6122C44727E49C0C), UINT64_C(0xA38EAFEE7E618C56), UINT64_C(0x43AFFB828CB07863), UINT64_C(0x51FCF4CF9D054E71)}}, {{UINT64_C(0xBDC4A4B3127F5E09), UINT64_C(0x956D021F47A90BE2), UINT64_C(0x6EA86B1A060197AB), UINT64_C(0x7D550EF3E77FA158), UINT64_C(0x53A65326549CCDE8), UINT64_C(0x4F060E8263877DEE), UINT64_C(0xDA38637AD077B58B)}}, {{UINT64_C(0xFCC1E8F3016E1DF3), UINT64_C(0xF0D8FDDE2D5C2AB0), UINT64_C(0x069E94E451B14E3C), UINT64_C(0xD26E9FFD7894FAFE), UINT64_C(0x33D0E6336A6F7E2C), UINT64_C(0x4ED876762451F486), UINT64_C(0x71432CF172A3BCF7)}}},
+	{{{UINT64_C(0x2ABC901B30E9FAC8), UINT64_C(0x4EFCFA082046FB2A), UINT64_C(0xAC12D092F68AB5E0), UINT64_C(0xAB25D479184A30A9), UINT64_C(0xF4C0F031611AA11A), UINT64_C(0x3A083CFC88178BC5), UINT64_C(0x84D9355597F93F7E)}}, {{UINT64_C(0x04C014478239ABC6), UINT64_C(0x5789B226B098D37B), UINT64_C(0xA745EBB056942F57), UINT64_C(0x9B98DDB6816B95AB), UINT64_C(0xA26291AF812A49D3), UINT64_C(0xAFE99AB26347C41C), UINT64_C(0x59C31BC604B638B3)}}, {{UINT64_C(0x298DB1CD433108F6), UINT64_C(0x3B7D16785D25A4A6), UINT64_C(0x046FD1C337BCCCF0), UINT64_C(0xEBF64D0F16E08A0C), UINT64_C(0x355BF528718F937E), UINT64_C(0x185EC340DE2A11A6), UINT64_C(0x9F2645F11752220C)}}}
+	},
+	{
+	{{{UINT64_C(0x00A16A8B9C42BEFD), UINT64_C(0xDFA0731C9C92052F), UINT64_C(0xFFCE361AD49B41F5), UINT64_C(0x00C79CF17A289E3B), UINT64_C(0x28486721AB868FAC), UINT64_C(0x0F928E726C946D6D), UINT64_C(0x0E802CB51F384159)}}, {{UINT64_C(0xB86A6A57A0B694BC), UINT64_C(0x5826B9BB0CD8120F), UINT64_C(0x768DF0AD96AC79C0), UINT64_C(0x1B56C6C6294DA8C7), UINT64_C(0x2C6AE8D050FE3231), UINT64_C(0x765E7E7DB4C9291C), UINT64_C(0xE058298D65F9F71C)}}, {{UINT64_C(0x7B634C3AAC03FACF), UINT64_C(0x44358BDEA9C87555), UINT64_C(0xD77913549C127013), UINT64_C(0xFFEEC5456608D295), UINT64_C(0xECC33DE44EA55F67), UINT64_C(0x4D1FEBCC771979D0), UINT64_C(0x4CB054E3E78CF477)}}},
+	{{{UINT64_C(0xC84BFA85B7E8D345), UINT64_C(0xACE3A04EF95DE1DF), UINT64_C(0x74B14AB5F7F21324), UINT64_C(0xFF8E5C8D4B350A15), UINT64_C(0x9F9764236911436B), UINT64_C(0x5E335FB623CE1C78), UINT64_C(0x9DEACD2442D562EB)}}, {{UINT64_C(0x2A4FF989F531EE71), UINT64_C(0xFADC43E2C49AACB5), UINT64_C(0x0161A0A76319885B), UINT64_C(0xA541F19708B6D5CD), UINT64_C(0x89E3279A16010E3F), UINT64_C(0x991376309F9B83A5), UINT64_C(0x07C093BF1CEA10F0)}}, {{UINT64_C(0x2CB3A51FC378AFD5), UINT64_C(0xAF9A6BD812D3922B), UINT64_C(0xE5DD6D2CD597D026), UINT64_C(0xB7F71BB8290837F3), UINT64_C(0x7B0F81E0ACC901A6), UINT64_C(0x01A5922240C05AFF), UINT64_C(0x2AAAAAC6C7A785C2)}}},
+	{{{UINT64_C(0x731CE3F0F33D2192), UINT64_C(0xBE2707B559AC37CE), UINT64_C(0xED93DEAA2AD38207), UINT64_C(0x73B98A4B84F053B7), UINT64_C(0x46163AA9B9BC5C79), UINT64_C(0x7CC16231A10CC923), UINT64_C(0x8FFDF57A06120980)}}, {{UINT64_C(0x3AA9CA741497070F), UINT64_C(0x384DF608EC9D113B), UINT64_C(0x5EC30751327268D0), UINT64_C(0xD71C466596686ACF), UINT64_C(0x9D57C379CA437BBB), UINT64_C(0xBE033621747CDEF0), UINT64_C(0x2775B378AE8047F8)}}, {{UINT64_C(0x32187C6C8050A17B), UINT64_C(0x9B55BA151B09B934), UINT64_C(0x09100F121F40FC2A), UINT64_C(0x90122B0FD54B9D22), UINT64_C(0x7F6B4DB9E76B14CC), UINT64_C(0x7BD9C99BE03E761C), UINT64_C(0x5D6CD5B21974061D)}}},
+	{{{UINT64_C(0x2E4009798B2C4FC2), UINT64_C(0x23FB148D7D120377), UINT64_C(0xF8CEF49D9392DF84), UINT64_C(0xD4380B53A5BD72EA), UINT64_C(0x8F18C39D24579D58), UINT64_C(0xA2FBC57064662FF8), UINT64_C(0xB42987D1E56AF29C)}}, {{UINT64_C(0x76CC2556E5D94EA8), UINT64_C(0x4F9C4E5C2B35369D), UINT64_C(0xCB41455DE35742A9), UINT64_C(0xF51BFCBF8D068C95), UINT64_C(0x1648A23FCE4D553F), UINT64_C(0xCB3A9D0FA7F33AB7), UINT64_C(0xF81209BED9CED1C9)}}, {{UINT64_C(0x23431F709C1A16E4), UINT64_C(0x834413EF619E059C), UINT64_C(0x9447D0603B6C4D3D), UINT64_C(0xC820A5E080AA19D2), UINT64_C(0xF78DB9821FC1B5F4), UINT64_C(0xD708F28FED35DCE0), UINT64_C(0xC9DAC20C6B8E555B)}}},
+	{{{UINT64_C(0xE0DE7356EE5B66F5), UINT64_C(0xB7257B2BF1AE8A25), UINT64_C(0x906C5509A444A2C9), UINT64_C(0x082514F3FD8A2F44), UINT64_C(0x09928999A9409CC8), UINT64_C(0x582A66A312F447E0), UINT64_C(0xF7946F8F6723DE0A)}}, {{UINT64_C(0x1CA55F6BA92D8AFF), UINT64_C(0x6A94B62C3C8A544B), UINT64_C(0xAD5E71A1D14115C1), UINT64_C(0x706B1DD6C3783192), UINT64_C(0x5F8EE7FF5513D784), UINT64_C(0x5EA3F8A1E7D89900), UINT64_C(0xDC7F53CB4CAC39FB)}}, {{UINT64_C(0xE873708DE0732316), UINT64_C(0x5A5573C0D7184E1A), UINT64_C(0xB2C2A95A806CFDC5), UINT64_C(0xA73E8853C05CF9F7), UINT64_C(0x6EFAF9F2E9989094), UINT64_C(0xC9D02A01CE562843), UINT64_C(0x199D604C184C2A90)}}},
+	{{{UINT64_C(0x4F482ABAF36E3794), UINT64_C(0x29BEC23E9E5C7468), UINT64_C(0xF403744544CF6F16), UINT64_C(0xFF433BDBD8A8EE52), UINT64_C(0x99CAE9990E2EEA87), UINT64_C(0xC131E54B23B6489A), UINT64_C(0x25FE6998600270EF)}}, {{UINT64_C(0x3C03D2D9EC059A7E), UINT64_C(0xBCEAA6445B56979C), UINT64_C(0x937AF1491A10C9BF), UINT64_C(0x2797C7FC15B5974E), UINT64_C(0xA49FEDCFEE4BE800), UINT64_C(0x751CEA9E0691BED8), UINT64_C(0xE9A9FA39EF598235)}}, {{UINT64_C(0x5DEB67FDF576BDEA), UINT64_C(0xB86209BE8C9D60F3), UINT64_C(0x3433330C399B5C6D), UINT64_C(0x792D8ACC5EFC1F19), UINT64_C(0xB601BC5531A53A95), UINT64_C(0xFFAFB23A138B1BDB), UINT64_C(0x03EAEE2D0424C741)}}},
+	{{{UINT64_C(0xE2EFFEACA3065DE7), UINT64_C(0x199F841D544AC4D4), UINT64_C(0x43967A8144679CAF), UINT64_C(0x4F33183C98CF4F94), UINT64_C(0x32AC1B15EB8CD57F), UINT64_C(0xB1FEAA53B5003908), UINT64_C(0xD762A10DFF24B5C4)}}, {{UINT64_C(0x85CCD3EEDB0EE2A9), UINT64_C(0x047AA6DD4A9362D4), UINT64_C(0x3860FCEB4FF26F1D), UINT64_C(0x94B64114C0771FD2), UINT64_C(0xF244D29B29DBB4E3), UINT64_C(0xAC005387B3652FF3), UINT64_C(0x05B7AA6DE5994A9C)}}, {{UINT64_C(0x918FAA7DBC9E0B7B), UINT64_C(0xFA571C5FA162FE24), UINT64_C(0x1F7A5D61D2D6B5B9), UINT64_C(0x11E5800DFE6998B7), UINT64_C(0xCF3212110CEE084D), UINT64_C(0x802D55C2E72A2884), UINT64_C(0xD477FF4A2DD173DD)}}},
+	{{{UINT64_C(0x875E71752C03DD63), UINT64_C(0x76ABAD10FE9BC746), UINT64_C(0xF586D451A5B0C54C), UINT64_C(0xE816048B763FD501), UINT64_C(0x3D23F744DCC7BD5C), UINT64_C(0x61802109DF9A8FC8), UINT64_C(0x18FB01FCCF0E4305)}}, {{UINT64_C(0x98E4606FC038AB23), UINT64_C(0x73565878F1FA664C), UINT64_C(0x16746A3AEDBBD5DA), UINT64_C(0xF1A172103C578F55), UINT64_C(0x69D028248F259477), UINT64_C(0x17A6148CBF95C7A8), UINT64_C(0xBC5F91D3D04D4765)}}, {{UINT64_C(0x82808027B8735E15), UINT64_C(0x66C5D54BC8E3C4B3), UINT64_C(0xE7B789F660664C57), UINT64_C(0xE4323236201B3792), UINT64_C(0x112CFA400175B33C), UINT64_C(0x47B8D243B84BD83C), UINT64_C(0x978C4F6000364D61)}}}
+	},
+	{
+	{{{UINT64_C(0xA615FD9A9083CA53), UINT64_C(0x676C1161DA02697C), UINT64_C(0x5EEC13F516AF356B), UINT64_C(0x21A9526B8A420D57), UINT64_C(0x29E76B463F72D674), UINT64_C(0xA4F5888156278D8C), UINT64_C(0xF7E528BE0650F938)}}, {{UINT64_C(0x3C2CFA78E382EDCA), UINT64_C(0x0119638D183C4AD8), UINT64_C(0x7C110196D3B9DE4A), UINT64_C(0x92B8D04A5769CCBA), UINT64_C(0x2F64951BDEC3B3B7), UINT64_C(0x7905A481161E9621), UINT64_C(0x8FD676241C5EDFAD)}}, {{UINT64_C(0x7A6A2736F45113BD), UINT64_C(0xB5EB3FB196516652), UINT64_C(0x5397A30802872F37), UINT64_C(0x97B83B3D41147A8A), UINT64_C(0xA5DA35443D6CE9EF), UINT64_C(0xF7321BC1DEB7408B), UINT64_C(0x17A8500FCB243229)}}},
+	{{{UINT64_C(0x4AF7B063539D6CDE), UINT64_C(0x9FE469D0549115A8), UINT64_C(0x50FF964A976C6CBD), UINT64_C(0xE654D127C92953F9), UINT64_C(0x870DA0F75D1D7F0F), UINT64_C(0xB3652CF2277F7293), UINT64_C(0x64798C9834484F7B)}}, {{UINT64_C(0x6BB94D8BFAC3A76C), UINT64_C(0x2E31F5721A97FF77), UINT64_C(0xA5C03423A6E9F272), UINT64_C(0x3456EBC3E9DA9969), UINT64_C(0x58A96956A4B9BBF8), UINT64_C(0x75BEB18B7F00239F), UINT64_C(0x6C2B5B8A51CB978B)}}, {{UINT64_C(0x5CDD073B71926B26), UINT64_C(0xC410871313EBD5F5), UINT64_C(0x1815159763262F07), UINT64_C(0x6CC8D73996DD5EF5), UINT64_C(0xFFCC3C16B0050D73), UINT64_C(0x9022DC0800995F3D), UINT64_C(0xA7121FDA58E03931)}}},
+	{{{UINT64_C(0x5278B1C627EB41F3), UINT64_C(0x709C0638FCF17C43), UINT64_C(0xDC906C939EDD80C5), UINT64_C(0x7EFB01ED0A8DFC3E), UINT64_C(0x75749986FE3942F4), UINT64_C(0x2545C4DFFA574C82), UINT64_C(0xEEE68836C3FF2679)}}, {{UINT64_C(0x7F824D08E12B1218), UINT64_C(0x55B3515A47890245), UINT64_C(0xCEF9D4C70CC9CBAE), UINT64_C(0x62F9DB7F1240737B), UINT64_C(0xF0291F8DA2F22E61), UINT64_C(0x9219CAFAAA6798C4), UINT64_C(0xF35FD87E7D27E2A8)}}, {{UINT64_C(0x7EA50C79783589E7), UINT64_C(0xD26844B9FD7E701E), UINT64_C(0xEA52F8A12E36D732), UINT64_C(0xE847C53BC9669CF8), UINT64_C(0xB1A0FC97BF8BB865), UINT64_C(0x8DA00B3D16973E24), UINT64_C(0x14007D166DF153B8)}}},
+	{{{UINT64_C(0xD119B0CD701B80D0), UINT64_C(0x7CBC3D7E29DF9AEB), UINT64_C(0xFF0D3DD39C9CA047), UINT64_C(0x3520FD01AC0F6155), UINT64_C(0xF54B22D6FB8A5199), UINT64_C(0x86C47318D3AB508F), UINT64_C(0x4312C464A683F887)}}, {{UINT64_C(0x1E73B1D3995359F6), UINT64_C(0xE83E0D94FA596301), UINT64_C(0x841DF35723AF29BF), UINT64_C(0xAB7C498AAFA90016), UINT64_C(0x1AD7EA4253791E92), UINT64_C(0x8E016B783C06BC93), UINT64_C(0x1347DB22CA662B43)}}, {{UINT64_C(0xDB04DB0E376D9325), UINT64_C(0xCB224C833CB49067), UINT64_C(0x1358F3387ABF447F), UINT64_C(0x4DD41D4A69271B86), UINT64_C(0x86EADC5E1A4532ED), UINT64_C(0x9243350BB291CD38), UINT64_C(0x51FA740F208CCC45)}}},
+	{{{UINT64_C(0xDE41DF37DFBAA861), UINT64_C(0xE01898ECB23329E4), UINT64_C(0x088E32DAF1560507), UINT64_C(0x5E4CAB2FA902269B), UINT64_C(0x9ED02C1E1BAD898A), UINT64_C(0x0A5D58488AF3D84E), UINT64_C(0xC7165AF6CC77C6C2)}}, {{UINT64_C(0x328526F3ADEB7461), UINT64_C(0x60B503577B14A2D3), UINT64_C(0x27626628E469DE47), UINT64_C(0x7F9C90FA442C7F9B), UINT64_C(0x7163E211BD90D5C7), UINT64_C(0xD8FF05DECFD67AA8), UINT64_C(0xA204B56EE23E6E56)}}, {{UINT64_C(0x642CB4E640F3720C), UINT64_C(0x2D8BF76B896360AC), UINT64_C(0x90A15B0E4E059EC5), UINT64_C(0x0E938EF42243B564), UINT64_C(0x20E87A7D0F8BD83A), UINT64_C(0x9FD6142DDD2677FB), UINT64_C(0xC8E2F2994C16E04D)}}},
+	{{{UINT64_C(0xE52E4374E4ACEAFC), UINT64_C(0x55CA978743B6FCD5), UINT64_C(0x98074BA0F6345C48), UINT64_C(0x7C33D08A9BC7E4FE), UINT64_C(0xC8B6F005663835D5), UINT64_C(0x628A21ACF55CEEC7), UINT64_C(0x5DA375097FB19E71)}}, {{UINT64_C(0x806904A8E01A7125), UINT64_C(0xF94AAD33C85E6E37), UINT64_C(0xC04B3D1702928C19), UINT64_C(0x919E2BA3B424FF27), UINT64_C(0x8E8C9AF4C9B212E3), UINT64_C(0xAB7AEFD9BF0E4CCA), UINT64_C(0x21D245D9799DB598)}}, {{UINT64_C(0x1EEB197DA406E628), UINT64_C(0x62DECDDC59F4B542), UINT64_C(0x4BF06DA437877D00), UINT64_C(0x857CBE3E312E9D22), UINT64_C(0xA7B1A993C34F6B9A), UINT64_C(0xD75151F73F6E581B), UINT64_C(0xC0C0F5565BB131D7)}}},
+	{{{UINT64_C(0xD96B034DCEC08806), UINT64_C(0xB906FD763F2B40F2), UINT64_C(0xA0E16A5E16DE029C), UINT64_C(0xEE071E1202B70148), UINT64_C(0x28125AD509463C8E), UINT64_C(0xE6F2DDC0E07A6447), UINT64_C(0x188895C68D4D979E)}}, {{UINT64_C(0x22092FFF3B27F971), UINT64_C(0xE42DB3C159FC9B77), UINT64_C(0x87071DE27D8FF3CA), UINT64_C(0xF607EBD2F8A5ED6E), UINT64_C(0x67B53486F1318388), UINT64_C(0x304947C46E1F9249), UINT64_C(0xF279C60F21D19677)}}, {{UINT64_C(0xB4ED1D808FBD22CC), UINT64_C(0xAE2AA398E93A4AFE), UINT64_C(0x4710A18601218978), UINT64_C(0x7BB48530DDDDC887), UINT64_C(0x3C46966786F11555), UINT64_C(0x50060F2FDDD2D774), UINT64_C(0x4F12C9CE203A1127)}}},
+	{{{UINT64_C(0x51EF2BC0384F3201), UINT64_C(0xEC65F8750C71F94C), UINT64_C(0x732A33BAA4F5A986), UINT64_C(0x0299E3656F8A5DE2), UINT64_C(0x530E85261F0F13D8), UINT64_C(0x7D922F527D562709), UINT64_C(0x4969687BE1F3F809)}}, {{UINT64_C(0xE49F3F5043E1708D), UINT64_C(0xA87EAC67B874AA4B), UINT64_C(0xE2CAD675FB042320), UINT64_C(0x0203E9F6A361AD36), UINT64_C(0x7B7C9B76C6CB0147), UINT64_C(0x86833B907C09E380), UINT64_C(0xE9BED3C7E85A01F0)}}, {{UINT64_C(0x8A1A9A1E421B8336), UINT64_C(0xC47805500F5832C4), UINT64_C(0x6976F321E640EE49), UINT64_C(0x6BFB26270BAF7955), UINT64_C(0x8F8A2BEC6A817804), UINT64_C(0x75A34C2FCC014A39), UINT64_C(0xBD3B81391A9D1A8F)}}}
+	},
+	{
+	{{{UINT64_C(0xB6A7EA98991780C7), UINT64_C(0x4B6804E4ECCD2476), UINT64_C(0xEE64FD0AF9F58C49), UINT64_C(0x6021BD26E0F269FD), UINT64_C(0xC35B5D284B85A61F), UINT64_C(0x755EA3775AFDC265), UINT64_C(0x617F1742ECF2C658)}}, {{UINT64_C(0x3950109E25EC556A), UINT64_C(0x6B2E235366BFD57E), UINT64_C(0x2B7B9C7B3C97644B), UINT64_C(0xB0EC6409F7F9E82B), UINT64_C(0xD160A20D9EB6196A), UINT64_C(0xBE3B4586F76188F1), UINT64_C(0x9983C26E26395DE3)}}, {{UINT64_C(0x0E5F4CE144C81690), UINT64_C(0x15008696BB7A5093), UINT64_C(0xFFBDF26492DBEFC8), UINT64_C(0x3E46D1BFD323D6FB), UINT64_C(0x92D7E7AB9CC1B8BC), UINT64_C(0x4AD122CF40314129), UINT64_C(0xEEF57F149954848D)}}},
+	{{{UINT64_C(0x8A1D7605C6909EE2), UINT64_C(0xB361FC4D970995EC), UINT64_C(0x225F552D82E9DCF2), UINT64_C(0x3AEE9C5507F0EF61), UINT64_C(0xD1E5627B54A240C1), UINT64_C(0x164A73A44575D449), UINT64_C(0x61A15FDBD4BD7107)}}, {{UINT64_C(0x2630696B9D3A9FE4), UINT64_C(0xB8C868308C77E7E3), UINT64_C(0x04DB8E3AC222BCE0), UINT64_C(0xB5E5DB0B83EE3193), UINT64_C(0xDCEB1C6539ECA503), UINT64_C(0x8B05E2D256BC78A8), UINT64_C(0xA1C3CB8BD9FD574A)}}, {{UINT64_C(0xC4B9057E17E08277), UINT64_C(0x4C8C747A65E4EA47), UINT64_C(0xA33A11F4AB01B153), UINT64_C(0x5289D67F9533327B), UINT64_C(0x16BE033C63DB4339), UINT64_C(0x59B3739361B0A2A8), UINT64_C(0xB53C0AD05473406B)}}},
+	{{{UINT64_C(0xFF5685531D95AA96), UINT64_C(0x2343C6F11746BD51), UINT64_C(0x921841B38308AC9C), UINT64_C(0x478F3B0152EE64A2), UINT64_C(0xA99AE403AC60809C), UINT64_C(0xDC18FCB09A5BE297), UINT64_C(0x4808BCB81AC92A7E)}}, {{UINT64_C(0xA53EC1BB234DC89A), UINT64_C(0x64861E8B42E4E39D), UINT64_C(0x6F0684DE67D5EE52), UINT64_C(0xD285A3DD23765487), UINT64_C(0x87DFE9B0090A583B), UINT64_C(0xBD73604139793D8B), UINT64_C(0xB5D5F9038A727F45)}}, {{UINT64_C(0x4B0DF3F64E9C32F6), UINT64_C(0xFABFDFEB97275BFD), UINT64_C(0x4066C43332A8DD86), UINT64_C(0x8F3EF11912365957), UINT64_C(0x306EA722F4B18DCC), UINT64_C(0xEEC29CFF69A1B92C), UINT64_C(0x19984A44264F67D5)}}},
+	{{{UINT64_C(0x707B8820F4BDE3EE), UINT64_C(0xEC7BEA712EF24D51), UINT64_C(0x83EA9A517F88CDF6), UINT64_C(0x431A4592B15CECF9), UINT64_C(0x784EBB013E9EEEE4), UINT64_C(0x06CB31F4E15D786C), UINT64_C(0x5603FD84F4FDA12F)}}, {{UINT64_C(0x09F6790E99E1321F), UINT64_C(0x1A4E274C66A74A4C), UINT64_C(0xDA5157A4B70B49A4), UINT64_C(0xD51BE8DC7700BDDA), UINT64_C(0x2761A477E0E54A60), UINT64_C(0x61C72B027EACFAF9), UINT64_C(0x50E2340280B91766)}}, {{UINT64_C(0xF669C2DE01A4D458), UINT64_C(0x5325579CD0721781), UINT64_C(0xF5D7B490BF3D7F84), UINT64_C(0x4F317CD55901D11C), UINT64_C(0x0D12EAA4D430F45F), UINT64_C(0xB41F4FC2F09474B7), UINT64_C(0x82DEB2BCBD520EEA)}}},
+	{{{UINT64_C(0xA4635F40F96EC123), UINT64_C(0x55874A331337A766), UINT64_C(0x5D97E49CE4416B93), UINT64_C(0x39D4197DBB6E1F59), UINT64_C(0x478490E896261472), UINT64_C(0xA1B2A8BBA895ABD4), UINT64_C(0x401FA405E27A45F6)}}, {{UINT64_C(0x8B7354BA50620900), UINT64_C(0xF5FAC443A2938567), UINT64_C(0xBE152D48ABA1053C), UINT64_C(0x02A63D68D67E723B), UINT64_C(0x1EE72BE4EE4B858E), UINT64_C(0x0FBB39AB8D46174E), UINT64_C(0xA0FDFFBCE17DD7AD)}}, {{UINT64_C(0x6E4CBAA476635989), UINT64_C(0xB22CBF543E98D6A0), UINT64_C(0x5EE102141E5E4E0A), UINT64_C(0xAF5E3B1252727E50), UINT64_C(0x49968849417DD7D5), UINT64_C(0x77E83CCCFB22053A), UINT64_C(0x63135607A321B664)}}},
+	{{{UINT64_C(0xEFA1EA3259C46FD8), UINT64_C(0x7ACDECA122E9FB96), UINT64_C(0x787082F9074A2676), UINT64_C(0x77F3BA8E9B004A22), UINT64_C(0xDE90D5AABE389F80), UINT64_C(0x0CEAAB0905856463), UINT64_C(0x71B31E85634AB8F3)}}, {{UINT64_C(0x520DEE65CAF02AED), UINT64_C(0x8A59506886E20AC2), UINT64_C(0x2BB3280665F7886B), UINT64_C(0xADC6B089B9B784DF), UINT64_C(0xE1966C27FD46E443), UINT64_C(0x19265F0FDE703D5D), UINT64_C(0xED946122B5C03404)}}, {{UINT64_C(0xC7BC4C9FE8531670), UINT64_C(0x3AF946CB575DE77B), UINT64_C(0xD7C334F3CF38FB1B), UINT64_C(0xE19132086E233244), UINT64_C(0x3022793B515C6210), UINT64_C(0xE9E20D7E8040AC8B), UINT64_C(0xC4370E2129199DDA)}}},
+	{{{UINT64_C(0xE35A52AD213B0056), UINT64_C(0xAB089FBEB92B909E), UINT64_C(0xFC8A77B42BA18BDA), UINT64_C(0x5FDA906AEC127C4F), UINT64_C(0x547994BBE7C6D298), UINT64_C(0x470C09CDFD625355), UINT64_C(0x31A3971D2E675AA7)}}, {{UINT64_C(0x728D8311CCC8B356), UINT64_C(0x4566ABB0BF801B43), UINT64_C(0x07B67233C1CAD029), UINT64_C(0x82AE3284E2E649CE), UINT64_C(0xD4C1835CE29084D8), UINT64_C(0xD1CD5809D44C7A90), UINT64_C(0x78227149F0528FB4)}}, {{UINT64_C(0x5BF015FC06714013), UINT64_C(0x136A39D99D2FEA77), UINT64_C(0xCBEBD4FC79C0F162), UINT64_C(0xFD17FD20AE33044D), UINT64_C(0x239D38EC745613B9), UINT64_C(0x630D1839BFA5F2C7), UINT64_C(0x9CB48891B12D54CF)}}},
+	{{{UINT64_C(0xF9CA884CFBF5844B), UINT64_C(0xA8899DD05C48524C), UINT64_C(0x9E7666DBFFA1936B), UINT64_C(0xB3EAF48FEF94FDD2), UINT64_C(0x4D51530D56358F81), UINT64_C(0x8B2D14ADF9E59673), UINT64_C(0x2F850464731F6137)}}, {{UINT64_C(0x39D6AE90599DCB83), UINT64_C(0xF958A4F89E061992), UINT64_C(0xC2770764052498F0), UINT64_C(0x2F551C0F2866D99C), UINT64_C(0x0D04C3708064681A), UINT64_C(0x8925B00AC3012C7B), UINT64_C(0x8D57FB354DF89521)}}, {{UINT64_C(0xDB305D3387E426C5), UINT64_C(0x0DE70656CDC8734A), UINT64_C(0x2F02FD927F5C71A5), UINT64_C(0x5BB1CCF42F00875F), UINT64_C(0xED3A321EA3B40719), UINT64_C(0xE5FF71D77684C5BF), UINT64_C(0x3F08AEE76CA3DAC3)}}}
+	},
+	{
+	{{{UINT64_C(0xA1DAEBDE0809C8D7), UINT64_C(0xE5E258C761C0E95E), UINT64_C(0xD51ACDBD9965000A), UINT64_C(0x87C55D566117A85C), UINT64_C(0xDDEDFBEEAFC4424D), UINT64_C(0x98BB50DB4791E9B1), UINT64_C(0xFF3A5A63FCA108DA)}}, {{UINT64_C(0xC9172FB8E5CCBEA1), UINT64_C(0x7CE29FE12A7A9F6C), UINT64_C(0x71DBC61DE4B0B896), UINT64_C(0xA5DEDCDAC1AB60F6), UINT64_C(0x4203A043FE338385), UINT64_C(0xABC6428EBC89647A), UINT64_C(0xC357FF003BA3C8E9)}}, {{UINT64_C(0xBF74DD62CA7D7BC0), UINT64_C(0x9F530F5FEE32F418), UINT64_C(0x60FFD812AC7C4691), UINT64_C(0x4F6D363CD12B44AD), UINT64_C(0xA692031BFF52CDC7), UINT64_C(0xC84049C2CD3808AC), UINT64_C(0x8430C34F70772ADE)}}},
+	{{{UINT64_C(0x7A37061E7DE39EBD), UINT64_C(0xB80AEBB91352BE56), UINT64_C(0x9F0BA2A9A6F6BD6B), UINT64_C(0xE98BBF47039345D9), UINT64_C(0x7A4A2A1CCB215494), UINT64_C(0x1AA1037F67C9F2CB), UINT64_C(0xD29C85C17FFF71F5)}}, {{UINT64_C(0x098D4E4F24D30B87), UINT64_C(0x075C20FDF5593A83), UINT64_C(0xD701019B9F9CF757), UINT64_C(0xE766CA5509142ADC), UINT64_C(0x86A32E418B901D0E), UINT64_C(0x0AD92D7FCAEC6A5D), UINT64_C(0x64E8818D91B26E55)}}, {{UINT64_C(0xC4107AD0C075A0BD), UINT64_C(0x66AA63EA5BE05607), UINT64_C(0xCED5E0CCF56DA4E7), UINT64_C(0xC7C45F6CB1058C15), UINT64_C(0x6D598EDCBC8B7263), UINT64_C(0x33D2A0AD9E3E95EA), UINT64_C(0x2D82C9D41BDDB46D)}}},
+	{{{UINT64_C(0x995CEA0F747E5EE5), UINT64_C(0x36C78CA1D31BE996), UINT64_C(0x0E0D7452DB8465C1), UINT64_C(0xDEDE2AD88CECB389), UINT64_C(0xFF8F17ADE8B8EFE9), UINT64_C(0x227352D66C2018D6), UINT64_C(0xC46593EF2005FDD2)}}, {{UINT64_C(0xF2E5EBE6FF7141E1), UINT64_C(0x91B6C968315E0126), UINT64_C(0x8A600395ADC731CB), UINT64_C(0x54230A61753B54C3), UINT64_C(0x6EB559FECEA61412), UINT64_C(0x16B603865C2323AC), UINT64_C(0x567014E543A57098)}}, {{UINT64_C(0xF143E0E056A029C1), UINT64_C(0x904B5718809A8C79), UINT64_C(0x7A5A96B4FF34D7CE), UINT64_C(0x95A193356E37805A), UINT64_C(0xAE9A626F9711E22D), UINT64_C(0x91BA0C9B803FBED4), UINT64_C(0xB96A2D97F0CE4BC4)}}},
+	{{{UINT64_C(0xFFD46091DDD2B71F), UINT64_C(0xFF3C3999A5D97D24), UINT64_C(0x81C6F0CE2A4F11EC), UINT64_C(0xBCBA70B4AB2687C5), UINT64_C(0x35642093E1A9FB2E), UINT64_C(0x253ECAEE724A6FDE), UINT64_C(0xA08CE3C2B81BDD00)}}, {{UINT64_C(0x50A251238935A2B3), UINT64_C(0xA2198CAE1D4584F7), UINT64_C(0xA6A50E011469E988), UINT64_C(0xA01FCEBD61F7ED35), UINT64_C(0x97631D8867E13EBA), UINT64_C(0x5755CCDA32E7794B), UINT64_C(0x368A97B4564CD1F2)}}, {{UINT64_C(0x39369BC80EEE2E6A), UINT64_C(0xB29684B68B998C0E), UINT64_C(0x2C4F760D04B95FCD), UINT64_C(0x6F0C3968015591C7), UINT64_C(0xC506A986DE14A51E), UINT64_C(0x905D5C667B312C9C), UINT64_C(0xDC678090B7793E8B)}}},
+	{{{UINT64_C(0xDB0D22224AA3397B), UINT64_C(0x8E321DBB3E638066), UINT64_C(0xBAB4DCFE0B5EE0CE), UINT64_C(0xDF188B6409C17C87), UINT64_C(0xABF211B5FA5CC65D), UINT64_C(0xC17B7AB0BA8674C4), UINT64_C(0xFBDF46FA535501DC)}}, {{UINT64_C(0x184775087ACA569E), UINT64_C(0xDE936575F9006A17), UINT64_C(0x497171B5C45A9B94), UINT64_C(0x5489F7AB0FC80068), UINT64_C(0xB58F5C0C89775D96), UINT64_C(0xD4E201A062548775), UINT64_C(0x8CAB349B6D73A505)}}, {{UINT64_C(0x0A404BF86645F536), UINT64_C(0xE87C492C49026E6E), UINT64_C(0x80DC2C0F2F012DFC), UINT64_C(0x2A898C8E81F4265F), UINT64_C(0x6F83136A31A2947D), UINT64_C(0x5B1B99FDCBE128DB), UINT64_C(0x3C90A6ABDBD565AA)}}},
+	{{{UINT64_C(0xFDCA7816339465B0), UINT64_C(0x5C113EF914814498), UINT64_C(0x7F38F19CA1F34625), UINT64_C(0x9354B8F3389FD15B), UINT64_C(0x7FCA840A70DAC208), UINT64_C(0x3FD731DD483A82D0), UINT64_C(0xA6E4EAE1590578F5)}}, {{UINT64_C(0x827BF65AF3C01B77), UINT64_C(0xCFCE27542F3A75C9), UINT64_C(0x84B9E7C5BD947716), UINT64_C(0x4D55725DBA5FE768), UINT64_C(0x64EFAE0EAB39BAE1), UINT64_C(0xAE6627A5293A982F), UINT64_C(0x22A25A1D60F464CF)}}, {{UINT64_C(0x8AC058C09952F417), UINT64_C(0x6FC1A90FD608E41B), UINT64_C(0x0B3D12D8BE6D7530), UINT64_C(0xC9681575FE575696), UINT64_C(0x12921628355FE12D), UINT64_C(0xE880FA60464EBD16), UINT64_C(0x230E28E7FFE2530F)}}},
+	{{{UINT64_C(0xA374CAECC7DD5E16), UINT64_C(0x1BA123678A2CE7BC), UINT64_C(0x4C1697467393257F), UINT64_C(0x8EABA18D4EB9948A), UINT64_C(0x1C898078715D400E), UINT64_C(0xF9627BFF38A6128D), UINT64_C(0xF80B813A39D4CC78)}}, {{UINT64_C(0x648AEEFA031D3AAD), UINT64_C(0x6383504219927DB6), UINT64_C(0x2192A3244FC694CB), UINT64_C(0x5BBFB57B31904777), UINT64_C(0xA134451511CC8607), UINT64_C(0xCF416F6174F0BAE3), UINT64_C(0xB343CC0D37681316)}}, {{UINT64_C(0x6C1E3DF1C8A4717A), UINT64_C(0x4BFE90985CC94900), UINT64_C(0xE152917FBC35E09A), UINT64_C(0x1C3285E14A31C35C), UINT64_C(0xCEBFED9EC57921C7), UINT64_C(0x5082DB6F0DF2DC47), UINT64_C(0xFA380B0EF8A6442C)}}},
+	{{{UINT64_C(0x1A31AC9B9D1824B7), UINT64_C(0x17656282260EC8F6), UINT64_C(0xD110DABBEB9F8C78), UINT64_C(0x247146B806AB5C02), UINT64_C(0x6084100D05D583E2), UINT64_C(0xDBBB4F0A5C9579A1), UINT64_C(0xFE2AF1DE33166716)}}, {{UINT64_C(0xFE26F0364AF8710E), UINT64_C(0x5E9F1CB8C91EEC08), UINT64_C(0x7944A0436BCE61D9), UINT64_C(0xF07B626BFE9050C5), UINT64_C(0x93F9CF12765F45AC), UINT64_C(0x91371A05BFB748DC), UINT64_C(0x51063044BCF78544)}}, {{UINT64_C(0xE3ADE3A6C22851A1), UINT64_C(0x841F4633F0616620), UINT64_C(0x52582F553C498D81), UINT64_C(0xFAC0C4410DD48A49), UINT64_C(0x678FDBDA3F8F5F9B), UINT64_C(0xA68CE0A44A85772E), UINT64_C(0xDF795321F0F085B4)}}}
+	},
+	{
+	{{{UINT64_C(0x7BAC2E294ED0B3B6), UINT64_C(0x06775C5ADE667163), UINT64_C(0x54EB532F289CE114), UINT64_C(0x720421ADAF446E27), UINT64_C(0x836E0B755670911B), UINT64_C(0xDF1042A978274B73), UINT64_C(0x4824E498005BC6CA)}}, {{UINT64_C(0x97B0EECCD937C28A), UINT64_C(0x3FAA1CE061D0C3EE), UINT64_C(0xEA66DCCB076319F3), UINT64_C(0x5D111D989980BF4A), UINT64_C(0xAF67FE4DE02BD075), UINT64_C(0x6FB80B077B2F43FE), UINT64_C(0x227DC9F5793B04E7)}}, {{UINT64_C(0x4A272A85A3371030), UINT64_C(0x8A669AF85CC5C385), UINT64_C(0xDD88CA7EC259145A), UINT64_C(0x707B731F11BF1051), UINT64_C(0x475DDEB1596CE7FE), UINT64_C(0xAE484F25195133E2), UINT64_C(0x465F9EE750F1518A)}}},
+	{{{UINT64_C(0xE7EA24AE514F49BA), UINT64_C(0x85D8BC39EA611436), UINT64_C(0xF8B1319D7FED2784), UINT64_C(0xBFDBC7AFB6EF00CD), UINT64_C(0x5B564CCD270237B4), UINT64_C(0x8595DAFC5A760874), UINT64_C(0x43657AF29F5500AF)}}, {{UINT64_C(0x53300718348470F8), UINT64_C(0x551251F91FD640FD), UINT64_C(0xB3E9C5859C807BE1), UINT64_C(0x981553E57D1A474A), UINT64_C(0x3436F623105D714D), UINT64_C(0xC5BE06B02A620757), UINT64_C(0x5A4B9B7EA47832ED)}}, {{UINT64_C(0x9C6B3AC8EC3F3D83), UINT64_C(0x82662736FF4F0CFB), UINT64_C(0xEDF23DF985A1535D), UINT64_C(0xDE2777BC4B896A51), UINT64_C(0x529BCE834CC81DB7), UINT64_C(0x0A0290AF8A245CD1), UINT64_C(0x1E074CD19CFF7266)}}},
+	{{{UINT64_C(0x8403E0A24E93DBB3), UINT64_C(0x0AD525841DCCADC8), UINT64_C(0x042DDDABC1A818D1), UINT64_C(0xBFEBA8D8207E38A2), UINT64_C(0xEBBA3EC9B57FFFBD), UINT64_C(0xC39CA0B40A9F74EF), UINT64_C(0x69EE9C90267FEB0B)}}, {{UINT64_C(0xC6D402FACBC62919), UINT64_C(0x7D81E9F8FC11CF53), UINT64_C(0x6BB19DE76FA5A7CC), UINT64_C(0x9ADC67C74F2D8769), UINT64_C(0x1D596702DCD4FB7F), UINT64_C(0x6A98E438F6C54062), UINT64_C(0xA7C64DEF1A10365B)}}, {{UINT64_C(0x655A85F53FF61FE0), UINT64_C(0x33FD994EA4FC671E), UINT64_C(0xD326975866AEAE23), UINT64_C(0x48F04992B7D3DA0E), UINT64_C(0x557692C7DA1FBB2F), UINT64_C(0x38274D881B1EB2DE), UINT64_C(0xE687CAD61F55AF6A)}}},
+	{{{UINT64_C(0xB784C5E809A092C7), UINT64_C(0xC99B9E40E0A11C22), UINT64_C(0xECCA8F820A091D06), UINT64_C(0x35794F1645FDC77E), UINT64_C(0xE5B4CE3D6DFE1B8A), UINT64_C(0x5E01082C74C831F7), UINT64_C(0xFDABF30C1F6F7DFD)}}, {{UINT64_C(0x41BFA6017B9248A0), UINT64_C(0xFF65E898D30546B9), UINT64_C(0x874E64878C492207), UINT64_C(0xB53A547EBF22E8DB), UINT64_C(0xEDA5FBD46443FDB1), UINT64_C(0x127A6C7AE1B5B66D), UINT64_C(0xA4636466A7515A59)}}, {{UINT64_C(0x7C5AB906D7EAE232), UINT64_C(0x02EF34EA803F300E), UINT64_C(0x7550F32522E65215), UINT64_C(0x0E3D053D519AA746), UINT64_C(0x8F872800268C99DF), UINT64_C(0xDF24DAE84D6EACFD), UINT64_C(0x3A4D3348A716B215)}}},
+	{{{UINT64_C(0x5822C4E66DE9AB2E), UINT64_C(0xC5EDFAF60C20203C), UINT64_C(0xCA0F19ED2D7BF0D5), UINT64_C(0x6465B979DBC16FE4), UINT64_C(0x4B1A310EF954E8EF), UINT64_C(0xF2C953778636E2D6), UINT64_C(0xF3B4AA4281883BA0)}}, {{UINT64_C(0xC54AC9AF09BE6629), UINT64_C(0xF492BA455E11CA90), UINT64_C(0xBD78400147538856), UINT64_C(0x96BEB9CDC80DB7EA), UINT64_C(0x7FB9D81503B3526D), UINT64_C(0x29A16193CEC33765), UINT64_C(0xD9A93FBD69952A87)}}, {{UINT64_C(0x93701762600A18B5), UINT64_C(0x13A02C2839861F51), UINT64_C(0x57A64BB1CF4640CA), UINT64_C(0x1FCBB69145129E74), UINT64_C(0xE8171837580076D5), UINT64_C(0x7BF899CFFA36BED3), UINT64_C(0x0637137131BD89B2)}}},
+	{{{UINT64_C(0x05FCE017594F47C6), UINT64_C(0xBAF3228DA21E366D), UINT64_C(0xB4A95127CE0B2DC8), UINT64_C(0x7384BB018CC660B6), UINT64_C(0xD7D44D980CF67894), UINT64_C(0x980E4E85E81FC629), UINT64_C(0xA2E636A1CD723E47)}}, {{UINT64_C(0x916B6EBAE77FB207), UINT64_C(0x279C70179614C928), UINT64_C(0x1758CB5569541B4D), UINT64_C(0x227A8E30BB6B36A4), UINT64_C(0x46AB470AD9ECAA22), UINT64_C(0x4601763E2D3D8B67), UINT64_C(0xE19C4EDD3EDAEC4C)}}, {{UINT64_C(0xD722AF8E77CE82D2), UINT64_C(0x21D55BBAFC14CB4D), UINT64_C(0x63E1FC1C8E91C0C4), UINT64_C(0x266B17FCA138D91C), UINT64_C(0xAEEADA544321E80E), UINT64_C(0x18A2015E1700CD93), UINT64_C(0x8A2AB9885FFAE2E2)}}},
+	{{{UINT64_C(0x9F0B43FEC34718C8), UINT64_C(0xD1DB553C407F3349), UINT64_C(0x8E8D1C8272EFB970), UINT64_C(0x763EEC45008C62CA), UINT64_C(0x230F2D71A3E4B79D), UINT64_C(0x0FDAFA368C361FD4), UINT64_C(0xF62C101FCA7BAA09)}}, {{UINT64_C(0x131C9E6C8D2395B3), UINT64_C(0xA465671ED6304C55), UINT64_C(0x3F9986577D933299), UINT64_C(0xDBFC979C286890E6), UINT64_C(0x79D2B51019D92A95), UINT64_C(0x4D88B3D07251CEBD), UINT64_C(0x8B6DB73906F9ADE7)}}, {{UINT64_C(0xFD6B1068ADE5CBA0), UINT64_C(0x288E1EBF94FAF7D4), UINT64_C(0x752F06AFB4574B0E), UINT64_C(0x000B6F98D0E1F224), UINT64_C(0x0088A64D61BD9D8F), UINT64_C(0xB92D8F385608E136), UINT64_C(0x5C40095F366B6782)}}},
+	{{{UINT64_C(0x06C0C43DB7B3D90C), UINT64_C(0xF38E85D154E4304A), UINT64_C(0x3D9459E8ACEEFAF2), UINT64_C(0x2431AFD15E042938), UINT64_C(0x050A900A6565E5E3), UINT64_C(0xAA1718A266719E5F), UINT64_C(0x33D0B249C93DE7CB)}}, {{UINT64_C(0xF93DCBF92D5B6680), UINT64_C(0x1924C47E5EC20006), UINT64_C(0xD0ED46C9711299A5), UINT64_C(0xFA5FCAB6665D9B8C), UINT64_C(0xEB6CFBFC5AED2D63), UINT64_C(0x8169FB76EB76A817), UINT64_C(0x8B93544F11160BB3)}}, {{UINT64_C(0xE9A1F74270418C19), UINT64_C(0x0F013A08C2C7FBED), UINT64_C(0xB8558F43871AE058), UINT64_C(0x8E7BA503BF730B56), UINT64_C(0x3EEC8FE3D963E0AF), UINT64_C(0xDE7B7BDC1B4A34E6), UINT64_C(0x8989C34B263FF638)}}}
+	},
+	{
+	{{{UINT64_C(0xD602ECA52693BDCD), UINT64_C(0x4B3EBBF09232AE01), UINT64_C(0x250DFF0B0A2DE8B4), UINT64_C(0x66E1C530DB82449B), UINT64_C(0x6DCA64C2C40C42B8), UINT64_C(0xB2BB1F046B5FCD22), UINT64_C(0x97E2FAE3FCCB0DCF)}}, {{UINT64_C(0x29DF9290745ED156), UINT64_C(0xF67E224DCB9F6412), UINT64_C(0x9C8A6B2126ABC5F1), UINT64_C(0xC9857D9BA7EED5AE), UINT64_C(0x7F6DE941C640ABED), UINT64_C(0x58D42D725DDF3F9C), UINT64_C(0xBDD10158C6954321)}}, {{UINT64_C(0xA708E4957E9591FE), UINT64_C(0x62FC7B524FF03D09), UINT64_C(0x4687E709704AC068), UINT64_C(0x65F2AA46C3729C54), UINT64_C(0x4DEC890830C5E0CE), UINT64_C(0x864ABFC3D32895C3), UINT64_C(0x91D744883230A507)}}},
+	{{{UINT64_C(0xEEA7DD24E8DF2FBC), UINT64_C(0x21773ADBCFD13D1A), UINT64_C(0xA9A14CF6A32D113B), UINT64_C(0x3DC65DF989A72327), UINT64_C(0x3E3A64D74CE3AEF4), UINT64_C(0x387D84FEC33BEAEC), UINT64_C(0xABA2A0521A21284D)}}, {{UINT64_C(0xD32382C226B85E30), UINT64_C(0x72C44352D85CD2AA), UINT64_C(0xF3653FB0C6001D97), UINT64_C(0xF0300F477ED82635), UINT64_C(0x9DE6CA7E4E3626A6), UINT64_C(0x3DD81C1541412390), UINT64_C(0x9A49FAD7E4BC68B4)}}, {{UINT64_C(0x5DD490B42745541C), UINT64_C(0x05361D511036FB1D), UINT64_C(0x65A837FAA9DEE7AF), UINT64_C(0x02F977A76A3B0B11), UINT64_C(0xE969123599012E98), UINT64_C(0x70B299DB8C8835C9), UINT64_C(0x563558E957CB68C6)}}},
+	{{{UINT64_C(0xB2A3661DF2428F88), UINT64_C(0x9AA9BE48B0256E0D), UINT64_C(0x3DDDAC3CD1871CE7), UINT64_C(0x971871A690AB8712), UINT64_C(0xF7FA34910E9C58FB), UINT64_C(0x01EEA81060E4F031), UINT64_C(0xDB668BA791224EB5)}}, {{UINT64_C(0x5E240BBCB6A705BC), UINT64_C(0x36417E76FBD2D186), UINT64_C(0x6365C96E2CD02251), UINT64_C(0x8A5A01FBE6C52254), UINT64_C(0xA7BB67618BE46A8B), UINT64_C(0x8B3B90DB6792696F), UINT64_C(0x7204ACD7108B9C41)}}, {{UINT64_C(0x5E3FA3AC69F0682A), UINT64_C(0xB960055C32C9999B), UINT64_C(0xA76F72D287CB5F5A), UINT64_C(0xCD51579975DE3DFD), UINT64_C(0x846D2A8869C348E9), UINT64_C(0x8DC8179998D3356F), UINT64_C(0xB4FFE5A2A7DE18DB)}}},
+	{{{UINT64_C(0xD9B5A143B8456B45), UINT64_C(0xA5708A3AB25F53B4), UINT64_C(0x1487D2B112A58E13), UINT64_C(0x33B1E7C9613CA328), UINT64_C(0xADED41E9D5837D82), UINT64_C(0x1893A5CD02F2592B), UINT64_C(0x08795028972E23DC)}}, {{UINT64_C(0xE07003C08CB76261), UINT64_C(0xD78E14BDE9E332A5), UINT64_C(0xE238E814B2872CBB), UINT64_C(0x5067466C5594061D), UINT64_C(0xE64F5E4952AD1264), UINT64_C(0x44B82C7F8D06A8D0), UINT64_C(0xB51BEA8FB1B8285B)}}, {{UINT64_C(0x3398FB44D8FBB048), UINT64_C(0x80488D57763B91E1), UINT64_C(0x524648100A158732), UINT64_C(0xAD6299C86D1B011E), UINT64_C(0xFB639BCA068AC516), UINT64_C(0x3892ED3A9FB84A56), UINT64_C(0x57BDE88310769A73)}}},
+	{{{UINT64_C(0xBCEBAD6853F0DACC), UINT64_C(0xA2DC5C31B8B1CBEB), UINT64_C(0x1D9FAA6746975FA5), UINT64_C(0xD00FC0E42D959653), UINT64_C(0x21C55FE01B343797), UINT64_C(0xFDB247323AA038D8), UINT64_C(0x42613C4F962A8E0B)}}, {{UINT64_C(0x84599A211E134BC0), UINT64_C(0x34B575FA4A147A70), UINT64_C(0xDFCA2B6E719487F7), UINT64_C(0xC8AEABD2D5CED2D6), UINT64_C(0x03F12361DA9FA0FD), UINT64_C(0x23D315859FCF5E6B), UINT64_C(0x3120EF125A5FC8AD)}}, {{UINT64_C(0x3DB78FAA5C438736), UINT64_C(0xD1F05FA23B387562), UINT64_C(0x4128B13E568BB67A), UINT64_C(0x6FDBE1EB089C9A6F), UINT64_C(0x5A7321E09063A710), UINT64_C(0x60A2F20CEF116A66), UINT64_C(0xFA27A7090617A187)}}},
+	{{{UINT64_C(0x0C990EF628E9F638), UINT64_C(0xDDABFDAA240626A6), UINT64_C(0x8872B24A3DE202AB), UINT64_C(0x01EA5880D5D10B7D), UINT64_C(0x97FA81B9D8A01B73), UINT64_C(0x841533471ED84816), UINT64_C(0xEFD73F8292D37C29)}}, {{UINT64_C(0x65DDA76269994BEB), UINT64_C(0x47D5A0377036A4F8), UINT64_C(0x53EDBADA992ECE5B), UINT64_C(0x89264E45912A427E), UINT64_C(0x8C3AF71222646759), UINT64_C(0x3436C6DEDC5FD3B6), UINT64_C(0x1E027AF076B2AD9D)}}, {{UINT64_C(0xFB36DFCE81F23740), UINT64_C(0x7B4ED22AB2D6F0C5), UINT64_C(0x86468998848EA2D3), UINT64_C(0x9102C58814190B66), UINT64_C(0x060249FDDAB5E77E), UINT64_C(0x347CE8C02F0E9458), UINT64_C(0x17901BC2662CDAD1)}}},
+	{{{UINT64_C(0x7BD56FCA14382F4A), UINT64_C(0x9DDB83712A48966B), UINT64_C(0x602875D6B2CF5A4C), UINT64_C(0x6894F3D0A66BE29F), UINT64_C(0x220B3195CA70E426), UINT64_C(0x38D8F82C74D4007D), UINT64_C(0xDCCC5FCD975CBDBA)}}, {{UINT64_C(0x8D03E1610C88B38B), UINT64_C(0x6EB7EB9F9A152E0D), UINT64_C(0x76B6C16A57ECAB64), UINT64_C(0xDBD2E12B161641FC), UINT64_C(0x4DB5C0E26DF9025A), UINT64_C(0x5CB51BFECA7487C7), UINT64_C(0x603DFB6E34A08CED)}}, {{UINT64_C(0x0A562A47828EAFCA), UINT64_C(0xF80799031557A0A1), UINT64_C(0x22CFC134676C3EBE), UINT64_C(0xC6206626A0044369), UINT64_C(0x6A0BA2AB5AE4FB1D), UINT64_C(0x8917C8B67F008FA7), UINT64_C(0x71CAFB2FE9D8A34B)}}},
+	{{{UINT64_C(0xCCC4BE728CB03307), UINT64_C(0xEB17DE34C0EC2741), UINT64_C(0x905E4BE01DB05A74), UINT64_C(0xAD1B18261BFCE0C8), UINT64_C(0xB41E87BBFBB18830), UINT64_C(0x96842D2F1A79CACB), UINT64_C(0xA80E5FB08C83EA86)}}, {{UINT64_C(0x7BE48F1633F1439C), UINT64_C(0x1814C1D4108CD698), UINT64_C(0x1C622D05705C4B75), UINT64_C(0xF46CD053A9BFFD0C), UINT64_C(0xF5E39457C323DE4A), UINT64_C(0x5276B5E5D243F782), UINT64_C(0x31320416161AE381)}}, {{UINT64_C(0xF6B4991906D04246), UINT64_C(0x431CE73B21E0BBDB), UINT64_C(0x5578A38CE7CC8BA7), UINT64_C(0x19BF4D44190AC647), UINT64_C(0x0F33AAFFB5A0EBE8), UINT64_C(0xCD17E9A3E8A9E68B), UINT64_C(0x78D325E61230FFDC)}}}
+	},
+	{
+	{{{UINT64_C(0x25245966177F2542), UINT64_C(0x007B203BE7E8372B), UINT64_C(0x621799C7C9426EE2), UINT64_C(0x9C28C3CEC5641380), UINT64_C(0xA7C7AFC1E3DA5658), UINT64_C(0xA81E9E35208213E8), UINT64_C(0xF43054904435C7DB)}}, {{UINT64_C(0xAB4D26533691DE4A), UINT64_C(0x7F88364408CFB777), UINT64_C(0x525B11CCDFB43EAE), UINT64_C(0x53C60627BC40F44A), UINT64_C(0x581E17E6968E112A), UINT64_C(0xD78781EA774A7F7C), UINT64_C(0xD09E6320B1F5820F)}}, {{UINT64_C(0xED7BEC858B8B1F76), UINT64_C(0x48C159BCDBAC71BA), UINT64_C(0xB5A5DB87CB17B863), UINT64_C(0xCCD634178F02073D), UINT64_C(0xE4EC9FAE13129B27), UINT64_C(0x896B2A8A8284659B), UINT64_C(0x3E0253450395DEC6)}}},
+	{{{UINT64_C(0xF244390BD70AAB15), UINT64_C(0x534941112BC889C3), UINT64_C(0x584DFE6B02894D68), UINT64_C(0xB1BA788771030015), UINT64_C(0x86C2A017C7373CB1), UINT64_C(0xD03883C81FDC53D2), UINT64_C(0x3BFC5E3FBCC6FC2E)}}, {{UINT64_C(0x9ED38AC6FFD6418D), UINT64_C(0x4D66C667E96BFAD8), UINT64_C(0x91129346F4F77EAB), UINT64_C(0xF68C48D5194C04F0), UINT64_C(0x05563CF7F40FD09C), UINT64_C(0x0A8C4ACD562F6F5B), UINT64_C(0x94C1D8336D965D0C)}}, {{UINT64_C(0x9875550CAC4DA25B), UINT64_C(0x42B0B3838D967BB9), UINT64_C(0xECB237597E765FDA), UINT64_C(0x78778F1DFC593773), UINT64_C(0xB55820622D3B904B), UINT64_C(0x8A05DBCB63C3EB36), UINT64_C(0x6558518734851540)}}},
+	{{{UINT64_C(0x9094FC8F0CAA127A), UINT64_C(0xF0D3C762D5DD8036), UINT64_C(0x8EAC508BFDFD11EB), UINT64_C(0xD8B5FF10A98CDF24), UINT64_C(0x29BC65B4DE3D7365), UINT64_C(0xAC28E8EC7C6820DC), UINT64_C(0x7F5A13290372D262)}}, {{UINT64_C(0x2AF3D8A253246658), UINT64_C(0x1697A4BEBD39AC20), UINT64_C(0x8FC022078EDE75CC), UINT64_C(0x25FAE77B5525800C), UINT64_C(0x13957917B6302A80), UINT64_C(0x8806D864BF550180), UINT64_C(0x4E2D87812F06F17C)}}, {{UINT64_C(0xEFAD8F8F0BD00096), UINT64_C(0x4F1108ACD3C5AFEA), UINT64_C(0x2329AE2E2B2C4036), UINT64_C(0x7EE8E139910FEE07), UINT64_C(0x69C6D3AC4FFA0BC2), UINT64_C(0xCB7C6A28DF3D4915), UINT64_C(0x40867FB26E7FE01B)}}},
+	{{{UINT64_C(0x2A8D351183D66E88), UINT64_C(0x0E5FFB861A1A91D0), UINT64_C(0x5496F68C27C2A785), UINT64_C(0xE80800499FD6399A), UINT64_C(0x2FFFD1C2DC52152A), UINT64_C(0x5902AFFE8B2E600E), UINT64_C(0x5C4D2CCE03B175C7)}}, {{UINT64_C(0x878AD7C424F57E78), UINT64_C(0x038A77CF6061736F), UINT64_C(0xB97B952876012F85), UINT64_C(0x5392DFC8FF328451), UINT64_C(0x363A6F50753CC6DD), UINT64_C(0x8EC4471DE89472F1), UINT64_C(0x7030F2F6F45A8602)}}, {{UINT64_C(0xAB053B0730724040), UINT64_C(0x328CD29700D62E27), UINT64_C(0xF9330AAAA4449B44), UINT64_C(0x8C5E298858D25762), UINT64_C(0xE8238DF777109AEC), UINT64_C(0x87DE3038164D2E0A), UINT64_C(0x5D369CAC47B094B9)}}},
+	{{{UINT64_C(0x3666400F59695817), UINT64_C(0x4992EDA0A7DF20EA), UINT64_C(0x336F62855BE51D39), UINT64_C(0xDF28C8682D082C18), UINT64_C(0x8530DC86D030944D), UINT64_C(0x62AE5564A0BDFB5F), UINT64_C(0x1F7EA12B6B9B5195)}}, {{UINT64_C(0x725BD74E0D0A7148), UINT64_C(0xA4986C8247FB91E5), UINT64_C(0xF7C814699ABA547D), UINT64_C(0xB62057B9ED825811), UINT64_C(0xF5E15C15B4434674), UINT64_C(0x97DA1B1100818B4D), UINT64_C(0x2A96B0C4C417FE2A)}}, {{UINT64_C(0x3CAA56B4229BF17C), UINT64_C(0x2EC5137A4C73E60D), UINT64_C(0x2F0269D5C4FA64A6), UINT64_C(0x482D1AD85290DBFD), UINT64_C(0xB6AECCBB2BE5F4F3), UINT64_C(0x9EE939682F11191D), UINT64_C(0xA11865D451667C14)}}},
+	{{{UINT64_C(0x294F75DFC237639D), UINT64_C(0x28F7E5AD6BC1DB70), UINT64_C(0x447989D43E06EB3D), UINT64_C(0xC01A1A6E89F3BB5E), UINT64_C(0x71C315878FC426A2), UINT64_C(0x7784AB1B570533EA), UINT64_C(0xA59E86E77CA8118A)}}, {{UINT64_C(0x42DDB133C36AE155), UINT64_C(0x551949F1D4C0D51B), UINT64_C(0x29181655080829D0), UINT64_C(0xC67181EC20E23BE5), UINT64_C(0xDC47AAD09135047E), UINT64_C(0xD3CE1E2E25A26237), UINT64_C(0x1DE05220D3DB4CA1)}}, {{UINT64_C(0xE9993D5BB3429B0B), UINT64_C(0x7C92A00BB32C9C48), UINT64_C(0x6DF7FF8704AB0B9B), UINT64_C(0x3E406C8306787B92), UINT64_C(0xFC7C924DC013A918), UINT64_C(0x9046669B35D89C50), UINT64_C(0x847FF54E6F70D8DE)}}},
+	{{{UINT64_C(0x43E9A5E19D9FD423), UINT64_C(0xF2DA0C2C3D09801E), UINT64_C(0x1AD12A043C2DD28D), UINT64_C(0x79615AA54EECAB4E), UINT64_C(0x879CA7BB5E97E179), UINT64_C(0xA903CCC92619E57B), UINT64_C(0x5CEF370AA56E93A2)}}, {{UINT64_C(0x5CBEF29FA7F3232C), UINT64_C(0x077A1CF35ED2B7AD), UINT64_C(0xA1D47D35C48933B6), UINT64_C(0x3CE14572E0651487), UINT64_C(0x98C0B17629EDB467), UINT64_C(0x98EBE9A02A5CDC9E), UINT64_C(0x1F772E311D03C0EF)}}, {{UINT64_C(0x1DBCF617C41B86BD), UINT64_C(0x72652C47F004E63A), UINT64_C(0x4C7E2D02B02D9DBF), UINT64_C(0x0DBDA1A3FBD97939), UINT64_C(0xC7E52D2131B5E3CA), UINT64_C(0xE603F49480C68381), UINT64_C(0x10011D4AE46F0008)}}},
+	{{{UINT64_C(0x6FCBDBDCD4608F72), UINT64_C(0x3C21B4352235A13C), UINT64_C(0x2C15C9A6497F64BB), UINT64_C(0x36322D113AF23831), UINT64_C(0x5C6C641775FBBF4B), UINT64_C(0xCD967E81E0E1520A), UINT64_C(0x980B2C63DE387118)}}, {{UINT64_C(0x56FA9DB619AE44A2), UINT64_C(0xF8170281DD2176BC), UINT64_C(0x129B30FD037118A7), UINT64_C(0x8039626D9C485454), UINT64_C(0x50EE4ADA6BB43964), UINT64_C(0xC16D67F5D98C3550), UINT64_C(0xF53CCC318C4D5EC9)}}, {{UINT64_C(0x861240C9937D9931), UINT64_C(0xEAB570581E5BB2FF), UINT64_C(0xEB7CB338799D4630), UINT64_C(0x56C9EFD654B2F33C), UINT64_C(0x863EBFB0E6584BA1), UINT64_C(0x61866291C67CBCB5), UINT64_C(0xDF9063BC8F8E2C88)}}}
+	},
+	{
+	{{{UINT64_C(0xB450AE9423FFB20B), UINT64_C(0x30F1A6C0B426865E), UINT64_C(0xA164274677F7D099), UINT64_C(0xEF976F9A742E0B64), UINT64_C(0x9CFA454749521D18), UINT64_C(0x3A91DC51F50D43AC), UINT64_C(0xF657029AD6F954DA)}}, {{UINT64_C(0xCEFE5F0646B4F99A), UINT64_C(0xE081D92A5D963AD4), UINT64_C(0xD8A858FCB55092E0), UINT64_C(0x60632F0FADC85AB8), UINT64_C(0xF168D7216D8E9B96), UINT64_C(0xA4CC559C3B99E7A4), UINT64_C(0xED6D0BDBA09DC100)}}, {{UINT64_C(0x6189518969607771), UINT64_C(0x214EFA4D133FE93E), UINT64_C(0x34769A335FDF321F), UINT64_C(0x7F41C2B5A4963F4F), UINT64_C(0x8A003345054E12EA), UINT64_C(0xE47DD80F7BB77D12), UINT64_C(0x9860A1B158371C5B)}}},
+	{{{UINT64_C(0x957236D141621BEB), UINT64_C(0x319C1751FD4BC7CA), UINT64_C(0xE9316FAA619D12F5), UINT64_C(0x69FD4D33FC2B15B4), UINT64_C(0xBAC8CED8292D1A90), UINT64_C(0xEFAB51DD998F28C3), UINT64_C(0x2C133303B149EDF2)}}, {{UINT64_C(0x4565237C9F601AC6), UINT64_C(0xA4CFB54DD6507D6A), UINT64_C(0x15F67EA1CE391FB1), UINT64_C(0x8465279B29575331), UINT64_C(0x0AAA993E026456DA), UINT64_C(0x91853B7175E40289), UINT64_C(0x3FDA2030F3E59B68)}}, {{UINT64_C(0x99F7E2682DFA615D), UINT64_C(0x1B88912BBBBB3058), UINT64_C(0x52EFFADDF7E1CEE9), UINT64_C(0x7B535BA7B8A7C73E), UINT64_C(0xC1B0C7AA9BB25153), UINT64_C(0xFA257D7BB441ED58), UINT64_C(0xEDE695A85BDFFC3A)}}},
+	{{{UINT64_C(0x56E99FE12D8C6E0B), UINT64_C(0x7B247CB07FF5341C), UINT64_C(0xA29906C292C7BDF7), UINT64_C(0x6772F02CF52DFD0C), UINT64_C(0x684E1BBD094A6AA2), UINT64_C(0x56B2BEE7C2A826F7), UINT64_C(0x67709E6AD4A312EC)}}, {{UINT64_C(0xAE99C57B2C570263), UINT64_C(0x5ECAEB0100B2FAAF), UINT64_C(0x2CF936980D5D1FF2), UINT64_C(0x544679EDACE35E68), UINT64_C(0xA41074B81E5A82CE), UINT64_C(0x6FA43A00ABB15C76), UINT64_C(0x064281904FFB2DF3)}}, {{UINT64_C(0xE2EE3C179DBE9526), UINT64_C(0x8B6678F207360C47), UINT64_C(0xE3231298F376D147), UINT64_C(0xFE9BCB7583D4ACA4), UINT64_C(0xD79EB6FB999D031F), UINT64_C(0x88417A6313E8A69A), UINT64_C(0x3D569A9AF3AFC7F6)}}},
+	{{{UINT64_C(0xAD68F6BC804BDD28), UINT64_C(0x2E45C311D96B5DC7), UINT64_C(0x0F712DFF0D646ED3), UINT64_C(0x9D483861AF3CDC6E), UINT64_C(0xBE50E1C277D4508E), UINT64_C(0x10275C5DD841B624), UINT64_C(0x451C5C3298DC02C5)}}, {{UINT64_C(0x38F87D479DD34D6B), UINT64_C(0x9E9FDA7F293DD06A), UINT64_C(0x15B2CC575E129B69), UINT64_C(0x8657E69079E5FB22), UINT64_C(0xD09E702A71D28002), UINT64_C(0x160ABFA136777FEC), UINT64_C(0x5DE3427CE65F6485)}}, {{UINT64_C(0x416EDC2B5A4D958D), UINT64_C(0x122CFFE63961871E), UINT64_C(0xDB0A5EBDF7CD0590), UINT64_C(0x157B28D1C893F6C3), UINT64_C(0xCBB988F70A481C9C), UINT64_C(0xA16F8F5085F904DA), UINT64_C(0x70F139C1B5EF7156)}}},
+	{{{UINT64_C(0x1C84E4BF6E8FFF38), UINT64_C(0x72A516F3725B358B), UINT64_C(0x2F217A360371C3B4), UINT64_C(0x90501241E64C0615), UINT64_C(0x1D6AB2DD968E6737), UINT64_C(0xE218A138560488E8), UINT64_C(0x9736CAFE84184DF3)}}, {{UINT64_C(0x88B55A043DBB93A3), UINT64_C(0x4959335088F93010), UINT64_C(0x882C33CEA7A2DB2A), UINT64_C(0xBAD4617948E5D4AB), UINT64_C(0x467B446576114F09), UINT64_C(0xCB23E34C6C2F4416), UINT64_C(0xDDEBF04A02DB8A01)}}, {{UINT64_C(0xD6184D638CA4C4E9), UINT64_C(0xF39487AEC8892A8E), UINT64_C(0x622C86D5464F13B0), UINT64_C(0x88EA106D59D97C5A), UINT64_C(0x38BC79385700C1B2), UINT64_C(0x9FC0571501D9A964), UINT64_C(0xC20DE69BCEC5BF5C)}}},
+	{{{UINT64_C(0xAD36D60CC9BDE8A1), UINT64_C(0x658120FD2F2676E4), UINT64_C(0xBFC2C3EBDCFB7893), UINT64_C(0xCA9F82E5245D0D5D), UINT64_C(0x457D654D9B104C62), UINT64_C(0x66777AE7F10E7387), UINT64_C(0xEFEB16F1D8E582E9)}}, {{UINT64_C(0x724FAF4F170364B5), UINT64_C(0x60850E1AB58D6124), UINT64_C(0x59A09A11BBFE7FED), UINT64_C(0x9722FDB6B360A14A), UINT64_C(0x2F194068BD61D96E), UINT64_C(0x5BF07F73C2BE16A1), UINT64_C(0x1E64665C8BD24E22)}}, {{UINT64_C(0xD0F2732267AC07F4), UINT64_C(0xEF57C09315AFC0C3), UINT64_C(0xED0FF80BE01512C0), UINT64_C(0xED4A9FFCF735288B), UINT64_C(0x7D14903C387A6BBB), UINT64_C(0x24D818B366892CCE), UINT64_C(0x9FAAE2E9BEA3182D)}}},
+	{{{UINT64_C(0xA227A478A3698C75), UINT64_C(0x7F1F778CCD36202A), UINT64_C(0x84EDAE0149C638D8), UINT64_C(0xF82ADFA8A660E5F7), UINT64_C(0xDD61BA1F9DE0D4D2), UINT64_C(0xCFED96245C58F512), UINT64_C(0x6C3A54818B53DD90)}}, {{UINT64_C(0xE7833F70CBDC094F), UINT64_C(0xCF13A5F26F5B1514), UINT64_C(0x86EC4393E7CF51C8), UINT64_C(0xCE78170A14366011), UINT64_C(0x0A0869436881924A), UINT64_C(0xFA9550B62CBBCC88), UINT64_C(0x0BC6AA496B4A2C2D)}}, {{UINT64_C(0xFACE3131DEA06FA2), UINT64_C(0xE4C63BBC6EFB3FDA), UINT64_C(0x6827262E1D125975), UINT64_C(0xAA98FC5673777663), UINT64_C(0xA45B0F641FCEEFD8), UINT64_C(0x3E9B1656430AE45F), UINT64_C(0xD2FEBB1B1A6786C7)}}},
+	{{{UINT64_C(0x1E5157A7E3561AA2), UINT64_C(0xCBB3525C5008645C), UINT64_C(0x89A58B22FEB4ECE7), UINT64_C(0x7C9BDE9C36D0D25C), UINT64_C(0xDDA881F73143131F), UINT64_C(0xAB87C7C8E36A74AF), UINT64_C(0xF07A476C1D4FB299)}}, {{UINT64_C(0x9F1B82056BEBC606), UINT64_C(0x5D5C95A1E5AFCF08), UINT64_C(0x0EB0B1C5BCCFA2B5), UINT64_C(0xE9EFB4838FBC18E0), UINT64_C(0x7252D74C5793A06F), UINT64_C(0x518F03DE4350CAFD), UINT64_C(0x9A719BFC6FD762C7)}}, {{UINT64_C(0x3455C8D90EB35638), UINT64_C(0xF3A72BE259984A2B), UINT64_C(0x35DD71111C754686), UINT64_C(0x88D03272E4D537DE), UINT64_C(0xB1146587A0A06661), UINT64_C(0xFBEFA774EF76879D), UINT64_C(0xBF1FC0574EB5218A)}}}
+	},
+	{
+	{{{UINT64_C(0xE85EE0D832362087), UINT64_C(0xE8657F2C0D70B167), UINT64_C(0x8C4E65B7327895E0), UINT64_C(0xD8FE9CC1EF5B2E89), UINT64_C(0x73E82D1E15222797), UINT64_C(0xC0E9CF62DC4BFE6D), UINT64_C(0x962ACFE937CEDAC7)}}, {{UINT64_C(0x78D763711C1E85C7), UINT64_C(0x4E988F2DBBC28369), UINT64_C(0x3E93F8BADC0558C4), UINT64_C(0x741B55C7ED63EABA), UINT64_C(0xE5E6D1207B807E85), UINT64_C(0xEF9A639D541BD51A), UINT64_C(0x58855F9A0C56A5A0)}}, {{UINT64_C(0xF8B8A1EB091A5C8E), UINT64_C(0x3AB1DA26C8F9DF7D), UINT64_C(0x8D2593FA352041AB), UINT64_C(0xFD52B40ED018C252), UINT64_C(0x52687AADD749D033), UINT64_C(0x3D18E275FD5604E3), UINT64_C(0xFE67A7D80FEA17DD)}}},
+	{{{UINT64_C(0x0D7D88EAA213091D), UINT64_C(0xE077CBDFEE745B6A), UINT64_C(0x0F1E4C826A0124F5), UINT64_C(0x3AEA69AAB04FC139), UINT64_C(0x719D5BB63E1961AC), UINT64_C(0x378374AC7E5C3AFB), UINT64_C(0x78EFCC1C50CA452A)}}, {{UINT64_C(0xD0346E8F0B8ABDEF), UINT64_C(0x6C2227E3DBD88095), UINT64_C(0xA4B29156D3379FFC), UINT64_C(0x63B1B37367D416CF), UINT64_C(0xE1FDF73BAEC3BAAF), UINT64_C(0xAE8F791675280184), UINT64_C(0x7329D4C35D629738)}}, {{UINT64_C(0xDCE40B6D02000A42), UINT64_C(0xF20813252A9BC74C), UINT64_C(0xDC185284611A2422), UINT64_C(0xDEBEC61A3F7464B2), UINT64_C(0x665DCAA0E1363002), UINT64_C(0x761A056741A538FD), UINT64_C(0xA36364989F1E8789)}}},
+	{{{UINT64_C(0x9345D2AC9F568C52), UINT64_C(0x7ED8513481498085), UINT64_C(0x876ECD0C92D8331B), UINT64_C(0x5052736A921327A0), UINT64_C(0x487BC6B837F752D7), UINT64_C(0x1A320A23B4CC7B56), UINT64_C(0x1983937EC0D6656B)}}, {{UINT64_C(0x7F2C3017C08554AB), UINT64_C(0x7F0240AD955366E8), UINT64_C(0xCC5E6D88C4EDF8ED), UINT64_C(0xA2DC978B64A7DB13), UINT64_C(0x20D925D2A25AC91F), UINT64_C(0x04DFEABB57B4016A), UINT64_C(0xC3683ECD7E2E8536)}}, {{UINT64_C(0x7BB2BD17DF614BDC), UINT64_C(0x5D5DE8CAE43BA7C9), UINT64_C(0x53EFDC498F7539DB), UINT64_C(0xBCC3F66D4B2D194F), UINT64_C(0x376F71C1CDA86DBD), UINT64_C(0x1914820A5BD6EB50), UINT64_C(0x3E530A07C86556B5)}}},
+	{{{UINT64_C(0xCFC47150A4C0C6D0), UINT64_C(0xEA4B30AF45EE22AD), UINT64_C(0x7203B539B5ACB022), UINT64_C(0x46FD9B59FBE31857), UINT64_C(0xC90DD1C8DCE5AAA3), UINT64_C(0x113F354049AC0062), UINT64_C(0xD8FBA4D63A31B5CF)}}, {{UINT64_C(0xDA73B54881056A69), UINT64_C(0xA2B93BE6CBCD780B), UINT64_C(0xE8D6F75776EC230B), UINT64_C(0x45C2BE6FBE883CF8), UINT64_C(0x704F1ADE8D64EFE9), UINT64_C(0xCFD17743110E064F), UINT64_C(0xAAC94114C20ABE41)}}, {{UINT64_C(0x6E6F7CD5302F6589), UINT64_C(0x26A9C27B503D8023), UINT64_C(0x31EE33750C7B958B), UINT64_C(0x45794254F6D76AEB), UINT64_C(0x5A0F69594AE502D4), UINT64_C(0x793B6B891C451428), UINT64_C(0xAE66DA41FD0B9917)}}},
+	{{{UINT64_C(0x1391F9192F1C1468), UINT64_C(0xA15D8176E744563E), UINT64_C(0xA42AF6A48B5F90BD), UINT64_C(0x2425C0182A085AED), UINT64_C(0xBA408ABAFBFD38AB), UINT64_C(0x6F318CBD091D2884), UINT64_C(0x454E450817871B35)}}, {{UINT64_C(0xA8E080E818ADA531), UINT64_C(0x8EB1A40F1EB3152B), UINT64_C(0xD45003051049F0C3), UINT64_C(0x454A01E537E4BB3B), UINT64_C(0x32FEEB824A6D0980), UINT64_C(0xDEF37DC934816DE9), UINT64_C(0x8633E0793A05E8CC)}}, {{UINT64_C(0xC30F264F010E8026), UINT64_C(0xEFEBFFA1F7D72217), UINT64_C(0x3DD2E98D34D6B01D), UINT64_C(0x245C1379597BA289), UINT64_C(0x837DD0970FAA3027), UINT64_C(0x8E47A5A3C220DF5A), UINT64_C(0xFB6418D86DA58FB5)}}},
+	{{{UINT64_C(0x89BE94256034675C), UINT64_C(0x1B6B376C01D08DB7), UINT64_C(0x1BFBAC8707EE79AF), UINT64_C(0xFD06DB60633B3EF1), UINT64_C(0xBFCBB13407694F33), UINT64_C(0x860C9DA27C3A2A68), UINT64_C(0xBCA16DED701AC31C)}}, {{UINT64_C(0x8D2B76CFAC59FFD0), UINT64_C(0x0878F9A116554D71), UINT64_C(0xF34E85F86A1DB67F), UINT64_C(0x13343159E313E05A), UINT64_C(0xC3F0BB7ED1A18881), UINT64_C(0xB67E80C732BCDBE4), UINT64_C(0xA4E1C87E74110E73)}}, {{UINT64_C(0xC53F930F0DF73A91), UINT64_C(0xD3359BE623E6C796), UINT64_C(0xBA91CD6B25C289FA), UINT64_C(0x9C521384D060DCDD), UINT64_C(0x0B9B575B7A5B0FAE), UINT64_C(0xFEDD29CA4F61EB13), UINT64_C(0x745D03994A12289B)}}},
+	{{{UINT64_C(0xB7CE1106B5C6770C), UINT64_C(0x5E7F422C70B5C0BC), UINT64_C(0xCCD4AA32A3990819), UINT64_C(0xF720E557A24968D1), UINT64_C(0x0A454BCC818F08EC), UINT64_C(0x3C73B6CD846E5DA1), UINT64_C(0xAEB12C7368D0659D)}}, {{UINT64_C(0x6D2110859CF9FD1B), UINT64_C(0x66ACD2A4801EE2BD), UINT64_C(0xB5AA35376E556E94), UINT64_C(0x2B8A89BA767803B3), UINT64_C(0xCC16726BBF343F84), UINT64_C(0xCAF1725871B03263), UINT64_C(0xEF66AD641B857826)}}, {{UINT64_C(0x46A696CC9FFF3E42), UINT64_C(0x99E99B8ECB7447B4), UINT64_C(0xD3136CFC0116F54E), UINT64_C(0x4C1AB0D937E8811B), UINT64_C(0x38E7A732B70BDDDC), UINT64_C(0xE80FEDD07B4E3CCC), UINT64_C(0x23FF20E51346E080)}}},
+	{{{UINT64_C(0xAFC9F2249638068C), UINT64_C(0x435A96D282C1CCF9), UINT64_C(0xB9D5C971DF30C69B), UINT64_C(0x12A8F37888C943AC), UINT64_C(0x824114C6FFBF98EF), UINT64_C(0x3AD2CD52E8C7FFC1), UINT64_C(0xF1222BC1AFCB59DA)}}, {{UINT64_C(0x3A459E94B0EE334A), UINT64_C(0x401ED4477B842193), UINT64_C(0xD1E33060FB7B0A1E), UINT64_C(0xB3233FDEFDE6E820), UINT64_C(0x4662E93523CECFE9), UINT64_C(0xBA64930775B909EC), UINT64_C(0xCC397E5ADF80F2A5)}}, {{UINT64_C(0xA8710C7643B6F3D4), UINT64_C(0x5C3FB14A74BD9B93), UINT64_C(0xDB8430FAB102B2C5), UINT64_C(0x3DC2805364B6056B), UINT64_C(0x958832A47E8C0F8C), UINT64_C(0x9C2FBC32357114D7), UINT64_C(0x55546F21D8D791D8)}}}
+	},
+	{
+	{{{UINT64_C(0xBF2FE182D4DDC8A8), UINT64_C(0x1E4E88D6E79AC056), UINT64_C(0xC3679FC3FF2D10E4), UINT64_C(0x94E6105132EC7F92), UINT64_C(0xF5A6C6250A3561F0), UINT64_C(0x765EFDD25C5B4553), UINT64_C(0xE3A40A26A1CD7F2B)}}, {{UINT64_C(0xCAB27309B5D821DD), UINT64_C(0x0D4C950FB8DC2C17), UINT64_C(0x550179FEED0158FB), UINT64_C(0x4E095840762C479F), UINT64_C(0x13AD379E66306CF4), UINT64_C(0xE5D5ABB2E4F184B4), UINT64_C(0x8BC12B794B085DD6)}}, {{UINT64_C(0xEF09A108BCB8E83F), UINT64_C(0x5A4F5F90516DE951), UINT64_C(0x080D4BC5EDCA317A), UINT64_C(0xCF9EF3CCA1D79544), UINT64_C(0xA33F214991A1B15E), UINT64_C(0x6B3D358569658DE3), UINT64_C(0xD14B3693C9230A91)}}},
+	{{{UINT64_C(0xA6C0D4CB804B5532), UINT64_C(0x69D17A31525B9940), UINT64_C(0xA18C35010E7DD68C), UINT64_C(0x03F11E73D81F29D2), UINT64_C(0xF876E5510608AE77), UINT64_C(0x9E8CAC960EF55358), UINT64_C(0x89A6FB4ACFC8DC29)}}, {{UINT64_C(0x6E5996A406DC7D4A), UINT64_C(0x202B21E5112E51B9), UINT64_C(0x441F1F95B8C3D09A), UINT64_C(0xD98D4245306AB0FD), UINT64_C(0x387D0ABBDE2834FE), UINT64_C(0xA9BF1B805C15C29C), UINT64_C(0x602F4F8C4E458DF6)}}, {{UINT64_C(0x22E6DCDC7EDF1A73), UINT64_C(0x6931EF3EB03757AB), UINT64_C(0x20D8F449ADE04EF1), UINT64_C(0x561FC482FA13113D), UINT64_C(0xFDC6487EA7C89925), UINT64_C(0xDE35C3F2C3DFD53D), UINT64_C(0xA7FA91C22ACAFB51)}}},
+	{{{UINT64_C(0x27F041486E5A893A), UINT64_C(0x075853B891D89343), UINT64_C(0x62BAD911E000D400), UINT64_C(0xDB9A1B64A4CCDE86), UINT64_C(0x67584E7A6DE34D3E), UINT64_C(0x3DA2F6627BE472D9), UINT64_C(0xA11C946E835AE377)}}, {{UINT64_C(0x8D02E8203650BC15), UINT64_C(0xA3CC2D35936E58B7), UINT64_C(0x049222E9CFBE8F21), UINT64_C(0x438FFF4755AD8311), UINT64_C(0xD803831DB5BF99DE), UINT64_C(0x90636AF2AF42EBBF), UINT64_C(0xC26AE52B7F5A0EE9)}}, {{UINT64_C(0xA70EC4CB41FF8C8C), UINT64_C(0x40111D876347049A), UINT64_C(0xEFE0A89D768FFF56), UINT64_C(0xCD11CA114AC84959), UINT64_C(0x3AD331750C84D438), UINT64_C(0xBBE6233BC9733D08), UINT64_C(0xC32FE04CE9ACADC6)}}},
+	{{{UINT64_C(0x55B5D85B1FA8F846), UINT64_C(0xA3054166489B3B14), UINT64_C(0xFF5645768260DD36), UINT64_C(0x8D6E93E5C6A82354), UINT64_C(0xAA1A406E74D241CD), UINT64_C(0x96AB05F600D9EED9), UINT64_C(0xA26B8B56ECA2A19E)}}, {{UINT64_C(0xEC78321CFD705AEF), UINT64_C(0x9CF1C4FB6B3C0161), UINT64_C(0x0A5067DC32441519), UINT64_C(0xB15143EE33627D0D), UINT64_C(0xEDE85B4F4413490C), UINT64_C(0x4F12E394B16577E0), UINT64_C(0x90F50F5EFAB32D90)}}, {{UINT64_C(0x50004D722D2AED2B), UINT64_C(0xC2867A5B25602663), UINT64_C(0x0F2FB258DA900A6D), UINT64_C(0xCC14EB956B401E29), UINT64_C(0x6A241CF3223B71B8), UINT64_C(0x1E98E19AE91C578B), UINT64_C(0x161ACFBC97DE720B)}}},
+	{{{UINT64_C(0x2B4AA0A16BC2DE96), UINT64_C(0x8A29172596AAA9C1), UINT64_C(0x637E83D512E1E60E), UINT64_C(0x1D2AAE0B77D35C1F), UINT64_C(0x8A58C03738BB0D14), UINT64_C(0x24C01AB0E5258A87), UINT64_C(0xB7D3136F7608876D)}}, {{UINT64_C(0xC0DBC3F8F3F91B7C), UINT64_C(0xAE65E7B4BCAA8722), UINT64_C(0x25B0843286A91DA0), UINT64_C(0x5AE1886C83722742), UINT64_C(0x3EF3A23CF75884CD), UINT64_C(0x5F202F2DD0DAB4E6), UINT64_C(0x951FAC9653916CFE)}}, {{UINT64_C(0x34B416A46A6BB26D), UINT64_C(0x47E25CDB8F7D2631), UINT64_C(0xA2D7DA08085AE43F), UINT64_C(0x8108A0504C64EADB), UINT64_C(0xD9D41EF41DCB6E3E), UINT64_C(0xB728C0A72290AC74), UINT64_C(0x2C5EA06D187237C7)}}},
+	{{{UINT64_C(0x1005E2E8F854FA4E), UINT64_C(0x928DF411F941EDAF), UINT64_C(0xABCE6526CC562A0A), UINT64_C(0x998A32E278FD34E4), UINT64_C(0x76F4C375181D8760), UINT64_C(0xAEEF500E802185DC), UINT64_C(0x7FCB2F84E9B2A5DC)}}, {{UINT64_C(0x539EBA91EF382C06), UINT64_C(0x15192052E8524CAE), UINT64_C(0x4E632B617336EF5C), UINT64_C(0x1D7B8FFDF1546D5B), UINT64_C(0x14F29AB68CA9EDC8), UINT64_C(0x05070DEBBABADB29), UINT64_C(0x775E53BC3B719EE8)}}, {{UINT64_C(0x5768053613F39186), UINT64_C(0xA5511C200AF16964), UINT64_C(0x70374F32FC5B8EBD), UINT64_C(0x198937028A90102A), UINT64_C(0x82B79DF889536480), UINT64_C(0x9B790E31A78F7ED0), UINT64_C(0x2E3C771CE8367D3D)}}},
+	{{{UINT64_C(0x1AA40E294065256A), UINT64_C(0x667C9F113868FB03), UINT64_C(0x475F58AC03AF8059), UINT64_C(0xF01FAAD0432EB3A0), UINT64_C(0x2E9BC57A1122332B), UINT64_C(0xD5A173BC3F8BC813), UINT64_C(0x5471FC6930BF3E27)}}, {{UINT64_C(0x64BA28BC0E6BFF40), UINT64_C(0x5B8F198D57E555E5), UINT64_C(0x681B5113CE8319C6), UINT64_C(0xBDEB9E11B0A5C9D5), UINT64_C(0x1A7BB4250B467588), UINT64_C(0xB938BD12B433F189), UINT64_C(0x0B8C80224DCDA410)}}, {{UINT64_C(0xAE0AC23DA62F7776), UINT64_C(0x20B6AA42DDA3E78D), UINT64_C(0xB29E1CC0C848622E), UINT64_C(0x84FE8591F31251F8), UINT64_C(0xD505BF0F1E528F0C), UINT64_C(0x91ED8AF8AEF129B0), UINT64_C(0x7813A5643A0BE2D4)}}},
+	{{{UINT64_C(0x98C428703CF332D3), UINT64_C(0x8A159D0053CF2A5B), UINT64_C(0xBF8A434E4C620783), UINT64_C(0x421CD9A52E92919F), UINT64_C(0xD6C156158839AD52), UINT64_C(0xAF30517A95C8584E), UINT64_C(0xA223077B70E1C820)}}, {{UINT64_C(0xC7679CFEA2FA4871), UINT64_C(0xC5F154F2A46AC633), UINT64_C(0x5A1DC760306514CD), UINT64_C(0x82D07D19C4FACDA7), UINT64_C(0x64E6B44992710A28), UINT64_C(0xD4B6C454C5B2D558), UINT64_C(0x2855D2872F998144)}}, {{UINT64_C(0xEC5A80898E9A87C6), UINT64_C(0xD026B43B3824B822), UINT64_C(0x67A9FF4DEBD898C0), UINT64_C(0x193120EAFA3EA9AF), UINT64_C(0x979DB47AB74E71A6), UINT64_C(0x432257BD217CC943), UINT64_C(0x3A3799B53045EE82)}}}
+	},
+	{
+	{{{UINT64_C(0xD54071B3EC7B0674), UINT64_C(0x783E800EB14F8794), UINT64_C(0x78590170573AFBE6), UINT64_C(0x1405F32CAFAA4407), UINT64_C(0xA52169B3E2112D2A), UINT64_C(0x68B31842A3663761), UINT64_C(0x5BC322F9BF4734E1)}}, {{UINT64_C(0x6436EF240976C4A0), UINT64_C(0x9E57066F3D6FEA4E), UINT64_C(0x9466E40E954BDA98), UINT64_C(0xABEB9226E36EF5EF), UINT64_C(0xE5F3D5A2CA6BB615), UINT64_C(0x6EFE24897A865571), UINT64_C(0xED7E9CF28A9F77A8)}}, {{UINT64_C(0xF0945D787587302F), UINT64_C(0xB5D895692D4BE1CE), UINT64_C(0x79284C45365354D5), UINT64_C(0x55FCD81A1CD8FD94), UINT64_C(0xA12147423855B817), UINT64_C(0x806F5A16DD1F30D4), UINT64_C(0x4D5E47B0C78DAFE1)}}},
+	{{{UINT64_C(0xE6DF10C971F82C68), UINT64_C(0x8CBF796BA1E3B597), UINT64_C(0x10EAC81AC77ECE71), UINT64_C(0x1BC555EFC8175BB4), UINT64_C(0x9F17524E050CDF9A), UINT64_C(0xF1E61AE26D826B88), UINT64_C(0xB3F6AD5D2E97D96B)}}, {{UINT64_C(0xDE94DCFF9F226487), UINT64_C(0xDD7D60E6356BE03D), UINT64_C(0x9CA90CDA1F93B6A3), UINT64_C(0x31E6BCE5F1BE7217), UINT64_C(0x908D48AF3E05ED31), UINT64_C(0x0E85C61E554FCF50), UINT64_C(0xFE7E35BA2778D33B)}}, {{UINT64_C(0x8A1078698D318156), UINT64_C(0x0BD75206687BFADC), UINT64_C(0xE7C018E2F2C96C0A), UINT64_C(0x5E9B69959F74B55C), UINT64_C(0x51950DDDA3FEEC5F), UINT64_C(0x036BEBE1B8C1BBE1), UINT64_C(0xFB8065D6D929D5DE)}}},
+	{{{UINT64_C(0xC242C503275AC5A9), UINT64_C(0x7023A66A66DDA062), UINT64_C(0x4B4F86A4F4F82CAA), UINT64_C(0x897311AD489D4766), UINT64_C(0x637177B2EC10B108), UINT64_C(0xCCFF09A267B155DD), UINT64_C(0xF07690BFF327B0A5)}}, {{UINT64_C(0xF139162ED2250CD2), UINT64_C(0xD7311426DE08B255), UINT64_C(0xA4C844F227AFD1BD), UINT64_C(0x1157379C78F8A36F), UINT64_C(0xF92CC04ACB267A21), UINT64_C(0x4496CFC69CAE3F05), UINT64_C(0xBF2C5D016EBFEC37)}}, {{UINT64_C(0x7A23EE3CF256C4D1), UINT64_C(0xAEBEFED98E355401), UINT64_C(0x66E998656984DD8C), UINT64_C(0xEBA983387AD60649), UINT64_C(0xD27CF8B05ABE9AA0), UINT64_C(0xC490EDE63CBC41A5), UINT64_C(0x6F3398B3A28EB98C)}}},
+	{{{UINT64_C(0xC6605418BD0518D1), UINT64_C(0xC0193237F809E1CB), UINT64_C(0x15AF0B37A7005286), UINT64_C(0xCAA853C0F1FB0E0B), UINT64_C(0xBD0E6BEBA2FC3B97), UINT64_C(0x5D7C5E6A72F11F48), UINT64_C(0x575E66D26EBF0C8E)}}, {{UINT64_C(0x65099477662EAE3D), UINT64_C(0xBADE53F074F96C9C), UINT64_C(0xFED7D16CFBFDBB81), UINT64_C(0x338C338298B4EFE3), UINT64_C(0xB7347B8EC6DAA112), UINT64_C(0x0FE4B9504A4FDF88), UINT64_C(0x2E7DF4CF30C1C39B)}}, {{UINT64_C(0xBABD6410065F9F94), UINT64_C(0x306B54563A5BD610), UINT64_C(0xD5953FC77F1AC5FB), UINT64_C(0xD4E096A0E769A4F8), UINT64_C(0xD5ABFB5CCA0751FD), UINT64_C(0x8B5AA9F90E0E77DB), UINT64_C(0x958782AC666081E0)}}},
+	{{{UINT64_C(0xDE25380CB2FC1833), UINT64_C(0xF9DBB8E248C18D62), UINT64_C(0x44475091C8F59D82), UINT64_C(0x766B6F745EC2B202), UINT64_C(0xAA9DD7D14D3F3A1F), UINT64_C(0xA342D2956B9C0180), UINT64_C(0x26E910E7139873D0)}}, {{UINT64_C(0xDD2261DC4139E23D), UINT64_C(0x38DD7EDB181B8343), UINT64_C(0x3BFEA3FCF1073B40), UINT64_C(0x964A263E88870EFA), UINT64_C(0x5DC70811F54E98BA), UINT64_C(0xD28F5F86055D3C6E), UINT64_C(0xCA9C27666E419917)}}, {{UINT64_C(0x3894E981F259F09E), UINT64_C(0x9A6B7341A527ACFD), UINT64_C(0x05CABFA22BD9B7B9), UINT64_C(0xA0AFE13985F06882), UINT64_C(0x5DBC2206E7BA3C4B), UINT64_C(0xA8CFA42892AE46E9), UINT64_C(0x29E18E3032DE48E6)}}},
+	{{{UINT64_C(0xA60B2D8BD964EF8C), UINT64_C(0x98CE5A99B8588E2B), UINT64_C(0x56EB259E927B2044), UINT64_C(0xB3F277369FF20C57), UINT64_C(0xD6D472958397CC27), UINT64_C(0xC26580381A94F32D), UINT64_C(0x70FEF15EF2C06FBD)}}, {{UINT64_C(0xB950A619149252CC), UINT64_C(0x0F789EB4A14236B4), UINT64_C(0xEA9C239B1B2158E0), UINT64_C(0x3C3A8E7927ADD366), UINT64_C(0x42FD82CE56EF6176), UINT64_C(0x737E70CAED75ED45), UINT64_C(0xECA0AC2D452D76A8)}}, {{UINT64_C(0x9426213856C1CAEC), UINT64_C(0x8CF58847999C6459), UINT64_C(0xEC31C1A734F33AFC), UINT64_C(0x0ABF50AF17229845), UINT64_C(0x9569B23E0C83F6A0), UINT64_C(0x714A017E7473956D), UINT64_C(0xE26AE532DCAA235E)}}},
+	{{{UINT64_C(0x3B20C07793D082D0), UINT64_C(0x195F6E3CE64C9E9F), UINT64_C(0xDD9F24B3A4DCE75A), UINT64_C(0x886889423A3C305B), UINT64_C(0xC82080F32BE2545C), UINT64_C(0x2974842686B8A463), UINT64_C(0xF50E20D721386644)}}, {{UINT64_C(0xEC265AC523826E74), UINT64_C(0x3ED826FBA57228E8), UINT64_C(0x0FE65A8A1E1DBE6B), UINT64_C(0x3C3952347C7B278F), UINT64_C(0x2060B0F1149A6DF2), UINT64_C(0x0C8C4EF908379956), UINT64_C(0x21AD22A3645F6544)}}, {{UINT64_C(0x3D583C10015D68A3), UINT64_C(0x5DB160A5A3224FDD), UINT64_C(0x16D3FCC4DFEC8E8D), UINT64_C(0xC4B21633EEECC82E), UINT64_C(0xA74A566D8B4791E0), UINT64_C(0xC957210EF26BEDC3), UINT64_C(0x855AC771AFB94186)}}},
+	{{{UINT64_C(0x681E023A6EDD31B2), UINT64_C(0x45C8F76D1459FF86), UINT64_C(0xE88E37970705617B), UINT64_C(0x8922FAAC06120781), UINT64_C(0x92E22756D985C51C), UINT64_C(0x07FD0A03C98E4DF3), UINT64_C(0x626F46A52EA51C89)}}, {{UINT64_C(0x8CF8F766A486C8A2), UINT64_C(0xF0DE8C499A288ED1), UINT64_C(0xF2A0B644D2DC63C4), UINT64_C(0x84A973FD47DDE686), UINT64_C(0x24E786AC809A655F), UINT64_C(0x9E61CE8A05743E71), UINT64_C(0xDF0BA9A31CDD0D69)}}, {{UINT64_C(0x4FB85C3C2224BA06), UINT64_C(0x2BB9E539A9797818), UINT64_C(0xBDDED471A079DCD9), UINT64_C(0xA1458BF1FA31202D), UINT64_C(0x506D5C2B0C843C83), UINT64_C(0x7B4835D21EB893B8), UINT64_C(0xE5E95CC210DA56CB)}}}
+	},
+	{
+	{{{UINT64_C(0x8A76270ADD73E69B), UINT64_C(0x9F0C991120FC67D3), UINT64_C(0xDB40AC7BE5830946), UINT64_C(0xC822FC0893ABA597), UINT64_C(0xFC069551CD2B707B), UINT64_C(0xDEED4F3673244199), UINT64_C(0xCA518E1222878738)}}, {{UINT64_C(0x9072F1BEFD9A9277), UINT64_C(0x347857D4AABE49AE), UINT64_C(0xB4B77F13810D5DB2), UINT64_C(0xE1B4E0042A8B7809), UINT64_C(0xFD03EC77F0B542F4), UINT64_C(0x9E9FECEC65964080), UINT64_C(0x20338D33F16037B4)}}, {{UINT64_C(0x7D572AFC5FDB1437), UINT64_C(0x6DC05EE7D7E1FC3A), UINT64_C(0xECE29741472DD8CE), UINT64_C(0xE9DBF2D5A1949B45), UINT64_C(0x7EFEC5EB829CFD76), UINT64_C(0xC19AE55F789074B7), UINT64_C(0xE4FC4F8839007A44)}}},
+	{{{UINT64_C(0xDB4ADCDAE53554B0), UINT64_C(0x8233FEA4906E04C4), UINT64_C(0x7148D70808BEC774), UINT64_C(0xC03DA38CDE7477C4), UINT64_C(0x03125EE8E9DD9124), UINT64_C(0x67399B0D61616B25), UINT64_C(0x70C4ACD82203B6AE)}}, {{UINT64_C(0x699683916D31DAE8), UINT64_C(0xE4AD34775031AC7F), UINT64_C(0x3A15E19553153988), UINT64_C(0x492BA2DDB58F4115), UINT64_C(0xFB1A90169CB65A2D), UINT64_C(0x0F45E6B1747D7C3E), UINT64_C(0x16E8D1BCFF488D21)}}, {{UINT64_C(0x10B34380A520D8BF), UINT64_C(0x9FC7186FE46F1CDD), UINT64_C(0xDE23471A5DE2E5D4), UINT64_C(0x3A0E07E35975CAD8), UINT64_C(0x438D3476FBD4A264), UINT64_C(0x7FD1BCC5B7980979), UINT64_C(0x41B5C4CF3EB74596)}}},
+	{{{UINT64_C(0x39252ADF89D703DB), UINT64_C(0xE806259AC1DFDFEB), UINT64_C(0x1AFF217FAF6AF115), UINT64_C(0x07C0113D7AAEFD6C), UINT64_C(0x1A5E19B4B1805421), UINT64_C(0x17D43FCC8C61481F), UINT64_C(0x8B04452BB0BBBE7C)}}, {{UINT64_C(0x4CE51E5F54CEBAE1), UINT64_C(0x8A3005341BA56A41), UINT64_C(0x7F49520083A2C7FB), UINT64_C(0xC4BB0074B4663F27), UINT64_C(0xD66A3584D1CE72EE), UINT64_C(0x9E58EB02E07674FD), UINT64_C(0x5BE45D53B961F46B)}}, {{UINT64_C(0x9E560C8CC4D7D3CB), UINT64_C(0x5560A2FFB13E907C), UINT64_C(0x4D2A504B252A418D), UINT64_C(0x574D8E5884E2FD66), UINT64_C(0x2B8BF584C5FBC53E), UINT64_C(0x550726AE08A5DD20), UINT64_C(0xDD58116B3A5135F7)}}},
+	{{{UINT64_C(0x54C7474F31AB2E0B), UINT64_C(0x3EAC2838CCBF4BF4), UINT64_C(0x37602B634392EF3C), UINT64_C(0x9D1AE8E3440E40A1), UINT64_C(0x93A77E221EEEA67E), UINT64_C(0x9F3DA2719A10AFDF), UINT64_C(0x466ECEF32C82563C)}}, {{UINT64_C(0x981061C19F9C432F), UINT64_C(0x5C2CA1332D9B1C7D), UINT64_C(0xB1BCCBBC735F2A42), UINT64_C(0x16BBB5F91429CDF4), UINT64_C(0x8E35955AE477B42A), UINT64_C(0xCD77721CC3153007), UINT64_C(0xAA90D5FE86FA998A)}}, {{UINT64_C(0x380CBF91FAE454E7), UINT64_C(0xEB4205DEAE22F88C), UINT64_C(0x2E77E66B650FC4C3), UINT64_C(0x64CB9AC3A958C9F7), UINT64_C(0x43F4EADD4C9B24F7), UINT64_C(0x9CB6BBAEA3C700F9), UINT64_C(0x11A77FB6E0637653)}}},
+	{{{UINT64_C(0xB8FCFD460721115A), UINT64_C(0xD47E6A7DE3E08269), UINT64_C(0xDCA975E5964A696D), UINT64_C(0xE98B149E6717CD58), UINT64_C(0x4D5B7B80577EA4EB), UINT64_C(0x6F9607F30E316F89), UINT64_C(0x61CA45323DF092BD)}}, {{UINT64_C(0xE232241F99D782F3), UINT64_C(0xBBBD55173B02ABFA), UINT64_C(0x438ABB0ABE0EDD15), UINT64_C(0x79FFA20BB6D3C0AB), UINT64_C(0x6B5D31560A62FB46), UINT64_C(0xBF27C2A0AA6D3092), UINT64_C(0xF7473131A4CB9744)}}, {{UINT64_C(0xC38291CBEB24B896), UINT64_C(0x1860BC69EEDC28EF), UINT64_C(0xDAC4734277B8DC6E), UINT64_C(0xD22A4D7F63C9F5E2), UINT64_C(0xBD4D0D4BF1A5F38F), UINT64_C(0x12D417A84DD9B0F5), UINT64_C(0x6BA8F6695637C813)}}},
+	{{{UINT64_C(0x66A2F6C0DB0535DE), UINT64_C(0x22F0CB02AE1C8551), UINT64_C(0x81BA8AC699E6BB34), UINT64_C(0xFFFABCC7774FEBE2), UINT64_C(0xBA1FE12BA51D9D24), UINT64_C(0x8680313D0AF70B31), UINT64_C(0x90640D32F471604C)}}, {{UINT64_C(0x08A0C4BF45876603), UINT64_C(0x0DE8717F6FA950AB), UINT64_C(0xA88F50F12BB53A71), UINT64_C(0x92645351C500C616), UINT64_C(0xB5D24468930070F9), UINT64_C(0x53FA8B68F65757AA), UINT64_C(0xE8537C1693C55DD5)}}, {{UINT64_C(0xB4058ED4DAF5C189), UINT64_C(0xA8F25EA5338317F8), UINT64_C(0x2DF17AF0AFD8A530), UINT64_C(0xCDD6BEEC6A78395F), UINT64_C(0x73E154A09E660DF0), UINT64_C(0xE132FFC9EF894AAF), UINT64_C(0xE5EA3C77586A4D69)}}},
+	{{{UINT64_C(0xA958E86EB7FC7684), UINT64_C(0x1936DF330F7BFC73), UINT64_C(0xE3575941E337DCC1), UINT64_C(0x33500D8B36D92006), UINT64_C(0x4059483354013270), UINT64_C(0xF2980667851BFA68), UINT64_C(0x538EC8918296B0C8)}}, {{UINT64_C(0xBDA2A2C4FCFF55F9), UINT64_C(0xC59FB260D4D60D20), UINT64_C(0x514FCC3ED576FD9C), UINT64_C(0x2C22B3154ED8C64D), UINT64_C(0xA3694C212C37EBFB), UINT64_C(0x8E08C3A1795ECA67), UINT64_C(0x498F9264E7261F4F)}}, {{UINT64_C(0xE8B1FF8E594C090A), UINT64_C(0x94A249A305A6D9C1), UINT64_C(0xD30F11BCF7EFA894), UINT64_C(0x244A6CEB7D6A2BC1), UINT64_C(0x86AB82037CF46AF2), UINT64_C(0x61A40219A5389495), UINT64_C(0xA16EA77FC9031B77)}}},
+	{{{UINT64_C(0x5FFEA7382C59B3D4), UINT64_C(0x77E8B9942ED3F292), UINT64_C(0xCAB02EE4B00DC8EA), UINT64_C(0x2EF16D0B74A18EC3), UINT64_C(0xA4FFFAB032BBBB75), UINT64_C(0x71A4A3AA30F0639D), UINT64_C(0x8E26B22CAA175BC3)}}, {{UINT64_C(0x4C94E41567E2B62E), UINT64_C(0xF0157CCEEA625A79), UINT64_C(0x0B25B2931D2F4479), UINT64_C(0x768A2807946183D9), UINT64_C(0x7D3FA49DDD1504E9), UINT64_C(0xFC87EDD48699A757), UINT64_C(0x9EDEFD63D7D99C24)}}, {{UINT64_C(0xA39A993270A93C17), UINT64_C(0xFB67AE2407DCC777), UINT64_C(0x77E64F505DB24208), UINT64_C(0xF55D25E8DC36C69D), UINT64_C(0xD902FA5B54EFE11B), UINT64_C(0x25A1B874E0CAE4B8), UINT64_C(0x0F2BD88A7FC71971)}}}
+	},
+	{
+	{{{UINT64_C(0xF40508B340F0B450), UINT64_C(0xA761E0069A5C36F7), UINT64_C(0x48E04D26556642A5), UINT64_C(0x573FE2E70193FD88), UINT64_C(0x0ECFD787D4C108CF), UINT64_C(0x55CCBFF2898505EB), UINT64_C(0xB5AF09F651B99515)}}, {{UINT64_C(0x9A167D72CE1134BE), UINT64_C(0x76FAD6D98BF57C66), UINT64_C(0xA41B3140FB7166DD), UINT64_C(0xE09B75B0EABBF202), UINT64_C(0xFADD9A0C1E300FF0), UINT64_C(0x5188365A80E032B6), UINT64_C(0x8BEF69332110FE80)}}, {{UINT64_C(0x128B44C1603F91E6), UINT64_C(0x76EA2F60B2D7BFB3), UINT64_C(0x282074657BA71D96), UINT64_C(0x738C418527D3A7E3), UINT64_C(0x62D27FF3FE4A46B1), UINT64_C(0x831546363FBD7ACE), UINT64_C(0x23C6E9629F531EA6)}}},
+	{{{UINT64_C(0xAA637802FBEF47D4), UINT64_C(0x5644FAC114B2D16E), UINT64_C(0xDD895B7B3F3AB041), UINT64_C(0xE87195F317AB8D12), UINT64_C(0x67EA71F65F271B7F), UINT64_C(0xBA40CC80583AA3F8), UINT64_C(0x6DB067256E1FCC39)}}, {{UINT64_C(0x464FEAB4E06662A8), UINT64_C(0xB126C857415C74BD), UINT64_C(0xA099EA18032ED732), UINT64_C(0x536FE0A887C8AEA7), UINT64_C(0x8DA27673F6B4A753), UINT64_C(0x40C022B8E54933A9), UINT64_C(0x2DEF1AF9A4C5873E)}}, {{UINT64_C(0x36522F1FAD5F1CF8), UINT64_C(0x578FFC1F37680740), UINT64_C(0x68697375A07C2243), UINT64_C(0xEF89F8CAC2391162), UINT64_C(0xA3B731548DA69BBD), UINT64_C(0xAA3D96CF8288672E), UINT64_C(0x1C9692F0DD4AA639)}}},
+	{{{UINT64_C(0xDA9618B68A8C9AD9), UINT64_C(0x88EFD70B4AA49DEF), UINT64_C(0xD523F4AE8B1385F7), UINT64_C(0x55C5B00487C3542D), UINT64_C(0x360FA7DF57E42C70), UINT64_C(0xE27A75F6D0686303), UINT64_C(0x9B3268E8FF331A33)}}, {{UINT64_C(0x84845CC9623EE0C3), UINT64_C(0xC41D003AF70AC800), UINT64_C(0xB127F06A9F931530), UINT64_C(0x5CA36245A1D7051B), UINT64_C(0x05B0323EE9642CE0), UINT64_C(0xC8912B7B3513C342), UINT64_C(0x6252CC8076CBDB7C)}}, {{UINT64_C(0x90B9A661FEECB1CD), UINT64_C(0x67763161B435B340), UINT64_C(0x4BC9DEF2803144D4), UINT64_C(0x63EA172269A78CBF), UINT64_C(0x00B410580AAA352D), UINT64_C(0x7C7C92F2AAFA673E), UINT64_C(0x38348FD688F0C352)}}},
+	{{{UINT64_C(0x5810E68A07089522), UINT64_C(0x23A436C136158FC6), UINT64_C(0x19D56C490397D747), UINT64_C(0xBF1FF23542692C05), UINT64_C(0xD03C2CBF3769D251), UINT64_C(0x4CEBA825B7F4E689), UINT64_C(0xD6B9BEE2281C2EF0)}}, {{UINT64_C(0xE8C52EF3FE0043AB), UINT64_C(0x8A5A351BF28D1D1B), UINT64_C(0xD6800F277615F0F1), UINT64_C(0xDAB922E231F717F5), UINT64_C(0xE2F2D6AE43F5FB82), UINT64_C(0x477FEC63B98299AE), UINT64_C(0x904AEB1A594A0142)}}, {{UINT64_C(0x3C1836ADD6292166), UINT64_C(0xA6BB340F07C69290), UINT64_C(0x54C831C10DF8E530), UINT64_C(0x3791E12277EBC653), UINT64_C(0x2F436B1D7305262C), UINT64_C(0x7B123D48AB5E2DF0), UINT64_C(0x6A6FC6A0A134DD12)}}},
+	{{{UINT64_C(0xA0AA82174EB39974), UINT64_C(0x0675BC38E6195E6A), UINT64_C(0xFBE7396A3DF8A25C), UINT64_C(0x4A3F0649F324203F), UINT64_C(0x7327A7A6B8FA5A0B), UINT64_C(0x65ECD40AD3F579C8), UINT64_C(0x718D416E4E45C5EB)}}, {{UINT64_C(0xF0029DBF4E2326FD), UINT64_C(0xE6780C63416E7942), UINT64_C(0x1386016D0C7286F4), UINT64_C(0x88D92EA959F0B10A), UINT64_C(0x712C22ECA58A1D97), UINT64_C(0x970447B6B96B9F8D), UINT64_C(0xA2D49EEE6FB95573)}}, {{UINT64_C(0x9A9804AE824340F6), UINT64_C(0x3E44E8D6A4D6D6DD), UINT64_C(0x673D4469CE22DA91), UINT64_C(0xBDDF8580F1F1AF0D), UINT64_C(0xD7F96CA2BE7883FE), UINT64_C(0xFE5F7FFD53F3B154), UINT64_C(0x2B0A3F81297EAE2F)}}},
+	{{{UINT64_C(0xD2249F900BF14A19), UINT64_C(0x64D2D3522DA63A8C), UINT64_C(0x1FA74328A32F3869), UINT64_C(0xC0BB94D3ACF712BC), UINT64_C(0xCE1BC0682498A9BF), UINT64_C(0x476754FCE7F0318E), UINT64_C(0x19CAEC9E4135B7FC)}}, {{UINT64_C(0x896DE68A8C6817BB), UINT64_C(0x818E7121960F3B6D), UINT64_C(0x157455A7D4261F5A), UINT64_C(0xF450D5FF0C0BA519), UINT64_C(0x4934E8649A78B6AC), UINT64_C(0x41A3CFD05DA3198B), UINT64_C(0x264EA4ADB5595109)}}, {{UINT64_C(0x88C4B723C4F96AE9), UINT64_C(0xAC8ADF8F783A00BD), UINT64_C(0x83E9D81EC45EA121), UINT64_C(0xC64EC60F7EDBCF71), UINT64_C(0xACD98483C2036A7F), UINT64_C(0x9994E4AD46554BF5), UINT64_C(0x058F60A8912C7858)}}},
+	{{{UINT64_C(0x66CFEE91C46E5A31), UINT64_C(0x849D47B6806FFF73), UINT64_C(0xC66CC7DB14BE45DF), UINT64_C(0x4A5F47693C5E22BA), UINT64_C(0x815383BE367F3F28), UINT64_C(0xA9F0B8072B0B4E00), UINT64_C(0x9887CD5C7EADD639)}}, {{UINT64_C(0xB97DD8F05B659511), UINT64_C(0x134515C796DD2E1C), UINT64_C(0x939C60E5EDB0C0D3), UINT64_C(0x8BF15DE12025DF06), UINT64_C(0x54804C7FB56314C0), UINT64_C(0x3337FBB5D3ED03C1), UINT64_C(0xFC20B40477E98341)}}, {{UINT64_C(0x3C69C8D1F5A266E4), UINT64_C(0x09A25DDB170E7CAA), UINT64_C(0xB092159431C74889), UINT64_C(0xF514EC252467E6C2), UINT64_C(0x73034BA5BF61EE69), UINT64_C(0x1734E84AA7F10C6D), UINT64_C(0x962891237670F5CE)}}},
+	{{{UINT64_C(0x707F968805DB0EF9), UINT64_C(0xE13305562DEE9C2A), UINT64_C(0x37FC4A071E5BC7DA), UINT64_C(0x74EA492BA8CDD122), UINT64_C(0xF94381EE526D565E), UINT64_C(0xB8A4E9F5C546A17C), UINT64_C(0xBB642F340288EF6A)}}, {{UINT64_C(0xF464E59215DF5C2D), UINT64_C(0xE46C43696E3BB906), UINT64_C(0x506B8A73A841A74A), UINT64_C(0xAA1BE548E264883C), UINT64_C(0x5395E81B4A9542E1), UINT64_C(0x42CFAEACA6CE8938), UINT64_C(0xED8077B806E0F956)}}, {{UINT64_C(0x80846C14A89B0BD2), UINT64_C(0xD9049937E0601F84), UINT64_C(0xC52C231FB602F3C8), UINT64_C(0x44A8E02ADEF9A74D), UINT64_C(0xC51572C54CD2EB18), UINT64_C(0x0F164CA4E3CED5A1), UINT64_C(0x152078A0E2A93D31)}}}
+	},
+	{
+	{{{UINT64_C(0xFD1C776C47E13597), UINT64_C(0x61E80EC8B289E584), UINT64_C(0xCD835B0BB6043B8B), UINT64_C(0xC39FEF9ADCC17489), UINT64_C(0xB34D133E17493E6A), UINT64_C(0xBCD0071CB6F9B44E), UINT64_C(0xE6CF543D20EFF2FE)}}, {{UINT64_C(0x12F265CAD0A004C7), UINT64_C(0xEA539B06C9DD35CC), UINT64_C(0x993434769F985CB4), UINT64_C(0x08D939C429160A20), UINT64_C(0x77C6711E2FDF8DD1), UINT64_C(0x95790CD7A2CDEFA1), UINT64_C(0x38DA3D777F664216)}}, {{UINT64_C(0x1917FB21C5BBC12B), UINT64_C(0x55170E926E5A8FB0), UINT64_C(0x6C96E9A79860B834), UINT64_C(0x8DCCB9B87C909131), UINT64_C(0x561E1FF39812A351), UINT64_C(0xB46333D3DB3F9E6B), UINT64_C(0xCE8EFC60C09C748D)}}},
+	{{{UINT64_C(0xC39BFCFD96307B74), UINT64_C(0xE28EC26A36DBFDAB), UINT64_C(0x3D13879341BE04AB), UINT64_C(0xC3D1949CDB20B527), UINT64_C(0xAFEB8B3A41F8D229), UINT64_C(0xC60DFED565D0F1E0), UINT64_C(0x6930BB58B43B2C29)}}, {{UINT64_C(0x891D76527FC0718F), UINT64_C(0x32CCDB981431F671), UINT64_C(0xBD35E50C62F6451F), UINT64_C(0x1C1CECE770A66268), UINT64_C(0x0A8F96F4A4172564), UINT64_C(0x319E9F06EE987F13), UINT64_C(0x215B73867BF9B272)}}, {{UINT64_C(0x59264C91BEF2BD5E), UINT64_C(0xB0FF786F26DA908A), UINT64_C(0xE83501A38290FB12), UINT64_C(0xE1C507FF299FD38E), UINT64_C(0x602A4D82C22583CB), UINT64_C(0xDEBEF0E9EC1356F9), UINT64_C(0x06011016AED12666)}}},
+	{{{UINT64_C(0xF98D1BEC20AADDD7), UINT64_C(0x1026FB8B95BB8BE4), UINT64_C(0xD5860CEAC193EFDE), UINT64_C(0xA44280D3A5EDEA79), UINT64_C(0x67038F47984ADBAE), UINT64_C(0x4C107EC30DEACE8B), UINT64_C(0xBDC5CF7000776B91)}}, {{UINT64_C(0x6EB6FD7D1A206A13), UINT64_C(0xCAAA9941EBADAE98), UINT64_C(0xF108B476C27A81F1), UINT64_C(0x84AEA2D06967C123), UINT64_C(0x319144DDAC6F1152), UINT64_C(0x4D3EAC8EC6FC9BB4), UINT64_C(0xFE4B0B8BF374201A)}}, {{UINT64_C(0x7F768366AA00E8D4), UINT64_C(0x7BD435B43856D8B9), UINT64_C(0x8F3C9B862A24A37C), UINT64_C(0x4CB5D1A3A4073315), UINT64_C(0x7E9082D354B256EB), UINT64_C(0xD6461768E2A09173), UINT64_C(0xB4CB05993607BBF8)}}},
+	{{{UINT64_C(0x0D5D9A4A1EC0AC6F), UINT64_C(0xFAC384B79F2FC7C8), UINT64_C(0x23B3F264222F7C14), UINT64_C(0xDEA956BBDD9E039C), UINT64_C(0xCBAEBE09DC4A84AB), UINT64_C(0xA9EA8E0EAF82370D), UINT64_C(0x4CFB60AAEE375F79)}}, {{UINT64_C(0x5B6A10DBF9106827), UINT64_C(0xB083A3BA5CF43F30), UINT64_C(0x3117B1481B885C1B), UINT64_C(0x2DDD67912F52380B), UINT64_C(0x23E63BACE3006612), UINT64_C(0x5F499ECB88D44F89), UINT64_C(0xFDC780A3BAC1465C)}}, {{UINT64_C(0xE4532953911B70EE), UINT64_C(0x32B6689DD6574E6D), UINT64_C(0xDC80EC7306D1D843), UINT64_C(0x7547ED6AA333BFE4), UINT64_C(0xB4981203B1A9211B), UINT64_C(0xC907F356FB457AFB), UINT64_C(0x6B629AA244873678)}}},
+	{{{UINT64_C(0x8434B70AE7BA1F71), UINT64_C(0x7313909182945BD1), UINT64_C(0x164E913B39778E70), UINT64_C(0xD4971F39DEEFC5E6), UINT64_C(0x3398DAFC8BBB55BE), UINT64_C(0x391BFA6ADF0F7D52), UINT64_C(0xFD6F90AE31952282)}}, {{UINT64_C(0x3060FDF77F29BBC9), UINT64_C(0x0D3FEFF9ED8AAA40), UINT64_C(0xED65CD978E045F8C), UINT64_C(0xF3CFD4C8E0502C3E), UINT64_C(0xE44A6390053104D8), UINT64_C(0x3F4319EEAB3FAB1B), UINT64_C(0x01970E8451D797E8)}}, {{UINT64_C(0x51CF54E33ABF638D), UINT64_C(0xCA88FFEC8B897D76), UINT64_C(0x62F16DD4EDBF930B), UINT64_C(0x9B65C07126E7BDEB), UINT64_C(0xB8DA084BACFE54B6), UINT64_C(0x5FB3454AD2F2FE1F), UINT64_C(0x6FE4D6DFA17E1461)}}},
+	{{{UINT64_C(0x9DBC972F83180F4B), UINT64_C(0x149FAC053C061777), UINT64_C(0xCB626389392C57FA), UINT64_C(0x8CE12882DC4699BB), UINT64_C(0x9A7AF1A4DC0AE8B2), UINT64_C(0xD719F64E1A74DCA1), UINT64_C(0xBB50201AFFDD5DD3)}}, {{UINT64_C(0x0056F73107AC30E9), UINT64_C(0x38A365CC9C718789), UINT64_C(0xC5BB1383F5866273), UINT64_C(0x01BCD4D5122ADEFA), UINT64_C(0x985B8AA3A097DE20), UINT64_C(0x80F1D6821F9B6ED3), UINT64_C(0xCB42028DDA9F9886)}}, {{UINT64_C(0x25B5DD2F1C9E7C3A), UINT64_C(0xAFE58191E175FEB4), UINT64_C(0xFB08218EE4E3FC82), UINT64_C(0xA8638DB698032DE4), UINT64_C(0x21CC5D13B154B003), UINT64_C(0x984CE2A342366379), UINT64_C(0xBD179F6FC9D8020B)}}},
+	{{{UINT64_C(0xA1CDB07080EC2DB3), UINT64_C(0xDA07E28C8333DAD1), UINT64_C(0x3B89872093E32DE2), UINT64_C(0x1F552B8D73170738), UINT64_C(0xA9851CF70AAD1787), UINT64_C(0x4A16E5C4F5E1846D), UINT64_C(0x84299960F8348AF9)}}, {{UINT64_C(0x524BF3F6898DB78A), UINT64_C(0x72DCAD77FA83D19B), UINT64_C(0x321BE069767728B9), UINT64_C(0x6DD344A67DFA35A5), UINT64_C(0x292AD4E2A8988184), UINT64_C(0x75217BC68BF1E550), UINT64_C(0xDD837C4893BE1580)}}, {{UINT64_C(0xBBD57EC56B31B2AE), UINT64_C(0xE3F44E87CF708BC0), UINT64_C(0x020512E93EDCF842), UINT64_C(0x916F658E48BE6960), UINT64_C(0xE1F9F133061DD8A3), UINT64_C(0xF16FDB50674D4004), UINT64_C(0x13AB51D6478FB8B0)}}},
+	{{{UINT64_C(0xF109C931ED4FAB5B), UINT64_C(0x38A6B2DCF08B77A0), UINT64_C(0xAE73AF7DAC5C0E0D), UINT64_C(0x3F5AED28A5570B00), UINT64_C(0xA6F5251E92C7C19D), UINT64_C(0x43CD6CDF7275575F), UINT64_C(0xD9D3D8E9A01287B8)}}, {{UINT64_C(0xB0F94E356B3C370B), UINT64_C(0x6057C62B99FFE464), UINT64_C(0x4B18747792650A98), UINT64_C(0xD0B07078EAA67D5C), UINT64_C(0x36D7A03699BA1BA4), UINT64_C(0x16C34EDD32A3DBF6), UINT64_C(0x6CE2495A45CB5D1A)}}, {{UINT64_C(0x81502E0E67BC45C1), UINT64_C(0x9407C47C4C7FD7AF), UINT64_C(0xC3BD8C1841ABF37B), UINT64_C(0xE2FB6F28A6441085), UINT64_C(0xD1FC99F0A18EBE1F), UINT64_C(0xD1304CC9713AA49A), UINT64_C(0x34A5279B99F2AC34)}}}
+	},
+	{
+	{{{UINT64_C(0x2AD7C4D9AA684441), UINT64_C(0x14C4CE62AF630CD4), UINT64_C(0xF65B24CD2669B430), UINT64_C(0x9576FA19CE7E7116), UINT64_C(0x5AC9DD8CA61847CE), UINT64_C(0x09096B42E1DB8258), UINT64_C(0x2B2C83E384AB8B30)}}, {{UINT64_C(0x40E171FFCB4E9A6E), UINT64_C(0xD6169DE42187374B), UINT64_C(0x3E8CBC5701F9FDB1), UINT64_C(0xA1E400BF211E122A), UINT64_C(0x4700F3715904E8C1), UINT64_C(0x775D13DF8C280297), UINT64_C(0xCFAAD4A61AC2DB41)}}, {{UINT64_C(0x744AF2DAD8D2FB5B), UINT64_C(0x360AE108A43B6256), UINT64_C(0x4C47375A52F73603), UINT64_C(0x048073EC5CEAF320), UINT64_C(0x94A1618854952383), UINT64_C(0xED1C77B14D130C67), UINT64_C(0x261DD2CF1DBB6423)}}},
+	{{{UINT64_C(0x536341B4D7DC0F49), UINT64_C(0xE91EAFF6C2DF471A), UINT64_C(0x3B7B6220EC795FB8), UINT64_C(0x2D3749384C7A4DFC), UINT64_C(0xC653A60F2E9F33FF), UINT64_C(0x168AC2EFEF7338F8), UINT64_C(0x046146FCE408EEC1)}}, {{UINT64_C(0x709B39AC0308B0C3), UINT64_C(0xAACFE032D6136B85), UINT64_C(0x5A41DDEE07D8DFC4), UINT64_C(0x27C3D7260A82ACBD), UINT64_C(0xD60B926CE9BE0DED), UINT64_C(0x2F7F45806C1ECE51), UINT64_C(0xE367C6D1DEC59CFA)}}, {{UINT64_C(0xBBE6397A7D099DEB), UINT64_C(0xDD010BC8F02B5526), UINT64_C(0xBC044C1F482F245C), UINT64_C(0x4F17C38B2A5904CF), UINT64_C(0xFBED07023B5F8E93), UINT64_C(0xC179359E8EE0AE82), UINT64_C(0x0ABE7E908C78F2ED)}}},
+	{{{UINT64_C(0x0564511B6DA2547B), UINT64_C(0x23AB76A349C07614), UINT64_C(0x4D7C4837D6626012), UINT64_C(0x4DA756A00E243C1F), UINT64_C(0x0DFD72E7E9DC9C8B), UINT64_C(0xB130827B4210C743), UINT64_C(0x7A9C044CF11CBD0E)}}, {{UINT64_C(0xC62C08FF6E8DD150), UINT64_C(0x13E818B738C2932F), UINT64_C(0xA40A1707D5651045), UINT64_C(0x101BAA8F0CA5CFFA), UINT64_C(0xFAFB72B79ED48634), UINT64_C(0x051E5654020FFB20), UINT64_C(0xE3B33174E17F231A)}}, {{UINT64_C(0x5E55484D00DD18B1), UINT64_C(0xECBA1BBFEA5D33B5), UINT64_C(0x8A9F9A241062BF95), UINT64_C(0x299C78CCF69CE2D0), UINT64_C(0x888A7F460C762339), UINT64_C(0xFA7A75F19F6DF0CB), UINT64_C(0x1F9E3D259789CC7E)}}},
+	{{{UINT64_C(0x9705910484DE9428), UINT64_C(0xA4D1620542A5ABDF), UINT64_C(0xD65BB9AA0EDEDA16), UINT64_C(0x5B8DFAF9A93F71C6), UINT64_C(0x4E557CA8EE88BE13), UINT64_C(0x896AA26781AD1D9F), UINT64_C(0xD3FBE316C6C49F4C)}}, {{UINT64_C(0x1E088D8522C34C3D), UINT64_C(0x450DBB6D645BADFF), UINT64_C(0x0AB1F3E3080B8385), UINT64_C(0xEAC0657D5CCC54C5), UINT64_C(0x596B7EF2C04E07E6), UINT64_C(0xECA8A73A81E9A7BA), UINT64_C(0xA0B804C8284C35CC)}}, {{UINT64_C(0xA4F0DD36A6477DF0), UINT64_C(0xA9398392D7B364A9), UINT64_C(0xBF4A6EE6ABF59D87), UINT64_C(0x518C577DC87184AC), UINT64_C(0x1A4027050E915CB1), UINT64_C(0x8312DC8EC876DDD2), UINT64_C(0x9BCFFDDDEFA7791B)}}},
+	{{{UINT64_C(0xA87C55956F17A6A2), UINT64_C(0x6EAAB451D81789CF), UINT64_C(0xE96562DF414E8250), UINT64_C(0x30E0297E6EF40FBA), UINT64_C(0x26E73C46FA63EA28), UINT64_C(0x0641CAAC8BCEF5DF), UINT64_C(0xC89ED8F64371F3E0)}}, {{UINT64_C(0x50D22B08E793202E), UINT64_C(0xDDB439A9033875CB), UINT64_C(0xACF7B5E64EEC0F85), UINT64_C(0x1B9B802DDCE45A77), UINT64_C(0xE7CBD559AC39D1E7), UINT64_C(0xEC1F8809EEB5AFDF), UINT64_C(0x8C0E38A4889B8C17)}}, {{UINT64_C(0xF5D977B3C7E224A7), UINT64_C(0xD854AE2BCDBF9A38), UINT64_C(0xE0E32F21F7FE8580), UINT64_C(0x92B7B9650C4EEF40), UINT64_C(0xE5EF33FFDDF67EEE), UINT64_C(0x9938C6EDA3A8F291), UINT64_C(0x5112C7CB78DD018F)}}},
+	{{{UINT64_C(0x5047EABFE17089DA), UINT64_C(0x15312D18466EC90C), UINT64_C(0xC39B39A511AA4586), UINT64_C(0xAF1B5282EBB3D348), UINT64_C(0xBE7A9DADBAA0AC4D), UINT64_C(0x92BA8554D86EEA26), UINT64_C(0x7FCBDB6D5F2EF589)}}, {{UINT64_C(0x2D320E79B56863E7), UINT64_C(0xCBC6EB9D0C0A7DCE), UINT64_C(0xAC1F81B9F4031784), UINT64_C(0xF9D8749768823EE7), UINT64_C(0x7B657F9B6EA6B6F4), UINT64_C(0x357470FEF2A783C6), UINT64_C(0xF38028F59596E237)}}, {{UINT64_C(0x888603756819DF60), UINT64_C(0x1BE3D4A6A6B8F385), UINT64_C(0x9FE3D0148B1091E8), UINT64_C(0xFA6D2ECD8D8292AC), UINT64_C(0x97265AC729BC1D83), UINT64_C(0xC28E9EACCD5772B3), UINT64_C(0x77CEC34EA1ED18BD)}}},
+	{{{UINT64_C(0xD59EA57AB7E82886), UINT64_C(0xA24F18221C548C44), UINT64_C(0xD025E5BF8E6CF314), UINT64_C(0xE533446870FF18EF), UINT64_C(0x6D57404FB708D03D), UINT64_C(0x2327155E36B02B20), UINT64_C(0xCC7604AB88DDD9B9)}}, {{UINT64_C(0xFC3DF51524A746F0), UINT64_C(0xC32C8FDEBD8168E3), UINT64_C(0x48743EFFC550C7F8), UINT64_C(0x9B88E18B1DBBC171), UINT64_C(0x11C750027CD48AF2), UINT64_C(0x7F9DB1832BE38DCA), UINT64_C(0x22923E02B0601971)}}, {{UINT64_C(0x99413B8C53AC4D8B), UINT64_C(0x345068D4E710B390), UINT64_C(0xEF7B1A67FB32BF94), UINT64_C(0x0ED52EC44BA8FE18), UINT64_C(0xEFA394240BF5A775), UINT64_C(0xE89390E27AD056BA), UINT64_C(0x5B58FC378C422DD4)}}},
+	{{{UINT64_C(0x3AD4E06F5C1CC4D3), UINT64_C(0x28D00FA32E32B4F0), UINT64_C(0x39DAD1956B9AFC46), UINT64_C(0x08A0041695C39CE9), UINT64_C(0xF266FB01AA39D41E), UINT64_C(0x033D545AF340FD7F), UINT64_C(0x2F655428E36584C6)}}, {{UINT64_C(0x7414CFB1F8DFF960), UINT64_C(0x2D0F7236FFCDA814), UINT64_C(0x7F6094C6A6788D45), UINT64_C(0xA07EEA742AD4A527), UINT64_C(0xC38D6229AA369D65), UINT64_C(0x90E09886397627C6), UINT64_C(0x361CA6EB38B142E5)}}, {{UINT64_C(0x94F493A6535CAB4D), UINT64_C(0x434BD8B80BCCDF58), UINT64_C(0x091B650783534D7D), UINT64_C(0xEE3FF619A2A3407A), UINT64_C(0x40961CB8FD2EF254), UINT64_C(0xF16F32AF404DB2DA), UINT64_C(0xE163A7758D7AACA5)}}}
+	},
+	{
+	{{{UINT64_C(0xAD6803413DFEB7EF), UINT64_C(0x1606B669D71D3F4F), UINT64_C(0xE6C5B75DF402AC94), UINT64_C(0x392AB236E5D17768), UINT64_C(0xB31CE2E0E0131BCB), UINT64_C(0xC020D9E98C357F1F), UINT64_C(0x33B23C0F28657BA2)}}, {{UINT64_C(0xB3ED14E739CF7879), UINT64_C(0x4E0410D4867B4357), UINT64_C(0xA5F8A7127CEA331E), UINT64_C(0xA025B987C60D25FA), UINT64_C(0x1D666F2A0AFEF840), UINT64_C(0xA0B97AC361987808), UINT64_C(0xE0BB919134DC9F0F)}}, {{UINT64_C(0x4E5266148504B2A0), UINT64_C(0xBA465560C59B034B), UINT64_C(0xA205FDB7EFFE0F46), UINT64_C(0xC2CCF70337C2908C), UINT64_C(0xBFA24B4CC4CD57A7), UINT64_C(0x4A65F95FE28FDB18), UINT64_C(0xF59E0CBAE21ED9B5)}}},
+	{{{UINT64_C(0x37C1D2461CC32EAE), UINT64_C(0x5F020FDBFDF0F79A), UINT64_C(0x72CDDF70F2BC21C9), UINT64_C(0x784393427D68BEC3), UINT64_C(0x6784843A6C44F781), UINT64_C(0xDF77A07F8959A3D5), UINT64_C(0xF45819873DB4CABA)}}, {{UINT64_C(0xE7E8EAAF3D54F805), UINT64_C(0x535C2F529D1B84C1), UINT64_C(0x59B5F5404E32E21E), UINT64_C(0x4B00466FABAC85C1), UINT64_C(0xAABC9418734E8E59), UINT64_C(0x4E370BE407C640FC), UINT64_C(0xCCD57885B2E58D3B)}}, {{UINT64_C(0xA3D590F2C5956788), UINT64_C(0xC84FF9211D1959BF), UINT64_C(0x45869040DFFDAD56), UINT64_C(0x3C2B11B98DE8C64F), UINT64_C(0xFC9B7DDD4BAE7679), UINT64_C(0xFE86E753D14B74B5), UINT64_C(0xE267591736CE7688)}}},
+	{{{UINT64_C(0x693EE615E88B74A8), UINT64_C(0xCE36D7D6608EAB4E), UINT64_C(0xAEBABB27CF9F1E4A), UINT64_C(0xBF6D162F282359E7), UINT64_C(0x6F3F1A290A96E509), UINT64_C(0xD6C4F1314A58AD90), UINT64_C(0xEECFFE4218431DE7)}}, {{UINT64_C(0x44A66E0E9E2CFED9), UINT64_C(0xC5D7B0887EC71F05), UINT64_C(0xD4392DD34E36BA04), UINT64_C(0xDC8AA925094DAA5E), UINT64_C(0xF91B979786CDA83A), UINT64_C(0x24DCBFDDC5D61ADE), UINT64_C(0x5CC27ED0B70C1431)}}, {{UINT64_C(0x71571C263D08E082), UINT64_C(0x244D4CD40BB8D055), UINT64_C(0x3EEF9F6A588AAC30), UINT64_C(0xC5B0C488C82A10EB), UINT64_C(0x2E8EB911E18AF1BE), UINT64_C(0x4CD7DC5D22BFF1CA), UINT64_C(0x9814DBC3D3A5D60D)}}},
+	{{{UINT64_C(0x30386DBC00EAC2D8), UINT64_C(0x9F04A716ECBC50CA), UINT64_C(0xFEACEB9E3FC0580D), UINT64_C(0xDA3522D537DDE44C), UINT64_C(0xE9F2CF239AD88D74), UINT64_C(0x7FB49A7CBFEC6BB9), UINT64_C(0xE1A75F00A5C0EF9E)}}, {{UINT64_C(0xB36E434E7FB9229D), UINT64_C(0xB3110EC6DF5C8A79), UINT64_C(0x2E20FA7046380D3F), UINT64_C(0xA9EF4614E957EF05), UINT64_C(0xD9C54D8F2B0F4FE9), UINT64_C(0xB2DC139D84A21B37), UINT64_C(0xF62C4F6724E71323)}}, {{UINT64_C(0x3B476B619CBEBB59), UINT64_C(0x5B23783D452DAA5B), UINT64_C(0xC30A304A7357DEE3), UINT64_C(0x8423C678AA167794), UINT64_C(0xC94788492000DFEA), UINT64_C(0xC70983C6ECB62970), UINT64_C(0xFF836D4A505268F4)}}},
+	{{{UINT64_C(0x7BBD6922C747E219), UINT64_C(0x227234D14383869B), UINT64_C(0xFE361E8C875A596F), UINT64_C(0xF744839FD9602C03), UINT64_C(0x16C61AC1F1081348), UINT64_C(0x3B727D8DA4E161BD), UINT64_C(0xBB40BA8774127199)}}, {{UINT64_C(0x16E6DCC9881DCFFF), UINT64_C(0xCD8F9F513F593CE6), UINT64_C(0x6639BEDC09683618), UINT64_C(0xFC762EE2C3B1D102), UINT64_C(0x6EFB244AAEE8F149), UINT64_C(0x2DE27693DD9659F2), UINT64_C(0xD8B68F79C3A7DE3F)}}, {{UINT64_C(0x1556C812B21202F3), UINT64_C(0xD47DBB9A316ED6D8), UINT64_C(0xDB8559BB2218A962), UINT64_C(0xC86D5E067964C6B2), UINT64_C(0xC7F710D39168072C), UINT64_C(0x5F8AB2B851AC36CE), UINT64_C(0xE78E9CD2E2B803CA)}}},
+	{{{UINT64_C(0x796FA20B9970BD5B), UINT64_C(0x930887242D775F61), UINT64_C(0x7A8A58A95A6C672D), UINT64_C(0xAC59562C6EB25183), UINT64_C(0xC1E20F1FC3FDEA12), UINT64_C(0x1BD999D667884419), UINT64_C(0x4B7428832C05470C)}}, {{UINT64_C(0x424F38ACCDF479AB), UINT64_C(0xA9A701F6271C52A9), UINT64_C(0x718FC8E3298F402C), UINT64_C(0xAB093CA8533DACAB), UINT64_C(0xA808F98104133602), UINT64_C(0xF2E23AF08620C04D), UINT64_C(0x882C817178B164D0)}}, {{UINT64_C(0x2A25586850235879), UINT64_C(0x53C384F22F797DCD), UINT64_C(0xE60CF83C3687A85D), UINT64_C(0x2305808055A796BC), UINT64_C(0x99434B9DBFD509D2), UINT64_C(0x71765245405EA273), UINT64_C(0xD4E1E5BA872FF2B4)}}},
+	{{{UINT64_C(0xA128E6678EC30A71), UINT64_C(0xA078E646879F78AC), UINT64_C(0xEE3433868A64B88F), UINT64_C(0xB87C0211671030AF), UINT64_C(0xCA946C406AB2A06B), UINT64_C(0xD6284E4F0F59202E), UINT64_C(0x56AE4A23C9F90764)}}, {{UINT64_C(0x845ABBB561DCC100), UINT64_C(0x302D6FEF6CF07C77), UINT64_C(0x2980E8B6E25CDDB7), UINT64_C(0x3FB96801A26785B4), UINT64_C(0x55D8E4282BE7D404), UINT64_C(0x0A5F5C602D6E46DF), UINT64_C(0xF06560475DFE299C)}}, {{UINT64_C(0x3AB7C9B2A505F393), UINT64_C(0x6190A216F576B1B6), UINT64_C(0xD75DEDB761615221), UINT64_C(0x94DCCC9132D29D89), UINT64_C(0xBD41256C74507866), UINT64_C(0x5744A5D1341EAA3C), UINT64_C(0x72BFDB4BE584F13C)}}},
+	{{{UINT64_C(0xAC0E82A1A3DCBC90), UINT64_C(0xD3B2B1EE285656FE), UINT64_C(0xD5C5DFFA4353B0D3), UINT64_C(0x1416CE53C2E7A6ED), UINT64_C(0xE0787EBC0713707E), UINT64_C(0x273CE8A9A834C84C), UINT64_C(0x432A6175E8E1E7DD)}}, {{UINT64_C(0x16A359670BD0064A), UINT64_C(0x7169C899DD565345), UINT64_C(0x19A068666560EDB2), UINT64_C(0x7EAC75271537B22A), UINT64_C(0x25E6FC13A7342050), UINT64_C(0x47ACC1BC19B3479F), UINT64_C(0xECDECF00B20D45C8)}}, {{UINT64_C(0x4A3AF2286B39AEED), UINT64_C(0xC26E353BBB9408B4), UINT64_C(0x8A44AC43EF1D52E5), UINT64_C(0xD1B3A3DCE19D8C44), UINT64_C(0x76AF0B52FF501851), UINT64_C(0x0EFFBE9C3F6A0F0E), UINT64_C(0x20EF2565B9D67E83)}}}
+	},
+	{
+	{{{UINT64_C(0x976F241004ACEA57), UINT64_C(0xE77FDACE1C6DA685), UINT64_C(0x585884EA7DD4150C), UINT64_C(0x8EA4A85C1AECB841), UINT64_C(0x33C88EEBD292FF20), UINT64_C(0xCD3183F4D289DE94), UINT64_C(0x397085826539AF53)}}, {{UINT64_C(0x384B57599B827D87), UINT64_C(0x6E61DC82AC03D776), UINT64_C(0xD5E8A6694336652F), UINT64_C(0xCF388642B8FC4B0A), UINT64_C(0x533A74DD571B6F7D), UINT64_C(0x6937841750CF6F24), UINT64_C(0x06757EB28A37AFC6)}}, {{UINT64_C(0xEE6D164809229F29), UINT64_C(0xB2A0D2F1EAC87A0B), UINT64_C(0xDACB514717EFE3FF), UINT64_C(0xAA8E482688DA3429), UINT64_C(0x12F404317704682B), UINT64_C(0x81D7A28462F441D1), UINT64_C(0x297FA09DBCF6BBA5)}}},
+	{{{UINT64_C(0x7D0E70D53C133995), UINT64_C(0x3BE388A5E0C7C8C9), UINT64_C(0xE926984E59DBF85F), UINT64_C(0xBEF6940F0F364AC0), UINT64_C(0x941D85D23A3A1E79), UINT64_C(0x3BB999A00E58C8A3), UINT64_C(0x61CF7D6C6F2F1014)}}, {{UINT64_C(0x3F979C99485150FE), UINT64_C(0x7BCDCFD0DF259D77), UINT64_C(0xAFD8FCCE97B9DAAB), UINT64_C(0xD89A4628C9FFF8E6), UINT64_C(0x2821567090246BEF), UINT64_C(0x393426749C58F630), UINT64_C(0xFF47D0EA0F3FD315)}}, {{UINT64_C(0x9EEC2EE99FED773A), UINT64_C(0x06D0813769085FBB), UINT64_C(0x4CE35A2DDFBC8134), UINT64_C(0x7FA4B3C14EF105B9), UINT64_C(0x491B4CA0FC863DBE), UINT64_C(0x762989160142048B), UINT64_C(0xC75891252744DD23)}}},
+	{{{UINT64_C(0x6909B0BFD35F6706), UINT64_C(0x5FE974645812C82E), UINT64_C(0x5C74F1B60729F50D), UINT64_C(0x3BB76C89F1332459), UINT64_C(0x4045A9AFCC33647E), UINT64_C(0xD57EE0F154AB0126), UINT64_C(0x2EFA55525680A446)}}, {{UINT64_C(0xAF12EBFC65329D90), UINT64_C(0xE310CB37AE579800), UINT64_C(0x1BB9365BB53496F8), UINT64_C(0xAF4610E99B59C63F), UINT64_C(0xEEF4F2D6AC5B49BA), UINT64_C(0xEE21E0BADC672BBE), UINT64_C(0x12E2AADF1DDFA087)}}, {{UINT64_C(0xF476DC2CD7E634BF), UINT64_C(0x2881D593CF34FD2E), UINT64_C(0x6D674BA1B5097971), UINT64_C(0xA4661290F9D59EA0), UINT64_C(0x0B03A2D07FE12682), UINT64_C(0x852A97E37E4CE077), UINT64_C(0xF06148FB902E807D)}}},
+	{{{UINT64_C(0xA25B4668FA9109EE), UINT64_C(0x8E16FA951338A6CE), UINT64_C(0x205ED8E45E6FC406), UINT64_C(0x6679B79B8AE9A0C0), UINT64_C(0x78FED604D32993B9), UINT64_C(0xD020832C77F3C6B8), UINT64_C(0xD45D890495A1AB01)}}, {{UINT64_C(0x7A99348FA29D2030), UINT64_C(0xF74B961F9A661F8F), UINT64_C(0x3E72BCFD53212674), UINT64_C(0x6B77E2D545CEE23B), UINT64_C(0x3104219CB73FCCB8), UINT64_C(0x3771DC056871DFF0), UINT64_C(0x1214E327D2C52123)}}, {{UINT64_C(0x1A29A23E6D41E95F), UINT64_C(0xEB92BCDFE553D2D6), UINT64_C(0x80098F8D6B5821C7), UINT64_C(0x8C7C541B6266EC72), UINT64_C(0x84A98BF2C886BD98), UINT64_C(0xDD7E7B28A4B806D9), UINT64_C(0x383174E27306A69A)}}},
+	{{{UINT64_C(0x709F51E15FF2A8E1), UINT64_C(0x9D4686571C5138BC), UINT64_C(0x2A0C18BFC4CAF0C0), UINT64_C(0x2426867D65E33FEC), UINT64_C(0x6C080AE4ED821439), UINT64_C(0xBE8D7B110DE651CE), UINT64_C(0x7F6E947FD22EA46C)}}, {{UINT64_C(0x2F7373A75CADEFC4), UINT64_C(0x7C1E6FCA1D2B0C68), UINT64_C(0x58B7A5CD2140DF3C), UINT64_C(0xE55EB3218653A375), UINT64_C(0x6B3C31AF73653E74), UINT64_C(0x76379F4FC365BE0C), UINT64_C(0x3570B3771ADD4D33)}}, {{UINT64_C(0x80EDC6D7FD2C5B8B), UINT64_C(0xD20DA8EA7E538990), UINT64_C(0xA7135CF48A01E6D8), UINT64_C(0x2DBC238434595865), UINT64_C(0x26C225CB2FC6E43E), UINT64_C(0x6A8CB31E3CF15594), UINT64_C(0x084431A00618EF33)}}},
+	{{{UINT64_C(0x959061EC183C3494), UINT64_C(0x8768AF2F28D677BC), UINT64_C(0xFA86D86FE72793BF), UINT64_C(0x0A3293CEC5F50E30), UINT64_C(0x357E2355A66C0306), UINT64_C(0xA59EAE4DF9314D53), UINT64_C(0x6F48F5D13B79C643)}}, {{UINT64_C(0x3FA4D073DDDC5192), UINT64_C(0xDE9E6D0E318A6577), UINT64_C(0x9A03751008792765), UINT64_C(0x497D7C9EA724ED23), UINT64_C(0x6225BAA863510FF1), UINT64_C(0x464FE648A351251F), UINT64_C(0xF85E98FD50FD9186)}}, {{UINT64_C(0x3A31737819030119), UINT64_C(0x9D7093263FEF8052), UINT64_C(0xBADE2E3F3466AD4D), UINT64_C(0x82EBE444C7EC2EF4), UINT64_C(0x0A3147AAA82B1794), UINT64_C(0xB09D1EE371721117), UINT64_C(0x7F67F3B9A8D5F4FC)}}},
+	{{{UINT64_C(0x9F29C963486EE987), UINT64_C(0x0B1F93E8E5210DCC), UINT64_C(0xEB603EA1FC4D1C91), UINT64_C(0x80844A5F015ACACF), UINT64_C(0x93C73F4DACC9F25F), UINT64_C(0x58783310A4AA50DE), UINT64_C(0x544D570358F10617)}}, {{UINT64_C(0xCB4EEEC7B1DC68CA), UINT64_C(0x83C96238E6FE00FB), UINT64_C(0x29265634D394CB4E), UINT64_C(0x1F641F2E764FFA22), UINT64_C(0xEB69E072345614CD), UINT64_C(0xAEF4568D2BA44252), UINT64_C(0x8C9C5508A98B17CB)}}, {{UINT64_C(0x1D66B872F3BD7CB4), UINT64_C(0xC7FF02A891DB7022), UINT64_C(0xC7C579A126F4D2A5), UINT64_C(0x42DECEDED999037C), UINT64_C(0x426ED8CBF0DD9F8C), UINT64_C(0x3FA92B8404C63A65), UINT64_C(0x249C442017475E08)}}},
+	{{{UINT64_C(0x1EF235D9D4106140), UINT64_C(0xE0C31BF2FC39EB60), UINT64_C(0x0024D26FB6CA9375), UINT64_C(0x3EB54CC64BF5492C), UINT64_C(0x31F5C90CB53D9709), UINT64_C(0x88808FBE0F1AC609), UINT64_C(0xC22B83DD33E7D4FA)}}, {{UINT64_C(0xDF9CFEC53C0ABBF5), UINT64_C(0x96B652C3F0A93723), UINT64_C(0x6672700622B7E39B), UINT64_C(0x79EF426A300DE281), UINT64_C(0x189C6EB29550B66C), UINT64_C(0xEC3A98914A7E8849), UINT64_C(0x7ED56B0C4C99E0EA)}}, {{UINT64_C(0x2AA8030A074AD95C), UINT64_C(0xE40C6D023F306A7C), UINT64_C(0x8F71E24D4AAE7608), UINT64_C(0xC2AD67112DCF0EF3), UINT64_C(0x13A467DD2DDE8E15), UINT64_C(0x2B66736B54E26DFF), UINT64_C(0xA7A418AF4A1EE45E)}}}
+	},
+	{
+	{{{UINT64_C(0x177926403687E557), UINT64_C(0xA8FDA34981653100), UINT64_C(0xAC23CB1B06E91D43), UINT64_C(0xD4F48750F201DB46), UINT64_C(0xC8CE74BD3E6F172A), UINT64_C(0x2A654DABA6485ED8), UINT64_C(0x123010BA9B64FF49)}}, {{UINT64_C(0x8AA83125B6E89F93), UINT64_C(0xBE7C3A3B0B039837), UINT64_C(0x9512A49622E0B0AE), UINT64_C(0xD6AAF12AB9CBFDC4), UINT64_C(0xFF59F5EAFD13EDFF), UINT64_C(0xBA6FE1212EFA555D), UINT64_C(0xD07B744D9BB0F83C)}}, {{UINT64_C(0x9BDACDFC2E2DCBE9), UINT64_C(0x7914E0EDBD85F864), UINT64_C(0x9D54F8ED7C996E51), UINT64_C(0xC192E93037C151D1), UINT64_C(0xBB6CC70D82A311BF), UINT64_C(0x78E3652917BBDF50), UINT64_C(0x0E9D28F6EA4F506B)}}},
+	{{{UINT64_C(0x6D45732B09A48920), UINT64_C(0xF950F3080FC13FF3), UINT64_C(0x82B8979347395DE8), UINT64_C(0x404D72AD14D025A3), UINT64_C(0x7E511A9C7160C5A7), UINT64_C(0xFFABD31AC33A30BE), UINT64_C(0x97B06F335CBB1443)}}, {{UINT64_C(0x1EE4FF5C57740DE9), UINT64_C(0x7C9D5FED090AACF8), UINT64_C(0x45910B97196EEE8B), UINT64_C(0x55AD8C63316DCD10), UINT64_C(0xFFDC5B03BB7A2B2F), UINT64_C(0xCD133E65953C674F), UINT64_C(0x3C060520A83556C1)}}, {{UINT64_C(0xD5D338A83E65B063), UINT64_C(0x75AD017BCB9161A6), UINT64_C(0x97DF5ADBB296AB4A), UINT64_C(0xFDD7B74AE07B8D45), UINT64_C(0xBD17C1FD3E3ABF54), UINT64_C(0xEB3DF0FA395744AA), UINT64_C(0xC6C03FA06E719B6A)}}},
+	{{{UINT64_C(0x05797C3F6091C23D), UINT64_C(0xF67C2EA2DE339C9C), UINT64_C(0x5F088C5D958B4A31), UINT64_C(0xA0B37243F97AFE5D), UINT64_C(0xD3EECA630CBCFBD2), UINT64_C(0x2A33742845E0C43A), UINT64_C(0x970BFF7A9A0F16B9)}}, {{UINT64_C(0x2886355115970A79), UINT64_C(0xC208CEE332EF2059), UINT64_C(0xF5E5BF2C58D70C04), UINT64_C(0x88E51C56DBFE19A3), UINT64_C(0x58E8E2DA758F8F2C), UINT64_C(0x46A19624D93FB61F), UINT64_C(0x7DE64DBE1F953840)}}, {{UINT64_C(0x5426CCA4CF920BE1), UINT64_C(0x774BA53A4BDC01E2), UINT64_C(0x3B667984D5E78683), UINT64_C(0xD75C5E44CBE9AE7F), UINT64_C(0xA65F975B79F1FA47), UINT64_C(0x429B5BB8361F0C46), UINT64_C(0x26DADEB80265A7A8)}}},
+	{{{UINT64_C(0x3CD018E1CC2D850E), UINT64_C(0x42AF8CDB64363A72), UINT64_C(0x6F20CC9A65ABE90A), UINT64_C(0x0D5CFF56FEECE961), UINT64_C(0x23A3F0DEEDC90680), UINT64_C(0x43061728DD3A0ACF), UINT64_C(0x66276E2B8CE34C21)}}, {{UINT64_C(0x8B23700DC73CC9C7), UINT64_C(0xB669DB448515B177), UINT64_C(0x5282A4330F41E4AA), UINT64_C(0x930F9E012F5AABCF), UINT64_C(0xB2F901CC98FF837A), UINT64_C(0xF4ED9E69BD7F1A1E), UINT64_C(0xA6B11418A72A7DD3)}}, {{UINT64_C(0x6814C43AFE70954D), UINT64_C(0xC7CA3FEE8AD64F7E), UINT64_C(0xB437D7E119919A14), UINT64_C(0x7CEBF318EEF41CC0), UINT64_C(0x1FA4C837A8E25DEC), UINT64_C(0xE9373B4F6DEBD0FA), UINT64_C(0x25EF3755C26A2CD8)}}},
+	{{{UINT64_C(0xAE34BDE809EA3B43), UINT64_C(0x6CB85DDCB705CED6), UINT64_C(0x77DCB88257F5B95A), UINT64_C(0xD035B397AAC205DC), UINT64_C(0x47FCF7E0A677D740), UINT64_C(0x04DD6085601BCA78), UINT64_C(0x0A5046C457E4F994)}}, {{UINT64_C(0xF6CAEE868BC11470), UINT64_C(0x9173B118796005C5), UINT64_C(0x1F6827CC04976EC7), UINT64_C(0xC486FF7E7F51BA72), UINT64_C(0x63AF87838CA8E3F0), UINT64_C(0x2883E6D039FD3271), UINT64_C(0x6FB7AB6DB8B0E2CF)}}, {{UINT64_C(0x2CD44CC508108579), UINT64_C(0x50D608649B8225EC), UINT64_C(0x197A02A5CFB5CBB5), UINT64_C(0xA121DE54D6510C2D), UINT64_C(0x084E445880CC4548), UINT64_C(0x262D015FD6ACF203), UINT64_C(0x3CEC6B5DB394724A)}}},
+	{{{UINT64_C(0xA98CA5BAC620D669), UINT64_C(0x909BFF707C8ED7CA), UINT64_C(0x029DA3DAEFA2B927), UINT64_C(0x46D131A01D2F9557), UINT64_C(0x4FD3AB104152A3BA), UINT64_C(0x8917799BC0AEE5A9), UINT64_C(0xF750354FA1BD1650)}}, {{UINT64_C(0x84DD4E83A6CD31FD), UINT64_C(0x1382D33505392FAC), UINT64_C(0xA6ADE6F914CBC169), UINT64_C(0x38878513669683FD), UINT64_C(0x3CC4B1A72D694464), UINT64_C(0x5C46A61EEC36429D), UINT64_C(0x881EDED4BC497065)}}, {{UINT64_C(0x8C76AEB7E053FB5E), UINT64_C(0xAF200E477C789675), UINT64_C(0xDC015DF287FBB53D), UINT64_C(0x0DCF6EEE8E52E45E), UINT64_C(0xBB0D77D6BE0795A5), UINT64_C(0xBD3B162928FDC656), UINT64_C(0x9FAD38DE7BD0225B)}}},
+	{{{UINT64_C(0x345B39D377CA647F), UINT64_C(0xF73441533C1E917B), UINT64_C(0x286560EA2AEB57DA), UINT64_C(0x008E0473F1EF1EB1), UINT64_C(0xD7D5EDC74A582F2E), UINT64_C(0x8C7EC3C1E7545913), UINT64_C(0xBD6DB057146FE158)}}, {{UINT64_C(0xCC3B0D49E7634907), UINT64_C(0x2D5B4C65CE4E43B9), UINT64_C(0xAB1519B87E9582D9), UINT64_C(0x48C3AED005135727), UINT64_C(0xA21561A64103EC08), UINT64_C(0xF821199E92AD4D7A), UINT64_C(0x379B55F48A457CE5)}}, {{UINT64_C(0xE5BB59F390B5E5BC), UINT64_C(0xD069D4F88658DA8A), UINT64_C(0x5973380A5A593EA3), UINT64_C(0xF99D6BEF35E5C80E), UINT64_C(0xF14019E1B640D7F9), UINT64_C(0x8F321C613184AC14), UINT64_C(0x7FB95F42DF9B6721)}}},
+	{{{UINT64_C(0xDA8317C34D6A8442), UINT64_C(0xE8EBB0AB4A5AE499), UINT64_C(0xA96908EBCB16E720), UINT64_C(0x7AD23ACFFD5C5639), UINT64_C(0xA79BCDF748CAB4D6), UINT64_C(0xA6340A2A6A51A600), UINT64_C(0xF2F415C3AABD6918)}}, {{UINT64_C(0x15DB38A4F747258A), UINT64_C(0x7655B6EA5602E244), UINT64_C(0x957684FAD1EA9F1F), UINT64_C(0x1B2E1CFC4E27EB5C), UINT64_C(0xBD6AA6291CF8283E), UINT64_C(0xD23B55619E848F83), UINT64_C(0xB9F34E893770A428)}}, {{UINT64_C(0x8E942B837409E8E2), UINT64_C(0x6FBF49FA6FD828E9), UINT64_C(0xC89F03378A968D24), UINT64_C(0xAFAAFE01CE4923D4), UINT64_C(0x6E32BC92A16209ED), UINT64_C(0xB1B5826D09027363), UINT64_C(0xDCF1F11ECA6BE54B)}}}
+	},
+	{
+	{{{UINT64_C(0xA61BB84377515FB1), UINT64_C(0x390FAC73F2A7B860), UINT64_C(0x6048AA78AFDFA22B), UINT64_C(0x785BF620815502B6), UINT64_C(0xE653FC5D7CF513B9), UINT64_C(0x0ADC0178C9692524), UINT64_C(0xA1D53965391C8DA1)}}, {{UINT64_C(0x1E09FCCC5A8BCC45), UINT64_C(0xD0A1A1F97D67710E), UINT64_C(0xF42400D694442897), UINT64_C(0xC71279087030BEB5), UINT64_C(0x15C2187637DEBE08), UINT64_C(0x98250B52812996B7), UINT64_C(0x0F62F45A1CCB07C5)}}, {{UINT64_C(0xA040FA236B6AF506), UINT64_C(0x85CDACA9083D06F7), UINT64_C(0x8987BAA1EB0DFC98), UINT64_C(0xFB531144E914EE75), UINT64_C(0x4217E4C5475C6CE1), UINT64_C(0xB617CB9770E5CE48), UINT64_C(0x4EE8F8397992033C)}}},
+	{{{UINT64_C(0xC48404941B765479), UINT64_C(0xD465FDECFF45837D), UINT64_C(0x1598061796372ADB), UINT64_C(0xB6AAAD345F84C793), UINT64_C(0xB4A384B3756D2E46), UINT64_C(0x0ACD5B392002D303), UINT64_C(0x4F2A4A7C475E8744)}}, {{UINT64_C(0x50038E1DA5606FC2), UINT64_C(0x9DB42D821C29C2F0), UINT64_C(0xEC59BEC074CB3F13), UINT64_C(0xEA84ED59DE2FEE74), UINT64_C(0x62C3E987115A819E), UINT64_C(0xEB440B9723C1D65C), UINT64_C(0xB92775401BE61172)}}, {{UINT64_C(0xBE8A9766B06CF0AE), UINT64_C(0x609C1C18748D981E), UINT64_C(0x1C82BE57EF72FD93), UINT64_C(0x1BC66F9C2D4E4568), UINT64_C(0x1CA660F47BE9995E), UINT64_C(0x7EC483BA5068B710), UINT64_C(0xBA99C7C61C719F1B)}}},
+	{{{UINT64_C(0x85929FE64AB9E9FC), UINT64_C(0x8EE304379FD0BF1E), UINT64_C(0x4555E1B322093BC2), UINT64_C(0x8ABC558878AC4E2E), UINT64_C(0x5E177C8B12DB42B5), UINT64_C(0xD78DD40366C41C1B), UINT64_C(0xC21FF75BDAE22EF6)}}, {{UINT64_C(0x0A1E3D28EA211DF2), UINT64_C(0x40D5C5A65A13617C), UINT64_C(0x62D10C3FA02C0581), UINT64_C(0x2E48268F155C346B), UINT64_C(0x0831993BC3C9CF14), UINT64_C(0xC44D40EE69DCDC14), UINT64_C(0x61699505E2AC4607)}}, {{UINT64_C(0x0C83EFD5165DC92C), UINT64_C(0x8B07E9CBDAA30BC1), UINT64_C(0xCF5A5CC4FE83A57E), UINT64_C(0x40232523C1B8800F), UINT64_C(0x4A1AADB97892EA2F), UINT64_C(0x3F1345B9A7BBA0BF), UINT64_C(0x18BD54676DA9D6BE)}}},
+	{{{UINT64_C(0xE844E4A51D0FB585), UINT64_C(0xDE1E00846BEF1F3C), UINT64_C(0x3B3934EDEF39A8E2), UINT64_C(0x54337188430AFE33), UINT64_C(0xDE4C9A3F24AC78B0), UINT64_C(0x9EDDDC9AE6A40F39), UINT64_C(0xF4701578EACD5103)}}, {{UINT64_C(0xB11E396949A2F31A), UINT64_C(0x39D8C8A40F4B19A8), UINT64_C(0x87E066DDDD10C9D2), UINT64_C(0x13EA28C6F9742458), UINT64_C(0x0FBE1122A9FDB511), UINT64_C(0x0C89F36E0267B5AF), UINT64_C(0x7B1C0F774F024CD3)}}, {{UINT64_C(0x381D88AB6FD619EA), UINT64_C(0xF63643418911B8E9), UINT64_C(0x4F33F9224B61B07B), UINT64_C(0xA545FAA66EF3F525), UINT64_C(0x717311D1AAE0046F), UINT64_C(0x612337CA816A3D06), UINT64_C(0x80E4FFE65F94E89C)}}},
+	{{{UINT64_C(0x151EC995607A39BF), UINT64_C(0x9FE91C3ECF23A68D), UINT64_C(0x71ABC3D8A5C4E4F5), UINT64_C(0x071EF239ACB20322), UINT64_C(0x7ABB39B391BC6BDF), UINT64_C(0x73BB2B627A0E660D), UINT64_C(0x3464D7E248FC7E2E)}}, {{UINT64_C(0x59AA492491666760), UINT64_C(0x3089A257B6A85826), UINT64_C(0x3CA6BFF572CEF559), UINT64_C(0xF764CFF52F51BDE7), UINT64_C(0x8EAD411A35234B63), UINT64_C(0x37840AFE1DB129F4), UINT64_C(0x58EC0B1D9F4C4BD8)}}, {{UINT64_C(0xA031D8787445CD59), UINT64_C(0xF1C90D8012EAD923), UINT64_C(0x9293727441C299F9), UINT64_C(0x8ED167D18CD3879F), UINT64_C(0x47086473F18C7450), UINT64_C(0x3721C7C5F4DCE85E), UINT64_C(0xC8FFA007A072C950)}}},
+	{{{UINT64_C(0xF78E1DEBA5E6F3DC), UINT64_C(0xCA0FC636CF406A5F), UINT64_C(0xFFB90AE172B06C80), UINT64_C(0x89A05E8356DC0985), UINT64_C(0xAEC7561AC2895C21), UINT64_C(0x3574996283A06DDF), UINT64_C(0x6DFB2627E7CD43AA)}}, {{UINT64_C(0xEB6576DE52C8CA27), UINT64_C(0x43426A4A87249018), UINT64_C(0x2D90C400C275C5C3), UINT64_C(0x1D8743C4E34805AD), UINT64_C(0xD9B7312BF3651B16), UINT64_C(0x4B8E20BF7E00B3B9), UINT64_C(0x8899BDF78D3D7E5D)}}, {{UINT64_C(0xBC20CD5756EAC126), UINT64_C(0x01919F883D603A2F), UINT64_C(0x63EF50D153E23156), UINT64_C(0xDB25E15DC746B2FF), UINT64_C(0xEBED7714E4D3A8A4), UINT64_C(0xC8A7FF5F3E9DD585), UINT64_C(0xC4F7944DD3E30EE9)}}},
+	{{{UINT64_C(0x8E9644AD8FAA9CD1), UINT64_C(0xC63734C98BF6E0E5), UINT64_C(0xAC013B6022AAD404), UINT64_C(0x355408992A11A737), UINT64_C(0x5721E022A45BDD10), UINT64_C(0x2045DB834C332E67), UINT64_C(0x74A260C2F2D01CE3)}}, {{UINT64_C(0x5920D59E9C48841C), UINT64_C(0x98AC05045DDE5603), UINT64_C(0x0A6218EBA779CAC9), UINT64_C(0xE5327EF45BED10C0), UINT64_C(0x474459779425D4F8), UINT64_C(0xD68CA831D11EA278), UINT64_C(0x9AD370D934446AEF)}}, {{UINT64_C(0xAF5A0C5FC96915C7), UINT64_C(0x31BD0048F80A0A2B), UINT64_C(0x4B152D6D5F6B5437), UINT64_C(0xAAC24216745B968F), UINT64_C(0xE89BA6B33CAAF038), UINT64_C(0x6F0B978CAD5C0B68), UINT64_C(0xE00EF0735EB1216E)}}},
+	{{{UINT64_C(0x5C3089B3E73C92AC), UINT64_C(0x6F500FF3F27957A7), UINT64_C(0x496D43843D3D9D67), UINT64_C(0x98E924A4E547A19D), UINT64_C(0x8F885B552268911C), UINT64_C(0x4881183E0AC5FAB3), UINT64_C(0xCACCEA9DC788C410)}}, {{UINT64_C(0xF1FBE2E95E3C6AAD), UINT64_C(0x78B1A7B3992B3A6C), UINT64_C(0x8261005302EC587D), UINT64_C(0x78610632F589A0E1), UINT64_C(0xA8F9232B262ACDB9), UINT64_C(0x1194E9C09A151E4E), UINT64_C(0xAB13645849B909B2)}}, {{UINT64_C(0xB481A4D5FA204119), UINT64_C(0xACE427C6EFA57CBB), UINT64_C(0x2BC94F8833F57032), UINT64_C(0xFF24A8752F43AEE9), UINT64_C(0x16E4EDCD5CFDCA83), UINT64_C(0x67843EB7F45A939C), UINT64_C(0x1F86C3ACF41C74F0)}}}
+	},
+	{
+	{{{UINT64_C(0x6192E5D6DF3A71C1), UINT64_C(0x3FC9349ED29297D6), UINT64_C(0x9DDFB5E58BD52171), UINT64_C(0xF3C28CE0AD999A7B), UINT64_C(0x7DC2A9D460271C30), UINT64_C(0x728E9207DEC7F6CD), UINT64_C(0x9C2A532FCB8BF0AF)}}, {{UINT64_C(0xA8D70218468BF486), UINT64_C(0x5C9373B45BE7AB8E), UINT64_C(0xBB8DA2DDFC658179), UINT64_C(0x788E07A279416606), UINT64_C(0xB0826D3D12658F19), UINT64_C(0x7C95F9535B52A9D5), UINT64_C(0xAD55E25268EF8A4D)}}, {{UINT64_C(0x2E81B159829DE46F), UINT64_C(0x56BB870AF879317A), UINT64_C(0x9742084379B12974), UINT64_C(0x7F4E63A3F339F74B), UINT64_C(0x4B7BA12FAB3E97BB), UINT64_C(0xE286122935480D7C), UINT64_C(0xD6D8D1DD1FFA3D9D)}}},
+	{{{UINT64_C(0xF394A9B0BA2BC326), UINT64_C(0xFC74485ECC5167E5), UINT64_C(0x7AAA5C8340BC7C97), UINT64_C(0x5849698A06F882B0), UINT64_C(0x1EBB36A0BA4B5745), UINT64_C(0x18C6C8B8108FD928), UINT64_C(0xEDD1EEA5B50D1D89)}}, {{UINT64_C(0xD094D737D2A25F50), UINT64_C(0xD3E20E5A8232446A), UINT64_C(0xAF8CED02A54357CE), UINT64_C(0x8EEECEF2B09A92A4), UINT64_C(0x2B9E71E3D485FC49), UINT64_C(0xAD30784BB49A06A0), UINT64_C(0xF61585E64A5B4A00)}}, {{UINT64_C(0x7BCBCF2F8798AE9E), UINT64_C(0x140DAD431382A358), UINT64_C(0x9CC28DE019BF339F), UINT64_C(0xA4D7C0F045C60E3E), UINT64_C(0xADAAB136F55ED593), UINT64_C(0xEEEE8584D6ABF71F), UINT64_C(0x29A0FD30AEC831E4)}}},
+	{{{UINT64_C(0x1F915F6D8B86A4C9), UINT64_C(0x65EF944BC6BA861E), UINT64_C(0xB53A383091CA7544), UINT64_C(0x5014467911DF859E), UINT64_C(0xA9A0994EDDD44DDE), UINT64_C(0xBCEBF91241EF6C8D), UINT64_C(0xC419354C2F6859EE)}}, {{UINT64_C(0xB41F4969349581B6), UINT64_C(0xFD595712B10BB26C), UINT64_C(0x2E22E38FCAA41B09), UINT64_C(0x4B1199B0BD39AAD7), UINT64_C(0xC0CC6F863DF70E79), UINT64_C(0x8166FEE9DF4FDF63), UINT64_C(0xB9224EAC45E70BD5)}}, {{UINT64_C(0xA09493E7DE11F064), UINT64_C(0x8E24FE914BE6F19E), UINT64_C(0x8504D9CC47E5AF46), UINT64_C(0xEEF9DCD731281226), UINT64_C(0x90777C4200BFAFCE), UINT64_C(0x42C38CA181251CAF), UINT64_C(0xBBBE4023E409E916)}}},
+	{{{UINT64_C(0x0280072FACE525F4), UINT64_C(0x97258597BD666A55), UINT64_C(0x2222A4F65E203DBC), UINT64_C(0x22339834ECCFBE3F), UINT64_C(0x89162489E8490AA4), UINT64_C(0xF3F80A7350841348), UINT64_C(0x69D53D2F3F1BD6AF)}}, {{UINT64_C(0x48B123FFC813341A), UINT64_C(0xB08D359084C11738), UINT64_C(0x890AD4751425ED29), UINT64_C(0xC607CF201EDDA523), UINT64_C(0xCB8B42AC7CB64974), UINT64_C(0xCB305EDD42E5A8C8), UINT64_C(0xF3034DC44C090AD5)}}, {{UINT64_C(0xD425E6DDF515540C), UINT64_C(0xD2BEF1BF2B6C0B07), UINT64_C(0xE7B18BFF703659EF), UINT64_C(0xF33E04E9FA850532), UINT64_C(0xAB809CE9060227E0), UINT64_C(0xDA65314D4FBB23C2), UINT64_C(0xF928BBA8DE38A77D)}}},
+	{{{UINT64_C(0x27428921DBB18E19), UINT64_C(0xC8C34CFD680FED21), UINT64_C(0x32C894671144D92A), UINT64_C(0x67604CD921219011), UINT64_C(0x223AFBC2A025D0E5), UINT64_C(0x98A5256C16F7A372), UINT64_C(0x71F129AB5459E1CF)}}, {{UINT64_C(0x10F4AFDC5B668B2E), UINT64_C(0xD54AC5D937A0C2D4), UINT64_C(0xC53E18E2CC4AF285), UINT64_C(0x369A92F61C827778), UINT64_C(0x9AC616327A270F2C), UINT64_C(0x658D9D4246F2799F), UINT64_C(0x0FB681FFB12E36CE)}}, {{UINT64_C(0x7E3C88D300CEC7D3), UINT64_C(0x4EB542198232B961), UINT64_C(0x4ADFA7A7DE8940C0), UINT64_C(0x26A923D784682A97), UINT64_C(0x32D6B5F017DE7DE0), UINT64_C(0x9F9E30288D3DF7E4), UINT64_C(0x18DF245541820DB8)}}},
+	{{{UINT64_C(0x49C5AB11EE0690FE), UINT64_C(0x1CF280261E33F742), UINT64_C(0x84AE9B8EB4B4758C), UINT64_C(0x6D3E27EB4895A801), UINT64_C(0x638BFD251C4A4BDB), UINT64_C(0xEC144417A7E3A7A1), UINT64_C(0xD0736093F1B96029)}}, {{UINT64_C(0x5ACB1ED8349C73D1), UINT64_C(0x511833FC84A8D194), UINT64_C(0x82811F9F668DBE96), UINT64_C(0xC28BA5403331743A), UINT64_C(0x601654A454F394DE), UINT64_C(0x0DBB6362364544CE), UINT64_C(0xF07E7F22E6104824)}}, {{UINT64_C(0xEE54D8CB02B113C9), UINT64_C(0x09DAA82965EB4BD7), UINT64_C(0x0FF75E64C72BA20D), UINT64_C(0x5D7248F705F71572), UINT64_C(0x8969A3E499C24E55), UINT64_C(0x84E6ADF722310E0C), UINT64_C(0xC8A7ED57EBA9AE43)}}},
+	{{{UINT64_C(0x7F7C9F1763D45213), UINT64_C(0x83503EEFA709C1F7), UINT64_C(0xD481A7DE3C3C51B4), UINT64_C(0xA7874F3D4A2BC649), UINT64_C(0x5D4037B302FD4A58), UINT64_C(0x5252868BF5AB9665), UINT64_C(0x1B6D46A75177F694)}}, {{UINT64_C(0x7B7DE6763EFB8D00), UINT64_C(0xE6EDB2C1BA7A741B), UINT64_C(0xB68B3FCCA6AF47BA), UINT64_C(0xEAF71948E4378CA5), UINT64_C(0xB5EBC6AC99FB757D), UINT64_C(0x2A56827D636D7F07), UINT64_C(0xC8B7D1D4B8A34F75)}}, {{UINT64_C(0xB9BEE9DA04479F08), UINT64_C(0xCAE77AB58631064A), UINT64_C(0x10390B83773A9C34), UINT64_C(0x7C92CEA173AC7224), UINT64_C(0xB81D6C64559FF93B), UINT64_C(0xDCBE282F41881637), UINT64_C(0xF6FB481D4D1489E5)}}},
+	{{{UINT64_C(0xED76CB78E325331B), UINT64_C(0xF62341F41C9ADD2E), UINT64_C(0x102FA203DB2385C5), UINT64_C(0xA60182ECBBC1D177), UINT64_C(0x56955ADF1580F137), UINT64_C(0x53F5EE3373DCFDD8), UINT64_C(0xEC6FAF021B669B4F)}}, {{UINT64_C(0x9C7D4E9830B86081), UINT64_C(0x22C810D3CD9F2D97), UINT64_C(0x2F99EE0F48F5824A), UINT64_C(0x45E6C5FC86C540C0), UINT64_C(0x588BC404C8F4C665), UINT64_C(0x6EDBD423118AAF0C), UINT64_C(0x86E32E90690EAB2E)}}, {{UINT64_C(0x91EF4CE9EF8B6B5B), UINT64_C(0xF0BA9529E6E8313F), UINT64_C(0xDA7C6D91DD72CAC2), UINT64_C(0x54DA900454EF4490), UINT64_C(0x518EE93017D3C52A), UINT64_C(0xD530214E3545F4D9), UINT64_C(0x9D527C03AA0A8664)}}}
+	},
+	{
+	{{{UINT64_C(0x181D12656DFBFA6F), UINT64_C(0x97D0A49809576460), UINT64_C(0xDDA80A2F1071BC35), UINT64_C(0x8F3AE4493DF83F91), UINT64_C(0xD319E19AAD5853E2), UINT64_C(0x3F01BA0D8A46B853), UINT64_C(0xA84FCA62FEF10886)}}, {{UINT64_C(0xBFBE4C0B7FB84DE9), UINT64_C(0x575C40A03DCC0727), UINT64_C(0x66CDDB781F841B18), UINT64_C(0x205DC7A26A630454), UINT64_C(0x87F07AE8116BE758), UINT64_C(0x082423BF96C8420F), UINT64_C(0x723998C51C682128)}}, {{UINT64_C(0x65845D44E5D58333), UINT64_C(0x194172BA998C54D2), UINT64_C(0xF3C9252F9F14CABE), UINT64_C(0xB6E3882096A5F200), UINT64_C(0x4A434C2065DEF0C0), UINT64_C(0x2A714DD0C3F6E679), UINT64_C(0xE7BE42179E565C98)}}},
+	{{{UINT64_C(0xE138AB64181F5863), UINT64_C(0x5856D82ECBD05FF9), UINT64_C(0x45156D339C94EA06), UINT64_C(0xF065628C143054AA), UINT64_C(0x086A938589E6D64B), UINT64_C(0xD3A49385D79BE530), UINT64_C(0x0B107900AB824522)}}, {{UINT64_C(0xD7B0D80FBCA387B5), UINT64_C(0xBB73698206E35551), UINT64_C(0x107378199685DA10), UINT64_C(0x4D99DBBFA8E5FA89), UINT64_C(0x476D581B0336E572), UINT64_C(0x15BE788DD1E6D67F), UINT64_C(0x8DAC8E4E5BAA317A)}}, {{UINT64_C(0xB6F26BAA270F259B), UINT64_C(0x2294C82D43E58925), UINT64_C(0x03D237F9622912A3), UINT64_C(0x9DBC3CC16814B647), UINT64_C(0xE6D08DC7072C71CF), UINT64_C(0x6FBCCF3B0F9C6F2F), UINT64_C(0xE526B2FAF0D6B800)}}},
+	{{{UINT64_C(0x004D5D88FE170EF8), UINT64_C(0xABC5B6BA5DE1E9E6), UINT64_C(0xFAC9364A89D41EDE), UINT64_C(0x365C3125737C66B8), UINT64_C(0xCBCB61B68E8D05B2), UINT64_C(0xEA62620A6AF985A5), UINT64_C(0x85115DED8B50EC8F)}}, {{UINT64_C(0x955430C8D6A6F30B), UINT64_C(0x7F388BEF9CF84742), UINT64_C(0xE47BD70648F5BBE7), UINT64_C(0xA93106E2FE2B72F9), UINT64_C(0xF3DFA7A6C3AD6C5D), UINT64_C(0xD2ED8B3966504FA6), UINT64_C(0x7DE1CCE1157EF9DC)}}, {{UINT64_C(0xD1D471213FA22577), UINT64_C(0x21639330D1E1D26D), UINT64_C(0xDDFFF8A4E8950769), UINT64_C(0x378A1F0B0F94E69C), UINT64_C(0xA21C1DBF52D29766), UINT64_C(0x53CE3930B9A5C7DC), UINT64_C(0xF4E31AE94A333835)}}},
+	{{{UINT64_C(0x5C70A5F6C1F241D1), UINT64_C(0x29FB6C354D8798CD), UINT64_C(0x23CBDA23C78381A7), UINT64_C(0x43493697CFF8F155), UINT64_C(0xBAB7534F535683FF), UINT64_C(0xBD08E2243D53EF7D), UINT64_C(0x6F644CBF8072A9D7)}}, {{UINT64_C(0x4DAC960F9B22DB63), UINT64_C(0x98AFA97F41723AF0), UINT64_C(0xEDB156692B652D97), UINT64_C(0x0DFE6EE80E35967F), UINT64_C(0xEDEB41107014B5E5), UINT64_C(0x6F3CE442B3F97597), UINT64_C(0xE9B5AE81B2B6DB11)}}, {{UINT64_C(0xD025588978B6679C), UINT64_C(0xE6F98737E89D72E4), UINT64_C(0xCC518C7F5FCF82D0), UINT64_C(0x94B9477405F7129C), UINT64_C(0xFB5C439F51A85FC6), UINT64_C(0x970263754427B450), UINT64_C(0x6E02408B9F290712)}}},
+	{{{UINT64_C(0x40F4385EE2315930), UINT64_C(0x4A43C8D029827A87), UINT64_C(0x5821917907A8DD93), UINT64_C(0xE6A405E720BC946C), UINT64_C(0x6C843DF2F5A4ACB3), UINT64_C(0xF1593991F0B58C1D), UINT64_C(0xBB9DF984D9BE9D9D)}}, {{UINT64_C(0x8863620088E4B190), UINT64_C(0xB027EE1421EADA3A), UINT64_C(0xE95091B84F0CCF93), UINT64_C(0x2F3E37047A5D6678), UINT64_C(0xB5EC593E98397446), UINT64_C(0xB6CF7A6477D2FA6F), UINT64_C(0xE885B57B09A56244)}}, {{UINT64_C(0x78044CA72D9C46E0), UINT64_C(0xE4A9BAA523E2EFD2), UINT64_C(0xE47245F5677A00B8), UINT64_C(0x5D519CC63A15A046), UINT64_C(0x76B600BB80288F34), UINT64_C(0xDB76006AA78F970D), UINT64_C(0x706995A46A1F2510)}}},
+	{{{UINT64_C(0x296E339E909A0C02), UINT64_C(0xDB0357AFFF00E75F), UINT64_C(0x25A236797D8D6FB7), UINT64_C(0xC0107260C6E11A3D), UINT64_C(0xEC462EAE1C643CE1), UINT64_C(0x1D5B83F5A3F5E644), UINT64_C(0xA8AD453C0579D682)}}, {{UINT64_C(0xCD6518ED417D43A4), UINT64_C(0xEF9546E76A53F87C), UINT64_C(0xF7CBCFD6CBAABF9B), UINT64_C(0xA08476B425688324), UINT64_C(0x401BE6D324367159), UINT64_C(0x8CB98A6050261D1B), UINT64_C(0x144F3FE43B6B1E34)}}, {{UINT64_C(0x07461CAB0798A4EE), UINT64_C(0xE673646A39DA5E78), UINT64_C(0x5367EAFD5D541A3C), UINT64_C(0x420CBAB1ED3A87A2), UINT64_C(0x562842980E1CF3A5), UINT64_C(0x05D8256A2D17DD0B), UINT64_C(0x125EE391A4DDA481)}}},
+	{{{UINT64_C(0xF8BABBD787B1822C), UINT64_C(0xBEA4D34BA7E2AA51), UINT64_C(0x46F3D9086F1CC41F), UINT64_C(0x6281ECAF96F7EAC7), UINT64_C(0x905A14EE2CAD97F2), UINT64_C(0xE7FE90D7335F751A), UINT64_C(0x0D97B8F4892FF0B4)}}, {{UINT64_C(0x7BDB8A3155A5C40E), UINT64_C(0xFE8864E5DE77BA56), UINT64_C(0xB6FBF44F155F71EE), UINT64_C(0x96C16BE5E2297E9F), UINT64_C(0x847CDD83E2FE24BF), UINT64_C(0xAC2C85EDA4442251), UINT64_C(0x49D1B85283275F13)}}, {{UINT64_C(0xB19DC51E8CA45A3D), UINT64_C(0xFD3D6055A74ED4EC), UINT64_C(0x8A78C2BBAE6FF29A), UINT64_C(0x136D78ED48B4CEF9), UINT64_C(0xE8686540CD2C7796), UINT64_C(0xB8FD05F5E8FE7636), UINT64_C(0xDEB193195E3D08F0)}}},
+	{{{UINT64_C(0x14CA08731423E08F), UINT64_C(0x846C7046BB087D2F), UINT64_C(0x58FBE3876F10C3BC), UINT64_C(0xC0E26AC62202B763), UINT64_C(0x48BB9868810D4FC1), UINT64_C(0x9E61C8384A181FC7), UINT64_C(0x28A72D60D88E0060)}}, {{UINT64_C(0xA41332A3178C6E2F), UINT64_C(0xFE3E0367919B3526), UINT64_C(0x16A99B53989E4698), UINT64_C(0x0DDBB75F14B1145B), UINT64_C(0x6240E53955EF9EC8), UINT64_C(0xE087A8744AE17625), UINT64_C(0xCE50E8A672B87554)}}, {{UINT64_C(0x4225659918D8A252), UINT64_C(0x33C3DF33539ADC2A), UINT64_C(0xAF07E3C480500244), UINT64_C(0x386CE93F0D40751A), UINT64_C(0x59823A967877BA78), UINT64_C(0x01A2CD72162AC3E2), UINT64_C(0x0FC132592F5B6EE1)}}}
+	},
+	{
+	{{{UINT64_C(0x2F4C88B2BA29629C), UINT64_C(0xBE4C946559C7B264), UINT64_C(0x3632C9933D432F7E), UINT64_C(0xBE53184D97109B66), UINT64_C(0x8710F069A6799B3F), UINT64_C(0x182A13A68351D462), UINT64_C(0x974A8399A2437A0C)}}, {{UINT64_C(0x4B29F19972A70278), UINT64_C(0x4C3701B98B6D9C42), UINT64_C(0xB1DA15D85A60B08F), UINT64_C(0x5DDFFB0FCC3523F2), UINT64_C(0xE4DDE84AE2F92211), UINT64_C(0x0440C55365BEEE0F), UINT64_C(0xD2F66391A457E881)}}, {{UINT64_C(0x6851B06067BAA484), UINT64_C(0xD57ACF03B66AC278), UINT64_C(0x49BBBFAB6BE00320), UINT64_C(0xFE94610B1FFA1911), UINT64_C(0xFCD5BBA7483CBE0A), UINT64_C(0x9290341147797F90), UINT64_C(0xB96A9C56823C2CC9)}}},
+	{{{UINT64_C(0x615E6879FE2DDD05), UINT64_C(0xEDE892A7545ABDFC), UINT64_C(0x0DF4BD7DEDD63A5C), UINT64_C(0x591F6CBB8A03B3F7), UINT64_C(0xDE610F3FB2A5D1F6), UINT64_C(0x37F9EA9DEE05372F), UINT64_C(0x7EB85BBDF7AA5045)}}, {{UINT64_C(0x6B963EDF8E8C504D), UINT64_C(0xDF2D53C8DCAE7BDB), UINT64_C(0xC55BDEA246E4C6FE), UINT64_C(0xD0270A5475533400), UINT64_C(0xCF005860DD2AA748), UINT64_C(0x314509B84763ADB6), UINT64_C(0x626720DEB405EF8D)}}, {{UINT64_C(0x2FDBF66DEBCE549E), UINT64_C(0x36C5E0FB53EC3BB0), UINT64_C(0x66D1B74F36F174F7), UINT64_C(0xA90C3CEB689FBA2F), UINT64_C(0x59E6D2B5229825AD), UINT64_C(0x9DB3B4ABC2F55F7B), UINT64_C(0xA3F858CD85BFE481)}}},
+	{{{UINT64_C(0x78A3709AE6601328), UINT64_C(0xD24768E94FD2AC24), UINT64_C(0x92C19838793439D5), UINT64_C(0xD15DF607FA467AF3), UINT64_C(0x12261792A849E7B0), UINT64_C(0xF76581D3762F8C58), UINT64_C(0xAA38895244A39D79)}}, {{UINT64_C(0xBBEF60AF9C5CD0BC), UINT64_C(0x015D2B0DB53A33B3), UINT64_C(0x64489EE3E0B1F251), UINT64_C(0x703651AAC608AFCE), UINT64_C(0x8B91C6F7B9E52B05), UINT64_C(0x3F022FF418931DDA), UINT64_C(0x58EB0A0192818C83)}}, {{UINT64_C(0xC6136787E152E6B2), UINT64_C(0xAF49E4C22A77FDD0), UINT64_C(0x21875BAE11DC60CC), UINT64_C(0x04754A7DCB63C30F), UINT64_C(0xD9BF1A25AAB485AC), UINT64_C(0x83E2162CF2EA98F7), UINT64_C(0xFB8E1709FABAF80A)}}},
+	{{{UINT64_C(0x336C1300CFC7B5A7), UINT64_C(0x2EEF6D2FFE1A83AB), UINT64_C(0xA60D557B3CD019C0), UINT64_C(0xC19E2F736C64559B), UINT64_C(0x4AEDBE47B12E9C16), UINT64_C(0x0A2EE1B8153B11B2), UINT64_C(0x35C0E081E02E1AC1)}}, {{UINT64_C(0x90A9F470C1DD6F16), UINT64_C(0xE03F4EA93B6F41A2), UINT64_C(0x85AABDAC240F825E), UINT64_C(0xA1BE2F8F6CD88ADB), UINT64_C(0x4DA417BAC1378A64), UINT64_C(0x4E5A59231142BF25), UINT64_C(0x057AADC3B8C0577E)}}, {{UINT64_C(0xEAB52EFF1E324396), UINT64_C(0xA2D63E2CDDFD45E3), UINT64_C(0xB0FE12612839EFF5), UINT64_C(0x6A8A541BC5979EB4), UINT64_C(0x2648E680859187A1), UINT64_C(0xD9E812193D5AA6E2), UINT64_C(0x0C1F662A5BCDD25D)}}},
+	{{{UINT64_C(0x74607C77A80AF479), UINT64_C(0xB4C7D3E01FF5CCDF), UINT64_C(0xFC50A69680AAF101), UINT64_C(0xDB72D782D2A7BE12), UINT64_C(0xF2E4640B5292A788), UINT64_C(0x70D6939E601C35DA), UINT64_C(0x16E05F57B25C2FC1)}}, {{UINT64_C(0x9847A42A66FE37F8), UINT64_C(0xDA16EB74271BECA2), UINT64_C(0xA53873401E11E179), UINT64_C(0x35BB4783FB8DA82A), UINT64_C(0x758FCEA0B1D657D6), UINT64_C(0x261FB09931546847), UINT64_C(0x868ABE3592853A2F)}}, {{UINT64_C(0x44AC43C73376BC69), UINT64_C(0x947A5235F3DDFC27), UINT64_C(0x98AEB618C152AD64), UINT64_C(0xC0D315D99965BEB3), UINT64_C(0x448B56FE51266CC9), UINT64_C(0x8CC0DFEDB076CB15), UINT64_C(0xF7C6665D3076BA5A)}}},
+	{{{UINT64_C(0xEA1A4C54335766AB), UINT64_C(0xA199A1C84D66F4E4), UINT64_C(0x8B15A25D737A660B), UINT64_C(0xFFD967D34A7B1E29), UINT64_C(0x82DC262B4D207877), UINT64_C(0x278494F2A37DCAEC), UINT64_C(0x34781416AC17110B)}}, {{UINT64_C(0x3F28E3DF18FC6856), UINT64_C(0x9EBDBEC03F816D00), UINT64_C(0xD776D32BD705BFF3), UINT64_C(0xD5C0E7CE1DCB53B2), UINT64_C(0x8C24A53332ABAFA7), UINT64_C(0xF90D99D902145B9C), UINT64_C(0x789747EC129690E9)}}, {{UINT64_C(0x53E01BC36A4B9FAD), UINT64_C(0xEA60EE117F3F284B), UINT64_C(0x2B7C7F39D3DDDED2), UINT64_C(0xF355D55BCCE7F26A), UINT64_C(0x0970FD4D6A606639), UINT64_C(0xD0EDDFF5B0DFCD32), UINT64_C(0xE31A4B73306B5AB3)}}},
+	{{{UINT64_C(0x8F94D3C3954E2DFA), UINT64_C(0x3927919F406AFB2A), UINT64_C(0x165C37159EF0534E), UINT64_C(0x8288F337CDB4D14A), UINT64_C(0x7C00F90242A23E5E), UINT64_C(0x28150E34E7819586), UINT64_C(0x104E5016657B9525)}}, {{UINT64_C(0xFA695A6C9BCDDA24), UINT64_C(0x60F8609B99523EB5), UINT64_C(0x084A29CBCE4F516A), UINT64_C(0xA20C811FEC63F7DF), UINT64_C(0x1928C716A13075AD), UINT64_C(0x5F4D4CD4CD4A129A), UINT64_C(0xE18FA9C62188BED6)}}, {{UINT64_C(0x34C2738A878368E9), UINT64_C(0x62CFE8F08C856240), UINT64_C(0x04F43D0E24B1F94E), UINT64_C(0xCE85C8640FD6BAAC), UINT64_C(0x857C088AA9839F72), UINT64_C(0x9B97E8EBE2EF575E), UINT64_C(0x801F53F87A29ED28)}}},
+	{{{UINT64_C(0x4B1672757BAC60E3), UINT64_C(0x055B525B3B957714), UINT64_C(0x1E440838FC997887), UINT64_C(0x3CBA2FCF7A771263), UINT64_C(0xBDC5962AC0884F17), UINT64_C(0x3ED0A22287DC783C), UINT64_C(0x8A73E3450E20E64F)}}, {{UINT64_C(0xE6E7A1CD0D764583), UINT64_C(0x3ED68997D8D0D58E), UINT64_C(0xF363CB0EA08E9AA1), UINT64_C(0xD5B37BF4ED478D0C), UINT64_C(0x9E8783F13C068523), UINT64_C(0x47BBD87528A98B5A), UINT64_C(0xD6499CCCAEC313DE)}}, {{UINT64_C(0x3769130C8166586E), UINT64_C(0x12CE6FC4620F2935), UINT64_C(0x67F3804388112A62), UINT64_C(0x25673C93659B2F4A), UINT64_C(0xAF55812189DD5C53), UINT64_C(0x7A572099F494F5BD), UINT64_C(0x894384C60F046913)}}}
+	},
+	{
+	{{{UINT64_C(0x4854781BBE09859D), UINT64_C(0x582489B6E067F5E6), UINT64_C(0x717F68B006DFE707), UINT64_C(0x40B4EFE217316600), UINT64_C(0x2575E30D8E9C8655), UINT64_C(0xA5DB13B4D50FDBDB), UINT64_C(0x3B5662CFA47BEBA6)}}, {{UINT64_C(0xDC9D4091F89D4A59), UINT64_C(0x965E790517B550A7), UINT64_C(0x5ED7A419EAE96C52), UINT64_C(0x6EB165411A7B3C5B), UINT64_C(0x62FEF6685219E9AC), UINT64_C(0x83091C4CDA275F62), UINT64_C(0xA4ADF6F3BF742B1B)}}, {{UINT64_C(0xEDC16ECFD5887490), UINT64_C(0x39BD1A3A1454A74B), UINT64_C(0x230D91955D5D07DF), UINT64_C(0x12CE915A025E891F), UINT64_C(0x891F80DBAAF5139D), UINT64_C(0x8B620A7818D2995C), UINT64_C(0x7FDBDE16046D88A2)}}},
+	{{{UINT64_C(0x228CC2365A5100E7), UINT64_C(0x14D03026F5085924), UINT64_C(0x0FCB30A4DE79A3D7), UINT64_C(0x9474ADA0EFA0D3F9), UINT64_C(0xA77C94350A126D55), UINT64_C(0x80E570C7CB45D68F), UINT64_C(0xE042BB83985FBFFA)}}, {{UINT64_C(0xD751C80F1FE13DBA), UINT64_C(0x95F7EACE234CF055), UINT64_C(0xCDBE896B8197B73F), UINT64_C(0xFDFD98969CA5A89D), UINT64_C(0x5569E7CA372124D5), UINT64_C(0xE806A8BABB377C69), UINT64_C(0x91B4CC7BAF99CE58)}}, {{UINT64_C(0xA487E39A9F00B201), UINT64_C(0x94230D0B42D357C4), UINT64_C(0x66E393801E7CA0AC), UINT64_C(0x71F1D0CED848E7EC), UINT64_C(0x6C60ACD2DFFB32F0), UINT64_C(0x8A3AD1E4259B97F5), UINT64_C(0x0EF6AE13FE7DA5BA)}}},
+	{{{UINT64_C(0x68874E253197E968), UINT64_C(0x5DBE36277F531606), UINT64_C(0x0872A10B65DDA8B9), UINT64_C(0xA314268D477A792F), UINT64_C(0x8420C805C703A7E3), UINT64_C(0x41968B7BC4A8A96C), UINT64_C(0x79DCE3075DB390B9)}}, {{UINT64_C(0x07577D4EF6F4CC14), UINT64_C(0x36245B0D205B5D11), UINT64_C(0x034A2F64FF20F9F9), UINT64_C(0xB8B6F35C0B15E315), UINT64_C(0xA84E0D0EC53A0F6B), UINT64_C(0xE58230D5D5210399), UINT64_C(0xDEB3DA1CB1DD54D0)}}, {{UINT64_C(0x04FDF8D86B6146FA), UINT64_C(0x906DDEF7C7E79DA5), UINT64_C(0xF11E7CBF891D6D87), UINT64_C(0xF3895D707A5017DB), UINT64_C(0x6CDE902315586448), UINT64_C(0x8A2D82F467967521), UINT64_C(0x662A07017A6C8ECA)}}},
+	{{{UINT64_C(0x6F24684AE182401A), UINT64_C(0x98AF0B79C1C21A70), UINT64_C(0xBB069FE1D81F8D89), UINT64_C(0xCF3DD7AAADF870F4), UINT64_C(0xE06E4A40F8D57F85), UINT64_C(0x5228C8B55AA162D8), UINT64_C(0xC34244AA9C0A1A0C)}}, {{UINT64_C(0xB7B5C6CF968F544E), UINT64_C(0x690CA560533DE23A), UINT64_C(0x2AAAA6AA5512047C), UINT64_C(0xA751A6A020EDA5B1), UINT64_C(0xFFF2BAA272EA0A49), UINT64_C(0xB756EBF4C28A6D6C), UINT64_C(0xD747074E6178A495)}}, {{UINT64_C(0xCB7AD2268B904F50), UINT64_C(0xDD4A22414909471F), UINT64_C(0x629B6E2AA7504E66), UINT64_C(0x78A21669B8E7EBC9), UINT64_C(0x0301E1D59F9D32C3), UINT64_C(0xF884450509017713), UINT64_C(0x53BE3181E95B0780)}}},
+	{{{UINT64_C(0x20A27B453221A94B), UINT64_C(0x5117D56AD13E635F), UINT64_C(0xD30B7003574B08C9), UINT64_C(0x3957796FF0EE953E), UINT64_C(0x58358C336BB48D73), UINT64_C(0x70CD882DB529F5D9), UINT64_C(0xCD3EF00EC9D1EA61)}}, {{UINT64_C(0x59D1BEA0DE4D105F), UINT64_C(0x9690D2D670FAD6A5), UINT64_C(0x2529B0652D01252F), UINT64_C(0x0E89DF2A5F51FB2C), UINT64_C(0x684CD686E45E88BF), UINT64_C(0x19CCD882C7A19A90), UINT64_C(0x933A0DFC2F4D37F5)}}, {{UINT64_C(0x02DD3F36C985BE22), UINT64_C(0x4D7268F9797D790B), UINT64_C(0xA2AE3C97C2C5F7D3), UINT64_C(0xCEC14BA27633D2A1), UINT64_C(0x221325357407DF82), UINT64_C(0xF3BF9B075CCA4CE7), UINT64_C(0xFF568D5D81913198)}}},
+	{{{UINT64_C(0xDF0720A9F3F66938), UINT64_C(0x7F6199356B6D8149), UINT64_C(0xBA6E31B89C419A3D), UINT64_C(0x1AB936C8E6581344), UINT64_C(0xF6C40DBEF1D13056), UINT64_C(0x2D6A2B6BB8470625), UINT64_C(0x3CA8B2984D506B7B)}}, {{UINT64_C(0xC96BF729AFB011B0), UINT64_C(0x742001C307833448), UINT64_C(0x207FB86AE9508083), UINT64_C(0x857562A9F781A8DA), UINT64_C(0x364858C5ABCC54D5), UINT64_C(0xB5035359908FC9B7), UINT64_C(0x8BF77FD9631138DF)}}, {{UINT64_C(0x6F66A49DB4B1C23E), UINT64_C(0x757F085227569EA0), UINT64_C(0x07776DCEBB29E1A6), UINT64_C(0x3F3FAA8013AC4529), UINT64_C(0xF3C8E079797DB07C), UINT64_C(0x6A6864CF0E176D00), UINT64_C(0x179D1082B540DDBE)}}},
+	{{{UINT64_C(0xD5F523365C13FBB1), UINT64_C(0x349288532EA9993E), UINT64_C(0x5A8F3C5318B025A7), UINT64_C(0x1306C2A094BFF5CE), UINT64_C(0xBACF2668A373F9E6), UINT64_C(0xCE332076237D00AB), UINT64_C(0xC867F1734C0F9B23)}}, {{UINT64_C(0xF81E50995CFD2136), UINT64_C(0x7A7D0026A6EB2B70), UINT64_C(0x3B498E66CB184507), UINT64_C(0xB260EC86C31B2B8A), UINT64_C(0xE81E1B3DF0C12035), UINT64_C(0x7B8048D55A421CBE), UINT64_C(0x912A41CF47A8C8FD)}}, {{UINT64_C(0x2B772A4ADE443CE0), UINT64_C(0xB71418862C729AB3), UINT64_C(0x7FAE3F38ACD89F4C), UINT64_C(0x2ED3B957A1C189E7), UINT64_C(0xC403C7C1D75BDA3E), UINT64_C(0x1D7DE09A0A975E10), UINT64_C(0x41042E288CA8EEDE)}}},
+	{{{UINT64_C(0x58AB9FFE79E157E3), UINT64_C(0xA3EF9CFE46D44DC1), UINT64_C(0xB7E3A8435551C8A4), UINT64_C(0xD49954A7638ACC03), UINT64_C(0x90C13194F708A4EB), UINT64_C(0x2B68B253892A2953), UINT64_C(0xC1662C225D5B113A)}}, {{UINT64_C(0xC9CFBA0723A5D2BB), UINT64_C(0xE254FFAF6D3CC327), UINT64_C(0xF322086C6314BC67), UINT64_C(0x7BEA72E166616312), UINT64_C(0xF40002122FF780F9), UINT64_C(0x62F247578A99495A), UINT64_C(0x5F479A377CE51E35)}}, {{UINT64_C(0x5CE705C3520E05EA), UINT64_C(0xCBDEA38E0FC4FC46), UINT64_C(0x35800DB3F85116CE), UINT64_C(0xAA320D084AF936B8), UINT64_C(0x9F506D8E6F4B8850), UINT64_C(0x060AE78A7164712C), UINT64_C(0xD0B347A585688244)}}}
+	},
+	{
+	{{{UINT64_C(0x6291A58841A82A12), UINT64_C(0x417AA75417580F3A), UINT64_C(0xA8C5CD399009FF73), UINT64_C(0x2C046D512DB1FB90), UINT64_C(0x5778F1827482C891), UINT64_C(0xD0EDE26CCAE20A3F), UINT64_C(0x7D6BD8B8A4E9C22A)}}, {{UINT64_C(0xBBAA0D7974B3DE44), UINT64_C(0xC334F8658B996AC9), UINT64_C(0xDF12C931E7BE25F6), UINT64_C(0xB59EB5C923836CE4), UINT64_C(0x5315B8649D029027), UINT64_C(0xFDF03D9071622F22), UINT64_C(0x101D9DF9E80226A0)}}, {{UINT64_C(0x758A6760E9BA795A), UINT64_C(0x19CDE413613EC286), UINT64_C(0x45B37190415E96F2), UINT64_C(0x28E15399CA268291), UINT64_C(0x81495E364BC5058A), UINT64_C(0x4C0F76FB0D17F7F6), UINT64_C(0x237FA4A920B1BA0E)}}},
+	{{{UINT64_C(0xA7F12037A9A90835), UINT64_C(0x14E2D2D0882F0222), UINT64_C(0xB8146BEAF8D40C38), UINT64_C(0x18504653A986DC68), UINT64_C(0x0032FEAF67147A33), UINT64_C(0x27BBF602BEC5734E), UINT64_C(0xA1E21F16A688F36F)}}, {{UINT64_C(0x125A8EEAB73C4AE5), UINT64_C(0x2AF14DBADDBE70B4), UINT64_C(0xD7A286871CEBACFD), UINT64_C(0xDB5BB40118603827), UINT64_C(0xC093C39B73024059), UINT64_C(0x5A71166816972557), UINT64_C(0xF881C0F891B57CFC)}}, {{UINT64_C(0xCC0B567A17856A46), UINT64_C(0x2748DD69C74D5D08), UINT64_C(0xDE76EFFA9364BF4F), UINT64_C(0x057FE88D6202DCD0), UINT64_C(0x73AFAC0B0ED1BC61), UINT64_C(0x6290C1B8B6A1CC9D), UINT64_C(0xD3E356691120CD72)}}},
+	{{{UINT64_C(0xD03C443F18EA191A), UINT64_C(0xFCBF76FAA58D700A), UINT64_C(0x990EF76FE6CFABE7), UINT64_C(0xA80004CCAEFC5288), UINT64_C(0xADC6D8EF8544E30F), UINT64_C(0xCD931912DF70C744), UINT64_C(0xF62A9D1572A6D8AF)}}, {{UINT64_C(0x3647158A03219F27), UINT64_C(0xD61476FB27EAD731), UINT64_C(0xE1EC2141BB2ADCC2), UINT64_C(0x45F158668858CB9D), UINT64_C(0xD5BBC82BBFAB402C), UINT64_C(0xE9DD6F1B28D36675), UINT64_C(0x875884FE373C174E)}}, {{UINT64_C(0xD40512CC7C467907), UINT64_C(0xBFB407188A8B04C1), UINT64_C(0x33E286634BB75066), UINT64_C(0x30AF89DEFD880125), UINT64_C(0xDF024F9AECD9429C), UINT64_C(0x14A74863953BCA22), UINT64_C(0x41ADB8D039F99523)}}},
+	{{{UINT64_C(0xC117806DD2A67D36), UINT64_C(0xEE55AA23A8632C9E), UINT64_C(0x53701BD914126FC1), UINT64_C(0xAEA71367BF8F7BD6), UINT64_C(0x4ABA98E4179B0111), UINT64_C(0x45298561C5A561FD), UINT64_C(0x2187B0AE7AF394EB)}}, {{UINT64_C(0xB471F12DB1616DDE), UINT64_C(0xDB04061760907DA7), UINT64_C(0x86FB58414D37602D), UINT64_C(0xD6F0D95B1100BE72), UINT64_C(0xD23746D703D7CF88), UINT64_C(0xCC9D64E23D738539), UINT64_C(0xAEEF1D2EC89680DC)}}, {{UINT64_C(0x85050BADC460EAA4), UINT64_C(0xE7842B47BEB7DE61), UINT64_C(0x952F2E3E7E2D4CB3), UINT64_C(0x7A14D6CAB1397FC9), UINT64_C(0x56170B557EA9FF7A), UINT64_C(0x60A429C07E218B0B), UINT64_C(0xA93497C93D419C3B)}}},
+	{{{UINT64_C(0x5082CCF1A336508D), UINT64_C(0x188DA128C1F5BAD1), UINT64_C(0x71404F551D8C029A), UINT64_C(0x6C37B993EF13DD47), UINT64_C(0x0E20DDDAD2DD6769), UINT64_C(0x2278D038C94C428C), UINT64_C(0x1A24A51078E3F222)}}, {{UINT64_C(0x87D297FE6EDB0DB9), UINT64_C(0xA0D700988D28251A), UINT64_C(0xF45EA0BB946F8BFA), UINT64_C(0x5AFCCF5E380F7B9D), UINT64_C(0xFBFE9EC7BC852641), UINT64_C(0xD7093124755C909B), UINT64_C(0x436802889404E22E)}}, {{UINT64_C(0xCE75915976C77E76), UINT64_C(0x4365CB8FEEA30689), UINT64_C(0x0DDE5C6F2DDA988B), UINT64_C(0x7D580512A606AF57), UINT64_C(0x5ED5EF0B6E273A02), UINT64_C(0x86FAA0E3D7CD53FD), UINT64_C(0xD32F9A55F143B746)}}},
+	{{{UINT64_C(0x2621B9FA036D9EF1), UINT64_C(0x4849FD64B7CE4335), UINT64_C(0x5B54B3D9D7EB7654), UINT64_C(0xDBB61159201620CD), UINT64_C(0xEB0C53E0D325FAB3), UINT64_C(0x098319E7477290D4), UINT64_C(0x8749658EC1681CBA)}}, {{UINT64_C(0xA2A354349FEC316B), UINT64_C(0x50E6639A9B1A743E), UINT64_C(0xBAF6C52E514CA37C), UINT64_C(0xF6F511C99F4A4FDD), UINT64_C(0xCEF0C00D950DF87E), UINT64_C(0x1C0EBAA1433FADD4), UINT64_C(0x3C3A59EBB38AF940)}}, {{UINT64_C(0x62E06E696050F8DB), UINT64_C(0x32C721F46F7898D5), UINT64_C(0x22CCFA154D4613ED), UINT64_C(0x69A2C9598EB4DF82), UINT64_C(0xFDCFF707E5971703), UINT64_C(0xC0897D74C49447DD), UINT64_C(0x27B044E1D0B2FEC5)}}},
+	{{{UINT64_C(0xCA8706245F0E7DCA), UINT64_C(0xD8F0AD238CD3FB29), UINT64_C(0x54F49503304439B7), UINT64_C(0xA7D4AD09FDCD6E61), UINT64_C(0x9E85438390C67E24), UINT64_C(0x93B81B0C211E1B20), UINT64_C(0x1AA86F07E11E36F8)}}, {{UINT64_C(0xCD2CCA3FFEDEA8B1), UINT64_C(0xE2227EEDD073B306), UINT64_C(0xC42A1D78E37BC12E), UINT64_C(0x91FBD397257870BB), UINT64_C(0x47009D6C605FB2BB), UINT64_C(0x748A320BDC364702), UINT64_C(0x3FF24DC04280E811)}}, {{UINT64_C(0xA0282539E508B79C), UINT64_C(0x22B07557D8D2C9E5), UINT64_C(0xBB5474277D7D7F02), UINT64_C(0xC6B689D55D4069C9), UINT64_C(0xBCBE58ADA9115BE4), UINT64_C(0x0A615D0266558FF5), UINT64_C(0x2AECEF4BE3D3031C)}}},
+	{{{UINT64_C(0x320EB1C679839B52), UINT64_C(0x98E35BCCA27ACFBD), UINT64_C(0x489E5EB506C16748), UINT64_C(0x1F69488737D662E2), UINT64_C(0x49EF43F1DC8DC073), UINT64_C(0x30A3766D63DC5711), UINT64_C(0x0D2640EB50DD7064)}}, {{UINT64_C(0x4F2B561493B2675B), UINT64_C(0xBABC1B4806588C60), UINT64_C(0x08AABA55C86A8AAF), UINT64_C(0x504CAD8CA7B94476), UINT64_C(0xB1DCEE7788A42F63), UINT64_C(0x68374755D99A0F72), UINT64_C(0xD7CDD8F5BE25311D)}}, {{UINT64_C(0x3AA90DB227DE9DDF), UINT64_C(0x005C04B7D8F4317C), UINT64_C(0xD52DF0C6375A4B44), UINT64_C(0xF7FD6ADA9EE45DF8), UINT64_C(0x87FD98009A41D495), UINT64_C(0xF26A1B4D1611DF6E), UINT64_C(0x9B3A90BD103B997A)}}}
+	},
+	{
+	{{{UINT64_C(0x3F67873BDBCDFEE1), UINT64_C(0xA3D4A5A0C0AFCD0A), UINT64_C(0x1C865C59389F93CF), UINT64_C(0xE1D588CC14E945CE), UINT64_C(0xF8A8E228B462D2F8), UINT64_C(0x8F791B42B649FD02), UINT64_C(0x0E0DFF1AB397AD20)}}, {{UINT64_C(0xBB30AC3D90BC6EB1), UINT64_C(0x0AD2F14F16A5F313), UINT64_C(0xA0DB8470FA447E2A), UINT64_C(0xBE32E1E76E406855), UINT64_C(0x02A15CA330D52282), UINT64_C(0x57A70867C2FE315A), UINT64_C(0x55F076500549239A)}}, {{UINT64_C(0xB97DA76C0D5F3BEE), UINT64_C(0xD78A1CC7892E6978), UINT64_C(0x6485B43C022FD8F6), UINT64_C(0x5AA07FA34304E103), UINT64_C(0x63C55973E8823E84), UINT64_C(0x8841573563813BCF), UINT64_C(0x84154F227D813A49)}}},
+	{{{UINT64_C(0x7F2D729F6C0CF08F), UINT64_C(0x0C256B80138EBAF5), UINT64_C(0xCD2AC76285BCC020), UINT64_C(0xD922778AEE845192), UINT64_C(0x25CCD1011C28FCE4), UINT64_C(0x1F2475100E477613), UINT64_C(0xC7A1665C60D8E1D0)}}, {{UINT64_C(0xDB950966D7CEB064), UINT64_C(0x6F290A88E8578420), UINT64_C(0x40F1D244F2CFCE09), UINT64_C(0xFD2426F19D9325F6), UINT64_C(0xB189C905AC6A4A81), UINT64_C(0x3C0E2008854D3ED6), UINT64_C(0x1DF0BD6A0D321BBA)}}, {{UINT64_C(0x14440D6B59654932), UINT64_C(0x9E6016C48A780B63), UINT64_C(0x9101D1C5FC921AA8), UINT64_C(0x9CBB1CA6C874EF63), UINT64_C(0x527599D7FF6E2C7C), UINT64_C(0x44E7CF5706F80D14), UINT64_C(0xBE743B9FEDDBFB91)}}},
+	{{{UINT64_C(0x2F0117AD63FEB1E7), UINT64_C(0x3F06A058BA2F1AE0), UINT64_C(0xFACD4D5EEE5AA31B), UINT64_C(0x41571D91540D9D4A), UINT64_C(0x38EBF2C7DE38992F), UINT64_C(0xBFCAB92A798DEF27), UINT64_C(0x37C7C5D228673328)}}, {{UINT64_C(0x42B99936E6470DF0), UINT64_C(0xEEC53D762D58AF6A), UINT64_C(0x13AFBCA8C357AC74), UINT64_C(0x1F2DC0739917BEBF), UINT64_C(0xBF36CE7DF728F094), UINT64_C(0xC5F6FD6973C8306A), UINT64_C(0x640209B3677632A3)}}, {{UINT64_C(0xCB58C507A859BA27), UINT64_C(0xE0EFEC78289B7347), UINT64_C(0xFD232FB35FD7C34E), UINT64_C(0x266149A91BAAFD11), UINT64_C(0x718CF1765F37706D), UINT64_C(0xEC3A48FC1D30B5F6), UINT64_C(0x72B111E752E701B1)}}},
+	{{{UINT64_C(0x8EEE872A2E23AEF7), UINT64_C(0x3C63B497B6FEB9B0), UINT64_C(0xB32315FB94D973F3), UINT64_C(0x249A41669EA1FF42), UINT64_C(0xFE6AB4F8BE537B49), UINT64_C(0x8007FDAD8F0F89C7), UINT64_C(0xE56EF0B71B8474F6)}}, {{UINT64_C(0xF5478B2E83F333F9), UINT64_C(0x7AB5144E718B2607), UINT64_C(0xD0730D13AA605A4C), UINT64_C(0x75AB3EA1FC1FC991), UINT64_C(0x86A306D8D3E7A043), UINT64_C(0xF6111702A8B1C599), UINT64_C(0x7741394E040AD224)}}, {{UINT64_C(0x6BDBF971084C22FD), UINT64_C(0x08488D4E17149F0A), UINT64_C(0xD90F6335376732C7), UINT64_C(0x9ED9D61AA8EEC8B7), UINT64_C(0x8EE54CDBE1130230), UINT64_C(0x1541C7AB5A886552), UINT64_C(0x38E8A666FC7FDEBB)}}},
+	{{{UINT64_C(0x9134C6A2560723A7), UINT64_C(0x497F8AABD0DF4EA6), UINT64_C(0xD91FA49D676A55D7), UINT64_C(0x8647928412C09577), UINT64_C(0x3DAF4FD449581C7A), UINT64_C(0x89F3C4EF44CFA54F), UINT64_C(0xFC266B5C9EC97C2F)}}, {{UINT64_C(0xC1FCD3FBE88B142A), UINT64_C(0x5A6A9F3109F4BD69), UINT64_C(0xE6830308839C0B5F), UINT64_C(0xDBBA0A7463CA8502), UINT64_C(0xCCF5D56B542F0628), UINT64_C(0x4B06613E09FD743C), UINT64_C(0x7A8415BDE2BA3EBD)}}, {{UINT64_C(0x80C26F253BA3480B), UINT64_C(0x705435D1563AEA2D), UINT64_C(0xC425834D8B1F2DD9), UINT64_C(0x817822F96EDD2075), UINT64_C(0x7B72BD82F3C78ADD), UINT64_C(0x4083871B9F9E5B1F), UINT64_C(0x45A10ADBE230EB8D)}}},
+	{{{UINT64_C(0x982234A3BC076AB2), UINT64_C(0xBE2ED6953E54977A), UINT64_C(0xAD78E2C12215831E), UINT64_C(0xAA5C4B08632145FB), UINT64_C(0xA71998E32AD7BA78), UINT64_C(0x900D23485A636F4E), UINT64_C(0x97AC6286A5176F25)}}, {{UINT64_C(0x635DF91181093F7B), UINT64_C(0x24492BF9829C8445), UINT64_C(0x5C8A18525D99D627), UINT64_C(0x80544A084281CB5B), UINT64_C(0xD2DBAEB8F435DF27), UINT64_C(0xFF3175230447F4C3), UINT64_C(0x6B4D7645D2FBFFC7)}}, {{UINT64_C(0x41659FD201278A99), UINT64_C(0xB1BAA004FD486FF2), UINT64_C(0xB3D67633D0212AA6), UINT64_C(0x3A4E8442AEF4C002), UINT64_C(0x977436849553C181), UINT64_C(0x357231123EB515D4), UINT64_C(0x1351C1080072E5AA)}}},
+	{{{UINT64_C(0x184837F802B0C9CB), UINT64_C(0x1428B65F8168CE84), UINT64_C(0x4EA7E8DF66EA99FC), UINT64_C(0x08334E3C9788EE80), UINT64_C(0x058D6BA1B69EAE90), UINT64_C(0x4ABA1D7064B6BC91), UINT64_C(0x12D9BB3397B36863)}}, {{UINT64_C(0xE30645C85C413AA8), UINT64_C(0xA50BB09DEA6AC6B5), UINT64_C(0xBCCEB129A620D289), UINT64_C(0x287B3309104DB3BB), UINT64_C(0x73EEC97F0142E479), UINT64_C(0x53F94B93F84EDFC3), UINT64_C(0x3274B7F052DFBFE9)}}, {{UINT64_C(0x743CBD116D99D216), UINT64_C(0x309F580D1214CC77), UINT64_C(0x1512909EED5B6320), UINT64_C(0xEF13EBABCE66CC71), UINT64_C(0x1DAC2B0E7CFAEAEC), UINT64_C(0x68B1DC09150422EB), UINT64_C(0xC9F5F585522979F8)}}},
+	{{{UINT64_C(0xD49D5670A1BD6FA9), UINT64_C(0x2845EC42FC9DB6C4), UINT64_C(0xB03549AECD4ED1B4), UINT64_C(0xCBBAB1FA4EED90E1), UINT64_C(0xE1D28A2816EB3225), UINT64_C(0x41CFA0B77D2A5345), UINT64_C(0x712B19F7EA8CAA37)}}, {{UINT64_C(0x5D42E6844661853E), UINT64_C(0x49F64CF4126E4A6E), UINT64_C(0x21B6B1196A9CFC36), UINT64_C(0xC32E29EA06621BCF), UINT64_C(0xAEB8C5680F887021), UINT64_C(0x4BE24660F6D75703), UINT64_C(0xAF09BADC71864E97)}}, {{UINT64_C(0x00D0B319B3ED8290), UINT64_C(0x48DA8BAF62C5FB05), UINT64_C(0x7BA2CF61CAF64716), UINT64_C(0x8578ADD86C0633B8), UINT64_C(0x7C5E8FE279BBFBA3), UINT64_C(0x8F09DBD831407A1D), UINT64_C(0x6F3134FD246CE1D3)}}}
+	},
+	{
+	{{{UINT64_C(0xDC3483535A81B6D3), UINT64_C(0xDFEB19E7301CA037), UINT64_C(0xF01A38748CAB763D), UINT64_C(0xC2795CD6E5D87F66), UINT64_C(0x5D4615C36CBBA4A5), UINT64_C(0x48EFC706F412411C), UINT64_C(0x205BAFC4B519DFFF)}}, {{UINT64_C(0xF0FCAA5BE5227110), UINT64_C(0x2B1B7832F463AD0A), UINT64_C(0x72F82234EF2C4264), UINT64_C(0x8923A6167BBEF7B0), UINT64_C(0x2366D91BA793CB0A), UINT64_C(0xA94F142F7D215DF0), UINT64_C(0x3478298A14E8915D)}}, {{UINT64_C(0x7B6972825D373C7F), UINT64_C(0x4BC33D878EE82D3A), UINT64_C(0xAF4983F6BC806DAD), UINT64_C(0x5D0BE1C9204EA4A4), UINT64_C(0x28FD7029A82A2501), UINT64_C(0x5F523725DEE5E8DC), UINT64_C(0x9093BF423D4C42B8)}}},
+	{{{UINT64_C(0x44AD79A0FC831D39), UINT64_C(0xEEB224D19484803C), UINT64_C(0x26F6B94F8A86486A), UINT64_C(0xC1ACD7CD0CA284B9), UINT64_C(0x38B3D12C52501829), UINT64_C(0x223ABF371EF59F60), UINT64_C(0x2E0351613BF4DE77)}}, {{UINT64_C(0x467A5A4F2B4468CC), UINT64_C(0xE696DCEA921470AE), UINT64_C(0x20D6FBF23B7E811B), UINT64_C(0x22983469E59AD0D7), UINT64_C(0x110C4397EE9EACAC), UINT64_C(0xF85BDCBE26754DD4), UINT64_C(0xE4999F7AA7C74B4E)}}, {{UINT64_C(0x6F69F0A9DD97F7FD), UINT64_C(0x40E7122EA9E6A850), UINT64_C(0x9CA8E717CA16876A), UINT64_C(0x0863423934FEF446), UINT64_C(0x78F6DCF693D9C4F6), UINT64_C(0xEB6695726C69DE79), UINT64_C(0xAE278A0061EA3C02)}}},
+	{{{UINT64_C(0xA2031838C8EA1E98), UINT64_C(0x956E539B38304D96), UINT64_C(0xE3F52A5FBDEF0163), UINT64_C(0x355E897F6BD4D35C), UINT64_C(0xD3A472DD3FE538C2), UINT64_C(0x0241ECA9F4526078), UINT64_C(0x2BC8495FD7FC0759)}}, {{UINT64_C(0x6E23D0C89EAD4C8C), UINT64_C(0xB8331EA55A9601C6), UINT64_C(0xA5A97841493C94F5), UINT64_C(0x90C69594C49A300A), UINT64_C(0xCEDCCBDC8CC98BDC), UINT64_C(0xD4E916ADCCBF4E44), UINT64_C(0xD56E36B32C37AEB0)}}, {{UINT64_C(0x2CD81BDD72F56E64), UINT64_C(0x6F8D947C7DFC0142), UINT64_C(0xE70C1FCC4D5BBF22), UINT64_C(0xB9AD9B8CE5CC7EA4), UINT64_C(0x36FE5924F8EA7A1A), UINT64_C(0x226988B9921A6957), UINT64_C(0xAE0EB85378CA5AF1)}}},
+	{{{UINT64_C(0xFA052BD405B93152), UINT64_C(0xCC5F688B1D44F1DB), UINT64_C(0x6AC543E77BA1ABE5), UINT64_C(0x6E4BB98811F8A38A), UINT64_C(0xC5AF8DFFB43355FD), UINT64_C(0x1F58981F20EEDF29), UINT64_C(0x22A0F74DA9B7FB75)}}, {{UINT64_C(0x01EC8F2BC6397B49), UINT64_C(0x8264FF59FC936392), UINT64_C(0xFDC4CCB7F130AA04), UINT64_C(0x4B13ACAFE156A63A), UINT64_C(0x8D40CB49990FD7C3), UINT64_C(0x6ECAE7F26F248769), UINT64_C(0xAE51FAD0F296E26D)}}, {{UINT64_C(0xE3A530C4EAAA3528), UINT64_C(0x6506E4C29576CE89), UINT64_C(0x759449D28941CF69), UINT64_C(0x12ED282704588ECB), UINT64_C(0x4E14019085DE9328), UINT64_C(0x2D9E2D3826B06566), UINT64_C(0x3260AD19F242520A)}}},
+	{{{UINT64_C(0x80D0AD5EBDD0F58D), UINT64_C(0x1E0F6EC6A2C5C678), UINT64_C(0x996D32E1CE0349AF), UINT64_C(0xE5E69D2008014853), UINT64_C(0x43AAA48ECF59AF51), UINT64_C(0x3D2EA7DAFCB00EF7), UINT64_C(0x4AC4FAD89189B68D)}}, {{UINT64_C(0x6292D91C2EAE97F1), UINT64_C(0xB10AEF5ECA262B46), UINT64_C(0xC661DA440B213B38), UINT64_C(0x5F64CF8DEC90187F), UINT64_C(0x3CA457AD1B85F3F2), UINT64_C(0xEED4BF517672CEE5), UINT64_C(0x7706FB347618288D)}}, {{UINT64_C(0xD2C240499F6EE453), UINT64_C(0x498BE9FC88ED662D), UINT64_C(0xE70D4418133C8835), UINT64_C(0x3A821B35120326C5), UINT64_C(0xBAD6A04C87D44990), UINT64_C(0x280D51B82B94D9C4), UINT64_C(0x1F39BC5F6DEB732A)}}},
+	{{{UINT64_C(0x391577D9117494FE), UINT64_C(0x6D3752D29BE2FD72), UINT64_C(0x7FE1089A0EEF0018), UINT64_C(0xAE6FB59F241D0F52), UINT64_C(0x3DF0D48C2542824B), UINT64_C(0xFDB0A47AF4B0B8D3), UINT64_C(0x534C601073B0B6FF)}}, {{UINT64_C(0x94E6DF35951C033B), UINT64_C(0xB9B63E1002B86C0F), UINT64_C(0x7BBFF8A7CB55548F), UINT64_C(0x684D8BF2999818BA), UINT64_C(0xB326358F0AE4BA3D), UINT64_C(0xBC1E2F2568E853DB), UINT64_C(0xC6917EBB3E0F68EE)}}, {{UINT64_C(0xA9A1099D1913B0AA), UINT64_C(0x59E129EF9057A2A0), UINT64_C(0x7CD2EC6609B85A5D), UINT64_C(0x03067AE6346585FC), UINT64_C(0x3B3EB9D891E376DB), UINT64_C(0xA9EC2D91B0E1CAB9), UINT64_C(0x332FEEBA17FC2126)}}},
+	{{{UINT64_C(0x5CBE1BBFC19F8D13), UINT64_C(0x35A9C3951B62D479), UINT64_C(0x8CEBEA9371C49ED5), UINT64_C(0x7A141D0E77C389F6), UINT64_C(0xD7ADE44F8BFC1A94), UINT64_C(0xB1F058580A264B48), UINT64_C(0xEED1466258B5FC3D)}}, {{UINT64_C(0xAD5DAA4A19854B21), UINT64_C(0x57EB5BFA46F1AB1E), UINT64_C(0xA48ADAC152E35599), UINT64_C(0xFFC169B5DC84277E), UINT64_C(0xCE3720E61768709C), UINT64_C(0x2F262DD9A832DE50), UINT64_C(0xDDFFD4D2D6CE29E4)}}, {{UINT64_C(0x38E3959FDF15DFD9), UINT64_C(0x4E156561A90FF0E3), UINT64_C(0x10090FE33C1F4ACC), UINT64_C(0x6C21638B762B8987), UINT64_C(0xF0BDAD286828D7A2), UINT64_C(0x4226C8DFF5C05A96), UINT64_C(0xD5227D81E5C1ABBC)}}},
+	{{{UINT64_C(0x4CD5BA5578FA0A56), UINT64_C(0x63ED0D7D0F1FAFAF), UINT64_C(0xD87F027666E4138B), UINT64_C(0x6C958F3204E65135), UINT64_C(0x86D3CE2686DCA886), UINT64_C(0x785CAF1CBCD3AA84), UINT64_C(0x8A9B11403C8335E3)}}, {{UINT64_C(0x205C1DCA22E0EF60), UINT64_C(0x73A8775AF5B7D3FB), UINT64_C(0x8330E6E690FFC2B3), UINT64_C(0xBDD0F39330FE15D2), UINT64_C(0x364966A8288A1022), UINT64_C(0x4B154949208A6BD7), UINT64_C(0xFB38C6BB9D98288D)}}, {{UINT64_C(0xB86E85D34B99111B), UINT64_C(0xAE985FF31FFDBA92), UINT64_C(0xF868A09A4C80C4C4), UINT64_C(0x2822F29F73E9D42F), UINT64_C(0x67D754A53F73C35E), UINT64_C(0x8E3316024868FAD8), UINT64_C(0x632004233E131F0B)}}}
+	},
+	{
+	{{{UINT64_C(0xFF6D197640340AC2), UINT64_C(0x8E42969F473ECAB5), UINT64_C(0xD00EEDEAD46F7C45), UINT64_C(0x8E0CE0CF168646A1), UINT64_C(0x1D38D8D15AF70C87), UINT64_C(0xCF916FDD10CCA729), UINT64_C(0x6D3613424F86D592)}}, {{UINT64_C(0x15BA50D172D5C4B4), UINT64_C(0x098AE0AF5024626F), UINT64_C(0x6CAAA876F3809D76), UINT64_C(0xA70D97A7433DC27D), UINT64_C(0x360F5C735572DC67), UINT64_C(0xAAC93179BB31935B), UINT64_C(0x76738487ED1A33DB)}}, {{UINT64_C(0x2724C5E20370D9DF), UINT64_C(0xE0CDF6EA19C0E115), UINT64_C(0xF1DC2D54BF9153CC), UINT64_C(0x99105E6395F939ED), UINT64_C(0xC9B676DFD910B062), UINT64_C(0x5DC02B166F01D37B), UINT64_C(0x1DD9DCBB610636C2)}}},
+	{{{UINT64_C(0xBF8D1CA668F9FA0D), UINT64_C(0x0D7B4ED95D8A02F2), UINT64_C(0x46FA51D19FC79F63), UINT64_C(0x8623BF3F0448EC4F), UINT64_C(0xABCD650E94B371DD), UINT64_C(0xF3FCACD90A70E94F), UINT64_C(0x0F720C403CE3B73A)}}, {{UINT64_C(0x45590814CD636C3B), UINT64_C(0xA4C6CF6928D44699), UINT64_C(0x9B47225843AAF484), UINT64_C(0x36CFB2F9B5A4C1AF), UINT64_C(0xCF032C264025116B), UINT64_C(0xD059E27412A1F248), UINT64_C(0x866D536862FC5D8C)}}, {{UINT64_C(0x0BC1CC297F5334C9), UINT64_C(0xB01EDDD7F76205C6), UINT64_C(0xF1B506FD02F8246F), UINT64_C(0xE5A291FBCBD41C70), UINT64_C(0x34FC231E7A44DB02), UINT64_C(0x3DCE34FE4357985A), UINT64_C(0x2E39627236C0157B)}}},
+	{{{UINT64_C(0x78156E62F6DE4A2E), UINT64_C(0x925E0365AF7AAFCC), UINT64_C(0x8B219165C861819E), UINT64_C(0x1AD564FA4DB5C01F), UINT64_C(0xC5319C86101FD26D), UINT64_C(0x18EEF815F26216BB), UINT64_C(0x8684F4727F83D107)}}, {{UINT64_C(0x78A30FD28B0F48DB), UINT64_C(0x52DF6FEF5066AB82), UINT64_C(0x6EBC8CD164E771A6), UINT64_C(0x8DC3132B5A486F3C), UINT64_C(0x6EFD73323FB68B49), UINT64_C(0x61EB669B2262264B), UINT64_C(0xD17015F2A35748C2)}}, {{UINT64_C(0x19ACF77A1CEACB23), UINT64_C(0x6C60E1E77C4846F5), UINT64_C(0x23FD1AC4342FA80D), UINT64_C(0x6C24BE8B2FC3E2E7), UINT64_C(0x10A00C84687DE91D), UINT64_C(0xD80D93217959AE4E), UINT64_C(0xD801DA038DF807E3)}}},
+	{{{UINT64_C(0xC44241F657C4BB1D), UINT64_C(0x37535671702F5187), UINT64_C(0xC0C0CD8A9449F397), UINT64_C(0xE58E280C272F772C), UINT64_C(0x3494B5EE9C1B7EFE), UINT64_C(0x3AF4731142A57B32), UINT64_C(0x80C0E1DD62CC9EF2)}}, {{UINT64_C(0x3CCBC05BF675FFE3), UINT64_C(0x911066215CF258CE), UINT64_C(0xA69BC2C5D223928C), UINT64_C(0x076A9F4830E12A32), UINT64_C(0x4ED2329D5F5EF5E8), UINT64_C(0x81BA58A72CF27796), UINT64_C(0x38EA70D6E1B365DF)}}, {{UINT64_C(0x1D9F7F31D34C7E18), UINT64_C(0xEC86573170FDCBF6), UINT64_C(0x1D9544FFDDACA635), UINT64_C(0x8C19BF492556BECE), UINT64_C(0xCA08A56284DFF544), UINT64_C(0xBE1B7050A0A6D6E8), UINT64_C(0xFB288D786960D75F)}}},
+	{{{UINT64_C(0x5A1B186802F75C80), UINT64_C(0xE8DD0C153A069866), UINT64_C(0xDDFC276F5A7FE522), UINT64_C(0x50D3BDCE96738668), UINT64_C(0x7CF25001B27E421D), UINT64_C(0x8840F0E8490C2D73), UINT64_C(0xEA2610BE30C8DA56)}}, {{UINT64_C(0xB0E7B1BC09561FD4), UINT64_C(0x6160EDA786C26DEC), UINT64_C(0x8A3DA322369906A7), UINT64_C(0xE2A2D9BF371C7147), UINT64_C(0xB843292F921DB8FC), UINT64_C(0x97AF95A665F959D7), UINT64_C(0x7CB4662542B7A980)}}, {{UINT64_C(0xC0CE4E64E29129CA), UINT64_C(0xB12604167D0D26B8), UINT64_C(0xB2CAAB0CC53E97AB), UINT64_C(0xB5836EB977227DEA), UINT64_C(0xE97400263C9C34A5), UINT64_C(0xB8BE69E12069A56B), UINT64_C(0x1233E421CB6406BB)}}},
+	{{{UINT64_C(0x84A5C53AEC6B0C2F), UINT64_C(0x2736C4B87327312D), UINT64_C(0x310CC0FC374CBC73), UINT64_C(0x665D1752A8D78FE9), UINT64_C(0x92D6004727D980E8), UINT64_C(0x079280146220A626), UINT64_C(0xBD1FEDB860FEA55D)}}, {{UINT64_C(0x77CBC4F8AB35D111), UINT64_C(0x4B935BA8CDF3E32F), UINT64_C(0xF8808DD5B71ADB61), UINT64_C(0x26EF27217B3A2DF2), UINT64_C(0x05447C303009B89C), UINT64_C(0x044312986AE655A5), UINT64_C(0x427A0112367D4C21)}}, {{UINT64_C(0x9E48F57C6FF96DEB), UINT64_C(0x0566FFCE0AA25A0E), UINT64_C(0x9921334AB81C9FA9), UINT64_C(0x14458FCE981ECD06), UINT64_C(0x3F97F86A610DDAAD), UINT64_C(0x7018C39A4D1E0F8D), UINT64_C(0x52830C44FE0676B3)}}},
+	{{{UINT64_C(0x46E9FE256C1942D8), UINT64_C(0x17449E7377D96E35), UINT64_C(0x11FBCA43E734CB0C), UINT64_C(0xC32B62035F468212), UINT64_C(0x3086AD1D9644F83D), UINT64_C(0xDD5192FBB4558451), UINT64_C(0xC2A18222F1008954)}}, {{UINT64_C(0xB401055A21855BFA), UINT64_C(0xEA0E9E6D7B477078), UINT64_C(0x2973F73F8DF6D30C), UINT64_C(0x1C0B3D4081C21503), UINT64_C(0x24C50D0ABE17DD76), UINT64_C(0x99413783DEAB0404), UINT64_C(0xDE9271E8F3146F55)}}, {{UINT64_C(0x2DFCCD8758A5B7DF), UINT64_C(0x138E1C7F5074F624), UINT64_C(0x32BE4A99242EDE49), UINT64_C(0x4D6C318A88DD9EC5), UINT64_C(0xAAB89D97FE5956CC), UINT64_C(0xAD077F78C6EF33D1), UINT64_C(0xBE11B0D3BD8F529D)}}},
+	{{{UINT64_C(0x835EDFD25AF4A11D), UINT64_C(0xDD313A3C53078467), UINT64_C(0xE0EEF8B20086873E), UINT64_C(0xF3DD78C774E00ECF), UINT64_C(0x64371999F1BA65D2), UINT64_C(0x9BE5DDE9A7E8AB13), UINT64_C(0xEB146CE87A8609FA)}}, {{UINT64_C(0x1C76AFD6565353E9), UINT64_C(0xDE4FFA7023DD51BA), UINT64_C(0xBA7A1B7A09F2237E), UINT64_C(0x2B99950ACA085760), UINT64_C(0x266EA5057AD97388), UINT64_C(0x1C4217F55E49E894), UINT64_C(0x69CFB9C5555679D0)}}, {{UINT64_C(0xA5D3F14F3D559195), UINT64_C(0x7C52C61DAC29689D), UINT64_C(0x251418C879F02B0F), UINT64_C(0x3C13576E5CB197FE), UINT64_C(0xE0C1966F806E6415), UINT64_C(0x40E773FD7BF83895), UINT64_C(0xF2EB488868BE62BB)}}}
+	},
+	{
+	{{{UINT64_C(0x7B67867E7C5D631A), UINT64_C(0x13521DE88C55BCF4), UINT64_C(0xE203378366D06AFD), UINT64_C(0xF1253EC7D7DBDEF6), UINT64_C(0x84510AD240B0F9E2), UINT64_C(0xEC533F4A61181BE9), UINT64_C(0xD5E4C5B96CE63363)}}, {{UINT64_C(0x541D0B6C34DF4A25), UINT64_C(0x6EF3EF9486A5A1B5), UINT64_C(0xFF84D72F0E59E47B), UINT64_C(0x3DA359C94D8042F2), UINT64_C(0x16FD21C1603E74AA), UINT64_C(0xCFF210191CBA1BAA), UINT64_C(0x50032D8EBC6472B4)}}, {{UINT64_C(0x1A353EE727AA6557), UINT64_C(0x71E0186A417B9B5A), UINT64_C(0x3AF612C979F8D689), UINT64_C(0xD8882BEC9907EF97), UINT64_C(0x320940D06DD2B937), UINT64_C(0x7116A66F9BFD2C27), UINT64_C(0x8E66DC80D9E1FE70)}}},
+	{{{UINT64_C(0x8FB6833E01FC1B13), UINT64_C(0xB8208A8B7BA1A5AD), UINT64_C(0x38ED20C0CAFA2622), UINT64_C(0x68B18F97C6663AF7), UINT64_C(0x1F9774FBE4D89448), UINT64_C(0xDD4355BE814FCF0C), UINT64_C(0xD81C02DB57E543EE)}}, {{UINT64_C(0xD15E32AFC310BAD8), UINT64_C(0x2795065BC819B813), UINT64_C(0x32D59C8EFC5FC314), UINT64_C(0xF2B5A3CE50065147), UINT64_C(0x477FAF420491E39D), UINT64_C(0x96B184D9BD4F2AD4), UINT64_C(0xC3FEE95A4D9C071A)}}, {{UINT64_C(0xAFE34A59358892E2), UINT64_C(0xA67105EC3C724028), UINT64_C(0x3BFAB99AE03EB3C3), UINT64_C(0x0835D746E50899EC), UINT64_C(0x78F3E1FFC70E249E), UINT64_C(0xEE7B3E6E08BEF6BA), UINT64_C(0x6898D57FA1117C4C)}}},
+	{{{UINT64_C(0xEFFAC7DF06B4BA61), UINT64_C(0xF609A6ED551061AA), UINT64_C(0x0ED13D35AA2D6133), UINT64_C(0xEEA03D0C420CFBA2), UINT64_C(0xC56F936D6E861C63), UINT64_C(0x5F68F3D9A3D575F0), UINT64_C(0xBA0B7FECD9F66EA2)}}, {{UINT64_C(0x05292E1354680772), UINT64_C(0xA9E46F6A2DBA73F4), UINT64_C(0x68DAAACA6ADD924E), UINT64_C(0xCE6F147A81CFD612), UINT64_C(0x454BDED8F57A4CB6), UINT64_C(0xA893B11D61CB8EC3), UINT64_C(0x2256FFC7656022C8)}}, {{UINT64_C(0xA156292DF2E6F7A3), UINT64_C(0xFDF5FAA6475B9A75), UINT64_C(0x5160082E658E6AB9), UINT64_C(0x3F76267EDDBAC66A), UINT64_C(0x03ADA9599AD39167), UINT64_C(0xC618444462DBC965), UINT64_C(0xEED7A461C39D0713)}}},
+	{{{UINT64_C(0x3E6B33271575CB78), UINT64_C(0x834B560D305ADCD2), UINT64_C(0xA31E27EEDBD3AD6D), UINT64_C(0x647EE0C8614A64A5), UINT64_C(0xFF68BD7C2CE40B47), UINT64_C(0x297FC0B777278EF4), UINT64_C(0x8759208BAF88ADA5)}}, {{UINT64_C(0x2E86CFE64918DF68), UINT64_C(0x30149D60A73CDD88), UINT64_C(0xBBEF55546B642B95), UINT64_C(0x3F1C3467BACEAE38), UINT64_C(0x3FEE9F9BABDF58E4), UINT64_C(0x52CBF57A4A8B99A8), UINT64_C(0xF744E968AE36ECCD)}}, {{UINT64_C(0x0D4E6128A8BF661B), UINT64_C(0xBC2D9AE68BF08937), UINT64_C(0xFE8BECDA7277AA91), UINT64_C(0x22C27D6387A6DC78), UINT64_C(0x521856F217F94B0B), UINT64_C(0xF631721793C7FE9E), UINT64_C(0x5B1ACDAE0F8BE586)}}},
+	{{{UINT64_C(0xF6B945869A607124), UINT64_C(0xE381810DBE9440E6), UINT64_C(0x43B80B9911E60738), UINT64_C(0x6F7A3F3951DF68C3), UINT64_C(0xACB989015CE42433), UINT64_C(0x9B14931019E82D32), UINT64_C(0x8A31A38EC12F93A6)}}, {{UINT64_C(0x720D0D36997C916A), UINT64_C(0x9040DC95F3B88853), UINT64_C(0xBE95A2CF1A261354), UINT64_C(0xFE14132560F6F5EA), UINT64_C(0x8F2355C865A909E9), UINT64_C(0xC6442931A9C97D59), UINT64_C(0x2354A85B42385070)}}, {{UINT64_C(0xD4FC289ECABD5DE7), UINT64_C(0xC568C58815F3C689), UINT64_C(0x2688567645724728), UINT64_C(0xAEF90534A26E1069), UINT64_C(0x5E21EBD18D85116B), UINT64_C(0x752FAFB31CD7DEFB), UINT64_C(0x176A9AE59125DCA7)}}},
+	{{{UINT64_C(0x2E4CDD22497F9619), UINT64_C(0x31C24776FFFC2216), UINT64_C(0x209BB8EE5EC330CD), UINT64_C(0xE579E2117C04C10F), UINT64_C(0x32515CDFC235BBFD), UINT64_C(0x7E6D3E26FFA70E38), UINT64_C(0xC66A7C3C65C60465)}}, {{UINT64_C(0x9B322ACD7B45E567), UINT64_C(0xDB731589CF0296DB), UINT64_C(0x337A401FD0BD3BA1), UINT64_C(0x0B3035C7E8826109), UINT64_C(0xF066ED08D7F505A5), UINT64_C(0xC376B5EDA4004D5A), UINT64_C(0x9C7B7001944748B3)}}, {{UINT64_C(0xB8EC3F07CD4C08F6), UINT64_C(0x6101BDD1B3AC785F), UINT64_C(0x3F9F25EE0EF7EFDB), UINT64_C(0x047220287D8667F6), UINT64_C(0xE2D4D704D6FDD103), UINT64_C(0x579506AD7FF83A7A), UINT64_C(0x061E8E1F3F7F4393)}}},
+	{{{UINT64_C(0xE0D76832570C3716), UINT64_C(0x0FEADA62AF0DD540), UINT64_C(0x2B546476B155D658), UINT64_C(0x03F5B72B4F42ACC3), UINT64_C(0x30EE68B9BA881BB6), UINT64_C(0xEDE3B5C5034209C1), UINT64_C(0xCE61A9CFD15E7D37)}}, {{UINT64_C(0xC2FFF1D8572605D0), UINT64_C(0x43DD62AC2D3062AB), UINT64_C(0x947020A85E02EFBE), UINT64_C(0x9111C20B859D2BAA), UINT64_C(0x0A7A656F662EBC8A), UINT64_C(0x1384316B21A67F59), UINT64_C(0x29B30C500C7DB60E)}}, {{UINT64_C(0x02B8BF01390516E7), UINT64_C(0xBFCA4AE3DFA8F41E), UINT64_C(0xD303CB8CACD95B4F), UINT64_C(0xEE379CCCAA4796A9), UINT64_C(0xB5288301BE5E4D7F), UINT64_C(0x5816DFEA363B596B), UINT64_C(0x58D9F2430BFC68D9)}}},
+	{{{UINT64_C(0x4D61E55E2906B8DE), UINT64_C(0xEF676A97E9694997), UINT64_C(0xAA595A24B52B526E), UINT64_C(0x83C48FCB512F5361), UINT64_C(0xF2328115AD81CC7B), UINT64_C(0xDF6F93D44B8EA64A), UINT64_C(0x68D7F7C1FE22E39E)}}, {{UINT64_C(0xFB2B2116A520D151), UINT64_C(0xF79166A0B7D6AA3E), UINT64_C(0x37DB8848AE70A9B0), UINT64_C(0xD317D9F3CF121740), UINT64_C(0x05922FC34436868C), UINT64_C(0xA852646A5D23B573), UINT64_C(0xAD6569137FC10DBA)}}, {{UINT64_C(0xCA1DD47B60CA88A0), UINT64_C(0x11ADC3B9A9F62544), UINT64_C(0x65450FC6A6101F37), UINT64_C(0x1E6805027E154FAA), UINT64_C(0xEC6DCA5D26171185), UINT64_C(0x6E8EDC6711E7ED16), UINT64_C(0x9A428A339796BC79)}}}
+	},
+	{
+	{{{UINT64_C(0xBDCF8E5F512C78D5), UINT64_C(0x50B5EB94D98805CD), UINT64_C(0x33CD31AD1DCDF2AB), UINT64_C(0xB10AEFF5F33C136F), UINT64_C(0x493F2F8FC50D6226), UINT64_C(0x520D4DF57165F7FF), UINT64_C(0x41FBAE505271A77E)}}, {{UINT64_C(0x2372C898776480BA), UINT64_C(0x5F01260835925F45), UINT64_C(0x3D49EBED36B8D49F), UINT64_C(0xA49403223BC1DCEF), UINT64_C(0xCDA7E0F73130C1C1), UINT64_C(0xF2DC86D05A3178C1), UINT64_C(0x57B0AA807F352251)}}, {{UINT64_C(0x182047D3567B9FC6), UINT64_C(0x79F3911380470E44), UINT64_C(0x3FCEB5EF6CE339E6), UINT64_C(0x457807A725899DB1), UINT64_C(0x1A79BF44B07A4106), UINT64_C(0xCBA06241DDD67E05), UINT64_C(0x786CC80216C20641)}}},
+	{{{UINT64_C(0x217AB628E71F88BC), UINT64_C(0x64F6CF585F38018F), UINT64_C(0xC493A5DBBE3A413D), UINT64_C(0xC7725DE90F86DF1E), UINT64_C(0xFFEE00FE1E8355E6), UINT64_C(0x8978F9924E323954), UINT64_C(0x1C192987812714BB)}}, {{UINT64_C(0x197C4CE3EAABCA8B), UINT64_C(0xE541F861EB59BF70), UINT64_C(0xCD1B9231A84FC682), UINT64_C(0xE4BF28422307CA9A), UINT64_C(0x2ACCB9F9A96F8B6C), UINT64_C(0x0611D93C46D1DE25), UINT64_C(0x8E2BD80751DC987F)}}, {{UINT64_C(0x2D8A2C9F98C1097F), UINT64_C(0x2BE051AED421992A), UINT64_C(0x3272455A0CAC4DD2), UINT64_C(0x995E1B747789EA3F), UINT64_C(0x9EAE4A11D8FD36D0), UINT64_C(0xADF218F99B114215), UINT64_C(0x4E12934A7C794201)}}},
+	{{{UINT64_C(0x71F2FD8FBE27D54B), UINT64_C(0xF49A2A1E37EC2480), UINT64_C(0x18A9E52FCC888AB8), UINT64_C(0x870B244642C62A3C), UINT64_C(0x7FAC5AC55DE30290), UINT64_C(0x97D56D6DDE419027), UINT64_C(0xF4CF8A95DB04FE8D)}}, {{UINT64_C(0x933E280F5D30D077), UINT64_C(0xB0DD2C903073CB32), UINT64_C(0xBCB4F0E0BE2AC24E), UINT64_C(0x6CD0CD45A2D1A498), UINT64_C(0xAA79A8023216DB46), UINT64_C(0x7E52F17B008E3B28), UINT64_C(0x20685F2868E4DADD)}}, {{UINT64_C(0xB4A8F551BBC05FF7), UINT64_C(0x89C64CA3681B33F7), UINT64_C(0x926C1D120F453E22), UINT64_C(0x0739BB3654DF4F3F), UINT64_C(0x573BBFADC16D75AC), UINT64_C(0x1BB5C35EE712D314), UINT64_C(0x9647932A61EBDBE0)}}},
+	{{{UINT64_C(0x330A68C147C7A486), UINT64_C(0x7506D8EF234C4296), UINT64_C(0x828D51470667BFFE), UINT64_C(0x12E44BEF55A13C88), UINT64_C(0x92A5929F925F3274), UINT64_C(0x01D5B31C5CD5537D), UINT64_C(0xB77AA7867EB3D70A)}}, {{UINT64_C(0x9936EC45F8B82E4D), UINT64_C(0xA94E6821DA0B37B1), UINT64_C(0x0850108AF37AAD7F), UINT64_C(0x87E56851F0206421), UINT64_C(0x94452948CE9B8867), UINT64_C(0x5C2BAAFC136135F3), UINT64_C(0x8A57D0E453E33212)}}, {{UINT64_C(0x1EB691EDB8EB8BDC), UINT64_C(0xA7E381F4308F094F), UINT64_C(0xF008098CC7F2E001), UINT64_C(0x205EB811566DA452), UINT64_C(0x7F604032DFDF004B), UINT64_C(0x66567295CDADB382), UINT64_C(0xFC3392695B72913E)}}},
+	{{{UINT64_C(0x55EFE99488043664), UINT64_C(0x523FB8B8509DB1AA), UINT64_C(0x045C0F1A2E5A9332), UINT64_C(0xA7AE71805E255DD1), UINT64_C(0xCF345BF532E68DD8), UINT64_C(0x0722EE63A71655F1), UINT64_C(0xD1C21386116BACE0)}}, {{UINT64_C(0x78626221F1C6D1F4), UINT64_C(0xEF16240B83037732), UINT64_C(0xA0495CE393A0D88D), UINT64_C(0x9D3E4608229266EC), UINT64_C(0x9CB79271907B5C6C), UINT64_C(0xAFE42C7B3C57DC55), UINT64_C(0x8A2AD0BB439C9B06)}}, {{UINT64_C(0x2C164AED65E27311), UINT64_C(0x6D00AF1B2B3689DE), UINT64_C(0xDD4AA59558E53D0D), UINT64_C(0x68FE3589F8554D96), UINT64_C(0xB17CF987BFCF27DD), UINT64_C(0x5F16DEF3980CEE11), UINT64_C(0xACFC352C5BB53DCA)}}},
+	{{{UINT64_C(0x95D7360FBFFC3E2F), UINT64_C(0x8E69F721317FBD2E), UINT64_C(0x054BB98CACBAB574), UINT64_C(0xAAA868817C89F279), UINT64_C(0x5D375206E4CBE50F), UINT64_C(0xA01BCC752C667AA0), UINT64_C(0x5968CDE1F2C2BC1E)}}, {{UINT64_C(0x4B487C55F09A853E), UINT64_C(0x867082CBEF1E0920), UINT64_C(0x12DCB3AD5C492ABD), UINT64_C(0x2BF6AA067175963F), UINT64_C(0x697F8D52377A8576), UINT64_C(0xF7D1937C615702E5), UINT64_C(0x3B14CA6C2FD59CCC)}}, {{UINT64_C(0x6374247EB6344C3C), UINT64_C(0x6D326EE208D2047F), UINT64_C(0x43A07DA32FC1556E), UINT64_C(0xAD05D9A3C5E10851), UINT64_C(0xCEC5BCCF1571C320), UINT64_C(0xAB942B52A89B527A), UINT64_C(0x7C83C8A4B8D5F3DB)}}},
+	{{{UINT64_C(0x2F5E610D81B9F77F), UINT64_C(0x20DD85876D0051B0), UINT64_C(0x6CE6145D81C63B80), UINT64_C(0x5AA8BF0CD0B4116D), UINT64_C(0x91FCBF8C6691810E), UINT64_C(0x5DC5F38480AEF27F), UINT64_C(0x0A13FFEBEC76332E)}}, {{UINT64_C(0x2761FF6492BF6AF8), UINT64_C(0x5F04E6AEF2D641F8), UINT64_C(0xDFEE20AD5708A5DE), UINT64_C(0x268FCFA2E5C3A80C), UINT64_C(0xB3AD6E1D7B88466E), UINT64_C(0x14F06ED236B88E5B), UINT64_C(0x51C9C7BA5F5274A5)}}, {{UINT64_C(0x2939BAEBC07C1792), UINT64_C(0xE14100C56BEB7399), UINT64_C(0x0F7F0AAE59A1FDEB), UINT64_C(0x5FFA825058A26197), UINT64_C(0x665A21DB74324785), UINT64_C(0xDD3C44E1819B25E3), UINT64_C(0xDA40D8B715705BF4)}}},
+	{{{UINT64_C(0x69A19D228F9BC3D8), UINT64_C(0xF379F89C3F033810), UINT64_C(0x2FB857FEE890E5C3), UINT64_C(0x95B418DD3D3EF3D3), UINT64_C(0xF73C46E89A399884), UINT64_C(0x691A59E0F12F6786), UINT64_C(0x76916BF3BC022B79)}}, {{UINT64_C(0xBCEA073B62CD8A0A), UINT64_C(0xD0151FBEDD4102FD), UINT64_C(0x6655F71888B14CB9), UINT64_C(0x059F049498F2CFD7), UINT64_C(0xBE1E6986A3B9B591), UINT64_C(0x016A5EAF2B04A3DB), UINT64_C(0xF671BA7CD2D876EF)}}, {{UINT64_C(0x13830A83BFDF8215), UINT64_C(0x2AB483A74F043BD9), UINT64_C(0xA2805098A485747F), UINT64_C(0x5D295A86AE1A15BC), UINT64_C(0xAEB13F17794DD25C), UINT64_C(0x743C86832C274759), UINT64_C(0x5F2AFC75B3EDB773)}}}
+	},
+	{
+	{{{UINT64_C(0xEF1DAE3BF1AE05E9), UINT64_C(0xC3C66A029961F21F), UINT64_C(0x83189B95DF2B97AE), UINT64_C(0xF2D131409ABBC5AD), UINT64_C(0x84686AA406AF994A), UINT64_C(0x77E5075284C5C3F8), UINT64_C(0x1C1E13D2A9A4D7CD)}}, {{UINT64_C(0x3E7F8815D744B89D), UINT64_C(0x4570B1891332BA67), UINT64_C(0x61B04155EA93CD59), UINT64_C(0xA8D2C58019C8A18D), UINT64_C(0x44D05BA078938EBA), UINT64_C(0x2DA438EAF9B79B43), UINT64_C(0x809B8079FEA36862)}}, {{UINT64_C(0xC6A293DC8835366A), UINT64_C(0x7BD162F1C40F94FF), UINT64_C(0x85CCED438DB6085E), UINT64_C(0x27AB16D1B3BA2231), UINT64_C(0x636AA89EE4EE5F2E), UINT64_C(0x018DCD9FE2E47AF6), UINT64_C(0xBCA4B78D60FAD6E1)}}},
+	{{{UINT64_C(0xC83780E51C33B7A2), UINT64_C(0x60E4D7A205C387B1), UINT64_C(0xE1827779515F84BE), UINT64_C(0x6F0D9150DE02A8B1), UINT64_C(0xACBE0B3FD14645C9), UINT64_C(0x532BA9B53AC345F8), UINT64_C(0x7984DCDB0557C95D)}}, {{UINT64_C(0xCA5AE5CA68A92F01), UINT64_C(0x97C1D2FBB3C9D569), UINT64_C(0x295E89668CC570C2), UINT64_C(0x1A33AD40A4829436), UINT64_C(0xAA4C3F425DF646BC), UINT64_C(0x434CDD005DE2066A), UINT64_C(0x5ACA9E9DB35AF423)}}, {{UINT64_C(0x72722FAA123851E2), UINT64_C(0x513022C23EA3F4C6), UINT64_C(0xF0D389F56F1EC645), UINT64_C(0x6F5639AB7440E6E0), UINT64_C(0xF45EF7A1C17237BF), UINT64_C(0xAC195B5FA2B931A2), UINT64_C(0xE60CA1EA979AE1FA)}}},
+	{{{UINT64_C(0x7D2BCA35C6877C56), UINT64_C(0xF46CAB864B4F0DDD), UINT64_C(0x39C2795F6AA74404), UINT64_C(0xEE0283CF72BE1645), UINT64_C(0xF46AD583D91B1D73), UINT64_C(0xC6518E739AD1E550), UINT64_C(0x6B6DEF78D421004A)}}, {{UINT64_C(0xB84D36B8CFA8468D), UINT64_C(0x62812CB37735A3D7), UINT64_C(0x124733577F86F501), UINT64_C(0xAE29E039DB6FE5F9), UINT64_C(0x330580B8A1ACB6D2), UINT64_C(0x0A4AC643B2D02AB8), UINT64_C(0xA7996E35E6884E13)}}, {{UINT64_C(0x3CFCF336688996AC), UINT64_C(0x06394182477F3610), UINT64_C(0xA5BB536391EB8E40), UINT64_C(0x55B6E575A0EEDC4E), UINT64_C(0x7FA0B6B09892E9A9), UINT64_C(0x70D682D3F7D68B09), UINT64_C(0x64892F6D919E0A2D)}}},
+	{{{UINT64_C(0xF06FB627760A0AA8), UINT64_C(0xD443E046843CBE04), UINT64_C(0xBEF2FCC01D120E6A), UINT64_C(0x112FF09CA42A05CA), UINT64_C(0xEA8A3E58546B793F), UINT64_C(0x82B36775F0AD5734), UINT64_C(0x2F4F60DF864A34E4)}}, {{UINT64_C(0x71F521C5884F2449), UINT64_C(0xEACC58734A99186A), UINT64_C(0x48EE61157F5D5AC5), UINT64_C(0xD48149C3858D9A42), UINT64_C(0xEAAAC9EC500727E6), UINT64_C(0x3A64A20EE9B5D5C3), UINT64_C(0x3F0DFC487BE9DEA6)}}, {{UINT64_C(0xB2D4968A35751013), UINT64_C(0x4964E588E0741E82), UINT64_C(0x7179A741A0F9421A), UINT64_C(0xA067929DC04E0704), UINT64_C(0x0AC9123A55D1A03F), UINT64_C(0x815901B462D26464), UINT64_C(0x3765282EEAD31403)}}},
+	{{{UINT64_C(0x6D836349DB13E3F4), UINT64_C(0xFD6CEBDD0263E931), UINT64_C(0x964F413FD61E8324), UINT64_C(0xE52ADD1B85DDDFA0), UINT64_C(0xCFF8C4A9E206E72D), UINT64_C(0xB0894FDF09F7B752), UINT64_C(0xD5220AB0BC24FD53)}}, {{UINT64_C(0x018442B35FB1981A), UINT64_C(0xF089A733A373EDD7), UINT64_C(0x6E7BCA42B60C3D0E), UINT64_C(0x9A09AAF4A1B16EC4), UINT64_C(0x187638F3A1C0DF17), UINT64_C(0xF64F79EAB1C2CD4F), UINT64_C(0x86FED79D1D78E39A)}}, {{UINT64_C(0x965D59D2DA449366), UINT64_C(0xBAA96E4A9F1FE167), UINT64_C(0x852A7795059F292C), UINT64_C(0xD6A275870B1F15DF), UINT64_C(0x28D9CACBD6F47CB6), UINT64_C(0xFD7487DB307B5622), UINT64_C(0x7083F1C37164D973)}}},
+	{{{UINT64_C(0x6042C8D86FE29980), UINT64_C(0x92CA6657B8165756), UINT64_C(0x2D42BE82D52C680F), UINT64_C(0x16E8BDF08587AF10), UINT64_C(0x2D9C333495B51513), UINT64_C(0x3601A9673064706E), UINT64_C(0x27B1FBB8219099D5)}}, {{UINT64_C(0x6F3F0929D705F7C8), UINT64_C(0xAF5CFF40B10F3D6E), UINT64_C(0x25A422673C703026), UINT64_C(0x73DAD8B62C1DCE4E), UINT64_C(0x6B6BE2C3295348BD), UINT64_C(0x854FFB921084C39B), UINT64_C(0xB347B8BB391F2047)}}, {{UINT64_C(0x7120ECC5FF7C77BC), UINT64_C(0x2789A51954D22617), UINT64_C(0xD2BA97EA0CEB6A4F), UINT64_C(0x265A5FF9FFDC217B), UINT64_C(0xD72E1B87EEF92A38), UINT64_C(0xFD4D28FE0CF4F384), UINT64_C(0xE104F0CEF84C4127)}}},
+	{{{UINT64_C(0x1D79FC841EB9B774), UINT64_C(0x92CBF32DA25B4B6C), UINT64_C(0x623903CBBA76BFE4), UINT64_C(0xFCF0705A76C51FCD), UINT64_C(0x0497815DAF114CF6), UINT64_C(0x0B362473382E6B72), UINT64_C(0xBF40C3A9704DB563)}}, {{UINT64_C(0xC1A8A9DDCC5456EB), UINT64_C(0x6EF32B4472A72F2D), UINT64_C(0x0BA5ED9874444D6D), UINT64_C(0x4194849F27E8D85A), UINT64_C(0xCD6EBAA40D5D225B), UINT64_C(0x69C248D4BF3FE852), UINT64_C(0xA8601EB2343991B6)}}, {{UINT64_C(0x93963C1CE87CD796), UINT64_C(0xFB8AC52627809580), UINT64_C(0xDD858268FDE0E5F5), UINT64_C(0x48B91375EC943A78), UINT64_C(0x64810B2ECB04CB61), UINT64_C(0x0DEFCCAF114650F3), UINT64_C(0xD4F00659F5F5CD94)}}},
+	{{{UINT64_C(0x7B8A0485459502D3), UINT64_C(0x5ADACAB27EEE269A), UINT64_C(0x2405F94179307487), UINT64_C(0x87B28963179E685E), UINT64_C(0xDB8422A43E0D7B69), UINT64_C(0xFF318A0F43EE80C9), UINT64_C(0x7A928054BA7AA7F5)}}, {{UINT64_C(0xECA5C79FE0C0834E), UINT64_C(0xAB7B837CA0D1F849), UINT64_C(0xEDD19AFE0D7FA628), UINT64_C(0x32226FBF94BCB956), UINT64_C(0x379AAD54A3A18BC9), UINT64_C(0xEACF8371129E2795), UINT64_C(0x65CA57FA588BE5CE)}}, {{UINT64_C(0x4FE1A75B6378DA98), UINT64_C(0x28331E7596DBEC0D), UINT64_C(0x165B508848D8793F), UINT64_C(0xFCF6862056B59CE2), UINT64_C(0xC80B5FE80ADB6609), UINT64_C(0x960031F6EDB603BF), UINT64_C(0x7B17BB98674CAE85)}}}
+	}
+};
+
+/*! \brief Scan all eight entries in a public table row and select a secret signed radix-16 digit.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param row: Public row index, 0 through 55, independent of secret scalar values.
+ * \param digit: Signed radix-16 digit in [-8,8].
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_select(ed448_affine* out, size_t row, int8_t digit)
+{
+	ed448_fe negative;
+	uint32_t sign;
+	uint32_t magnitude;
+	uint32_t diff;
+	uint64_t mask;
+	size_t i;
+
+	sign = (uint32_t)((uint8_t)digit >> 7);
+	magnitude = ((uint32_t)(int32_t)digit ^ (0U - sign)) + sign;
+	out->x = ed448_zero;
+	out->y = ed448_one;
+	out->td = ed448_zero;
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		diff = magnitude ^ (uint32_t)(i + 1U);
+		mask = UINT64_C(0) - (uint64_t)((diff - 1U) >> 31);
+		ed448_select_field(&out->x, &ed448_base_table[row][i].x, mask);
+		ed448_select_field(&out->y, &ed448_base_table[row][i].y, mask);
+		ed448_select_field(&out->td, &ed448_base_table[row][i].td, mask);
+	}
+
+	mask = UINT64_C(0) - (uint64_t)sign;
+	ed448_sub(&negative, &ed448_zero, &out->x);
+	ed448_select_field(&out->x, &negative, mask);
+	ed448_sub(&negative, &ed448_zero, &out->td);
+	ed448_select_field(&out->td, &negative, mask);
+	qsc_memutils_secure_erase(&negative, sizeof(negative));
+}
+
+/*! \brief Multiply the base point with a fixed odd/even radix-16 schedule and immutable table.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param scalar: Read-only 57-byte little-endian scalar.
+ * \details Operands are borrowed and non-NULL. Initializes from the first selected
+ * affine point using one multiplication, saving seven multiplications. All 112
+ * selections still scan complete rows; the remaining 111 mixed additions and
+ * four doublings have a fixed schedule. Handles zero digits without branching.
+ * No dynamic ownership or shared mutable state.
+ */
+static void ed448_base_multiply(ed448_point* out, const uint8_t scalar[57U])
+{
+	uint8_t reduced[114U] = {0U};
+	int8_t digits[112U];
+	int32_t carry;
+	int32_t value;
+	ed448_affine selected;
+	size_t i;
+
+	qsc_memutils_copy(reduced, scalar, 57U);
+	qsc_sc448_reduce(reduced);
+
+	for (i = 0U; i < 56U; ++i)
+	{
+		digits[2U * i] = (int8_t)(reduced[i] & 15U);
+		digits[2U * i + 1U] = (int8_t)(reduced[i] >> 4);
+	}
+
+	carry = 0;
+
+	for (i = 0U; i < 111U; ++i)
+	{
+		value = (int32_t)digits[i] + carry;
+		carry = (value + 8) >> 4;
+		digits[i] = (int8_t)(value - 16 * carry);
+	}
+
+	digits[111U] = (int8_t)((int32_t)digits[111U] + carry);
+	ed448_select(&selected, 0U, digits[1U]);
+	out->x = selected.x;
+	out->y = selected.y;
+	out->z = ed448_one;
+	ed448_mul(&out->t, &selected.x, &selected.y);
+
+	for (i = 3U; i < 112U; i += 2U)
+	{
+		ed448_select(&selected, i / 2U, digits[i]);
+		ed448_point_add_affine(out, out, &selected);
+	}
+
+	ed448_point_double(out, out);
+	ed448_point_double(out, out);
+	ed448_point_double(out, out);
+	ed448_point_double(out, out);
+
+	for (i = 0U; i < 112U; i += 2U)
+	{
+		ed448_select(&selected, i / 2U, digits[i]);
+		ed448_point_add_affine(out, out, &selected);
+	}
+
+	qsc_memutils_secure_erase(reduced, sizeof(reduced));
+	qsc_memutils_secure_erase(digits, sizeof(digits));
+	qsc_memutils_secure_erase(&selected, sizeof(selected));
+}
+
+/* Scalar reduction: x = r + q*2^446; replace 2^446 by c = 2^446 - L.
+ * Three fixed folds suffice for a 912-bit input. The four low parts sum to
+ * less than 4*2^446; four masked subtractions produce a canonical scalar. */
+
+/*! \brief Reduce 912 input bits modulo the Ed448 subgroup order with three fixed folds.
+ * \param out: Fourteen caller-owned canonical 32-bit scalar words, little-endian; disjoint from input.
+ * \param input: Twenty-nine read-only 32-bit words; only the low 16 bits of word 28 may be set.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_scalar_reduce(uint32_t out[14U], const uint32_t input[29U])
+{
+	uint32_t work[30U];
+	uint32_t next[30U];
+	uint32_t quotient[16U];
+	uint32_t difference[14U];
+	uint64_t carry;
+	uint64_t value;
+	uint32_t borrow;
+	uint32_t mask;
+	size_t words;
+	size_t count;
+	size_t pass;
+	size_t i;
+	size_t j;
+
+	qsc_memutils_clear(work, sizeof(work));
+	qsc_memutils_copy(work, input, 29U * sizeof(uint32_t));
+	qsc_memutils_clear(out, 14U * sizeof(uint32_t));
+	words = 29U;
+
+	for (pass = 0U; pass < 4U; ++pass)
+	{
+		carry = 0U;
+
+		for (i = 0U; i < 14U; ++i)
+		{
+			value = (uint64_t)out[i] + (uint64_t)(work[i] & (i == 13U ? UINT32_C(0x3FFFFFFF) : UINT32_MAX)) + carry;
+			out[i] = (uint32_t)value;
+			carry = value >> 32;
+		}
+
+		if (pass < 3U)
+		{
+			count = words - 13U;
+
+			for (i = 0U; i < count; ++i)
+			{
+				quotient[i] = (work[i + 13U] >> 30) | (work[i + 14U] << 2);
+			}
+
+			qsc_memutils_clear(next, sizeof(next));
+
+			for (i = 0U; i < count; ++i)
+			{
+				carry = 0U;
+
+				for (j = 0U; j < 7U; ++j)
+				{
+					value = (uint64_t)quotient[i] * ed448_order_complement[j] + next[i + j] + carry;
+					next[i + j] = (uint32_t)value;
+					carry = value >> 32;
+				}
+
+				next[i + 7U] = (uint32_t)carry;
+			}
+
+			qsc_memutils_copy(work, next, sizeof(work));
+			words = count + 7U;
+		}
+	}
+
+	for (pass = 0U; pass < 4U; ++pass)
+	{
+		borrow = 0U;
+
+		for (i = 0U; i < 14U; ++i)
+		{
+			value = (uint64_t)out[i] - ed448_order[i] - borrow;
+			difference[i] = (uint32_t)value;
+			borrow = (uint32_t)(value >> 63);
+		}
+
+		mask = (uint32_t)ed448_mask_barrier(UINT64_C(0) - (uint64_t)(borrow ^ 1U));
+
+		for (i = 0U; i < 14U; ++i)
+		{
+			out[i] = (out[i] & ~mask) | (difference[i] & mask);
+		}
+	}
+
+	qsc_memutils_secure_erase(work, sizeof(work));
+	qsc_memutils_secure_erase(next, sizeof(next));
+	qsc_memutils_secure_erase(quotient, sizeof(quotient));
+	qsc_memutils_secure_erase(difference, sizeof(difference));
 }
 
 void qsc_sc448_reduce(uint8_t s[114U])
 {
-    QSC_ASSERT(s != NULL);
+	if (s == NULL)
+	{
+		return;
+	}
 
-    uint8_t rem[58U] = { 0U };
-    uint8_t diff[58U] = { 0U };
-    int32_t bit;
-    size_t i;
+	uint32_t input[29U] = {0U};
+	uint32_t reduced[14U];
+	size_t i;
 
-    if (s != NULL)
-    {
-        for (bit = 911; bit >= 0; --bit)
-        {
-            uint32_t carry = 0U;
-            const uint32_t inbit = ((uint32_t)s[(size_t)bit >> 3] >> ((uint32_t)bit & 7U)) & 1U;
-            uint32_t borrow = 0U;
-            uint32_t ge;
-            uint32_t mask;
+	for (i = 0U; i < 114U; ++i)
+	{
+		input[i / 4U] |= (uint32_t)s[i] << (8U * (i % 4U));
+	}
 
-            for (i = 0U; i < 58U; ++i)
-            {
-                const uint32_t next = ((uint32_t)rem[i] << 1) | carry;
-                rem[i] = (uint8_t)(next & 0xFFU);
-                carry = (next >> 8) & 0x01U;
-            }
+	ed448_scalar_reduce(reduced, input);
 
-            rem[0U] |= (uint8_t)inbit;
+	for (i = 0U; i < 56U; ++i)
+	{
+		s[i] = (uint8_t)(reduced[i / 4U] >> (8U * (i % 4U)));
+	}
 
-            for (i = 0U; i < 57U; ++i)
-            {
-                const uint32_t xi = (uint32_t)rem[i];
-                const uint32_t yi = (uint32_t)SC448_ORDER[i];
-                const uint32_t sub = yi + borrow;
-
-                diff[i] = (uint8_t)(xi - sub);
-                borrow = (uint32_t)((xi < sub) ? 1U : 0U);
-            }
-
-            diff[57] = (uint8_t)((uint32_t)rem[57] - borrow);
-            ge = (uint32_t)(((rem[57] != 0U) || (borrow == 0U)) ? 1U : 0U);
-            mask = (uint32_t)(0U - ge);
-
-            for (i = 0U; i < 58U; ++i)
-            {
-                rem[i] = (uint8_t)((rem[i] & (uint8_t)(~mask)) | (diff[i] & (uint8_t)mask));
-            }
-        }
-
-        for (i = 0U; i < 57U; ++i)
-        {
-            s[i] = rem[i];
-        }
-
-        qsc_memutils_secure_erase(s + 57U, 57U);
-    }
+	qsc_memutils_secure_erase(s + 56U, 58U);
+	qsc_memutils_secure_erase(input, sizeof(input));
+	qsc_memutils_secure_erase(reduced, sizeof(reduced));
 }
-
 
 void qsc_sc448_muladd(uint8_t s[57U], const uint8_t a[57U], const uint8_t b[57U], const uint8_t c[57U])
 {
-    QSC_ASSERT(s != NULL);
-    QSC_ASSERT(a != NULL);
-    QSC_ASSERT(b != NULL);
-    QSC_ASSERT(c != NULL);
+	if (s == NULL || a == NULL || b == NULL || c == NULL)
+	{
+		return;
+	}
 
-    uint8_t tmp[114U] = { 0 };
-    int64_t product[114U] = { 0 };
-    int64_t carry;
-    size_t i;
-    size_t j;
+	uint32_t aw[15U] = {0U};
+	uint32_t bw[15U] = {0U};
+	uint32_t product[30U] = {0U};
+	uint32_t reduced[14U];
+	uint64_t value;
+	uint64_t carry;
+	size_t i;
+	size_t j;
 
-    if (s != NULL && a != NULL && b != NULL && c != NULL)
-    {
-        for (i = 0U; i < 57U; ++i)
-        {
-            for (j = 0U; j < 57U; ++j)
-            {
-                product[i + j] += (int64_t)a[i] * (int64_t)b[j];
-            }
-        }
+	for (i = 0U; i < 57U; ++i)
+	{
+		aw[i / 4U] |= (uint32_t)a[i] << (8U * (i % 4U));
+		bw[i / 4U] |= (uint32_t)b[i] << (8U * (i % 4U));
+		product[i / 4U] |= (uint32_t)c[i] << (8U * (i % 4U));
+	}
 
-        for (i = 0U; i < 57U; ++i)
-        {
-            product[i] += (int64_t)c[i];
-        }
+	for (i = 0U; i < 15U; ++i)
+	{
+		carry = 0U;
 
-        for (i = 0U; i < 113U; ++i)
-        {
-            carry = product[i] >> 8;
-            product[i] &= 0xFF;
-            product[i + 1U] += carry;
-        }
+		for (j = 0U; j < 15U; ++j)
+		{
+			value = (uint64_t)aw[i] * bw[j] + product[i + j] + carry;
+			product[i + j] = (uint32_t)value;
+			carry = value >> 32;
+		}
 
-        product[113] &= 0xFF;
+		product[i + 15U] = (uint32_t)carry;
+	}
 
-        for (i = 0U; i < 114U; ++i)
-        {
-            tmp[i] = (uint8_t)product[i];
-        }
+	ed448_scalar_reduce(reduced, product);
 
-        qsc_sc448_reduce(tmp);
+	for (i = 0U; i < 56U; ++i)
+	{
+		s[i] = (uint8_t)(reduced[i / 4U] >> (8U * (i % 4U)));
+	}
 
-        for (i = 0U; i < 57U; ++i)
-        {
-            s[i] = tmp[i];
-        }
-
-        qsc_memutils_secure_erase(tmp, sizeof(tmp));
-        qsc_memutils_secure_erase((uint8_t*)product, sizeof(product));
-    }
+	s[56U] = 0U;
+	qsc_memutils_secure_erase(aw, sizeof(aw));
+	qsc_memutils_secure_erase(bw, sizeof(bw));
+	qsc_memutils_secure_erase(product, sizeof(product));
+	qsc_memutils_secure_erase(reduced, sizeof(reduced));
 }
 
+int32_t qsc_sc448_is_canonical(const uint8_t s[57U])
+{
+	if (s == NULL)
+	{
+		return 0;
+	}
+
+	uint32_t input;
+	uint64_t value;
+	uint32_t borrow;
+	size_t i;
+	size_t j;
+
+	borrow = 0U;
+
+	for (i = 0U; i < 14U; ++i)
+	{
+		input = 0U;
+
+		for (j = 0U; j < 4U; ++j)
+		{
+			input |= (uint32_t)s[4U * i + j] << (8U * j);
+		}
+
+		value = (uint64_t)input - ed448_order[i] - borrow;
+		borrow = (uint32_t)(value >> 63);
+	}
+
+	return (int32_t)(borrow & (uint32_t)(s[56U] == 0U));
+}
+
+void qsc_sc448_clamp(uint8_t* k)
+{
+	k[0U] &= 252U;
+	k[55U] |= 128U;
+}
 
 int32_t qsc_sc448_verify(const uint8_t* x, const uint8_t* y, size_t n)
 {
-    uint8_t d = 0;
-    size_t i;
+	uint32_t difference;
+	size_t i;
 
-    for (i = 0; i < n; i++)
-    {
-        d |= x[i] ^ y[i];
-    }
+	difference = 0U;
 
-    return (int32_t)(((uint32_t)d - 1U) >> 31) - 1;  /* 0 if equal, -1 if not */
+	for (i = 0U; i < n; ++i)
+	{
+		difference |= (uint32_t)(x[i] ^ y[i]);
+	}
+
+	return (int32_t)((difference - 1U) >> 31) - 1;
 }
 
-/* ============================================================
- * Group element operations
- * ============================================================ */
-
-void qsc_ge448_p1p1_to_p2(qsc_ge448_p2* r, const qsc_ge448_p1p1* p)
+void qsc_ge448_scalarmult_base(qsc_ge448_p3* h, const uint8_t* a)
 {
-    qsc_fe448_mul(r->x, p->x, p->t);
-    qsc_fe448_mul(r->y, p->y, p->z);
-    qsc_fe448_mul(r->z, p->z, p->t);
+	if (h == NULL || a == NULL)
+	{
+		return;
+	}
+
+	ed448_point point;
+
+	ed448_base_multiply(&point, a);
+	ed448_point_export(h, &point);
+	qsc_memutils_secure_erase(&point, sizeof(point));
 }
 
-void qsc_ge448_p1p1_to_p3(qsc_ge448_p3* r, const qsc_ge448_p1p1* p)
-{
-    qsc_fe448_mul(r->x, p->x, p->t);
-    qsc_fe448_mul(r->y, p->y, p->z);
-    qsc_fe448_mul(r->z, p->z, p->t);
-    qsc_fe448_mul(r->t, p->x, p->y);
-}
-
-void qsc_ge448_p3_to_cached(qsc_ge448_cached* r, const qsc_ge448_p3* p)
-{
-    qsc_fe448_add(r->yplusx, p->y, p->x);
-    qsc_fe448_sub(r->yminusx, p->y, p->x);
-    qsc_fe448_copy(r->z, p->z);
-    qsc_fe448_mul(r->t2d, p->t, FE448_2D);
-}
-
-void qsc_ge448_add_cached(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_cached* q)
-{
-    qsc_fe448 x1, y1, x2, y2, rx, ry;
-
-    fe448_p3_to_affine(x1, y1, p);
-    fe448_cached_to_affine(x2, y2, q);
-    fe448_affine_add(rx, ry, x1, y1, x2, y2);
-
-    qsc_fe448_copy(r->x, rx);
-    qsc_fe448_copy(r->y, ry);
-    qsc_fe448_1(r->z);
-    qsc_fe448_1(r->t);
-}
-
-
-void qsc_ge448_sub_cached(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_cached* q)
-{
-    qsc_fe448 x1, y1, x2, y2, rx, ry;
-
-    fe448_p3_to_affine(x1, y1, p);
-    fe448_cached_to_affine(x2, y2, q);
-    qsc_fe448_neg(x2, x2);
-    fe448_affine_add(rx, ry, x1, y1, x2, y2);
-
-    qsc_fe448_copy(r->x, rx);
-    qsc_fe448_copy(r->y, ry);
-    qsc_fe448_1(r->z);
-    qsc_fe448_1(r->t);
-}
-
-
-void qsc_ge448_add_precomp(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_precomp* q)
-{
-    qsc_fe448 x1, y1, x2, y2, rx, ry;
-
-    fe448_p3_to_affine(x1, y1, p);
-    fe448_precomp_to_affine(x2, y2, q);
-    fe448_affine_add(rx, ry, x1, y1, x2, y2);
-
-    qsc_fe448_copy(r->x, rx);
-    qsc_fe448_copy(r->y, ry);
-    qsc_fe448_1(r->z);
-    qsc_fe448_1(r->t);
-}
-
-
-void qsc_ge448_sub_precomp(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_precomp* q)
-{
-    qsc_fe448 x1, y1, x2, y2, rx, ry;
-
-    fe448_p3_to_affine(x1, y1, p);
-    fe448_precomp_to_affine(x2, y2, q);
-    qsc_fe448_neg(x2, x2);
-    fe448_affine_add(rx, ry, x1, y1, x2, y2);
-
-    qsc_fe448_copy(r->x, rx);
-    qsc_fe448_copy(r->y, ry);
-    qsc_fe448_1(r->z);
-    qsc_fe448_1(r->t);
-}
-
-
-/* Point doubling (P3 -> P1P1) using the unified doubling formula for
- * twisted Edwards curves:
- *   A = X1^2, B = Y1^2, C = 2*Z1^2, D = a*A (a=-1 for Ed448)
- *   E = (X1+Y1)^2 - A - B, G = D+B, F = G-C, H = D-B
- *   X3 = E*F, Y3 = G*H, T3 = E*H, Z3 = F*G
- */
-static void ge448_p3_dbl(qsc_ge448_p1p1* r, const qsc_ge448_p3* p)
-{
-    qsc_fe448 x;
-    qsc_fe448 y;
-    qsc_fe448 rx;
-    qsc_fe448 ry;
-
-    fe448_p3_to_affine(x, y, p);
-    fe448_affine_add(rx, ry, x, y, x, y);
-
-    qsc_fe448_copy(r->x, rx);
-    qsc_fe448_copy(r->y, ry);
-    qsc_fe448_1(r->z);
-    qsc_fe448_1(r->t);
-}
-
-
-/* Compress a P3 point: s = encode(X/Z, Y/Z) */
 void qsc_ge448_p3_to_bytes(uint8_t* s, const qsc_ge448_p3* h)
 {
-    qsc_fe448 recip, x, y;
-    qsc_fe448_invert(recip, h->z);
-    qsc_fe448_mul(x, h->x, recip);
-    qsc_fe448_mul(y, h->y, recip);
-    qsc_fe448_to_bytes(s, y);
-    s[56] = (uint8_t)(qsc_fe448_is_negative(x) << 7);
+	ed448_point point;
+
+	ed448_point_import(&point, h);
+	ed448_point_encode(s, &point);
+	qsc_memutils_secure_erase(&point, sizeof(point));
 }
 
 void qsc_ge448_to_bytes(uint8_t* s, const qsc_ge448_p2* h)
 {
-    qsc_fe448 recip, x, y;
-    qsc_fe448_invert(recip, h->z);
-    qsc_fe448_mul(x, h->x, recip);
-    qsc_fe448_mul(y, h->y, recip);
-    qsc_fe448_to_bytes(s, y);
-    s[56] = (uint8_t)(qsc_fe448_is_negative(x) << 7);
+	ed448_point point;
+
+	ed448_from_legacy(&point.x, h->x);
+	ed448_from_legacy(&point.y, h->y);
+	ed448_from_legacy(&point.z, h->z);
+	point.t = ed448_zero;
+	ed448_point_encode(s, &point);
+	qsc_memutils_secure_erase(&point, sizeof(point));
 }
 
 int32_t qsc_ge448_is_canonical(const uint8_t* s)
 {
-    QSC_ASSERT(s != NULL);
+	if (s == NULL)
+	{
+		return 0;
+	}
 
-    int32_t r;
+	ed448_fe value;
+	uint8_t encoded[56U];
 
-    r = 0;
-
-    if (s != NULL)
-    {
-        if ((s[56U] & 0x7FU) == 0U)
-        {
-            for (size_t i = 56U; i-- > 0U;)
-            {
-                if (s[i] < FE448_P_BYTES[i])
-                {
-                    r = 1;
-                    break;
-                }
-                else if (s[i] > FE448_P_BYTES[i])
-                {
-                    r = 0;
-                    break;
-                }
-            }
-        }
-    }
-
-    return r;
+	ed448_load(&value, s);
+	ed448_store(encoded, &value);
+	return (int32_t)(qsc_memutils_are_equal(encoded, s, 56U) && ((s[56U] & 127U) == 0U));
 }
 
-/*
- * Decode a compressed point and negate: used in signature verification.
- * The sign bit of X is in bit 7 of byte 56; the remaining bytes encode Y.
- * We recover X from Y using the curve equation:
- *   x^2 = (y^2 - 1) / (d*y^2 - 1)   (twisted Edwards, a=-1)
- * For Ed448-Goldilocks d = -39081:
- *   x^2 = (y^2 - 1) / (-39081*y^2 - 1)
- */
+int32_t qsc_ge448_has_small_order(const uint8_t s[57U])
+{
+	if (s == NULL)
+	{
+		return 0;
+	}
+
+	ed448_fe y;
+	ed448_fe square;
+	ed448_fe difference;
+	uint8_t encoded[56U];
+	uint8_t value;
+	size_t i;
+
+	/* The four torsion points have y = 0, 1 or -1. Ignore the sign bit. */
+	ed448_load(&y, s);
+	ed448_square(&square, &y);
+	ed448_sub(&difference, &square, &ed448_one);
+	ed448_mul(&difference, &difference, &y);
+	ed448_store(encoded, &difference);
+	value = 0U;
+
+	for (i = 0U; i < 56U; ++i)
+	{
+		value |= encoded[i];
+	}
+
+	return (int32_t)(value == 0U);
+}
+
+int32_t qsc_ed448_small_order(const uint8_t s[57U])
+{
+	return qsc_ge448_has_small_order(s);
+}
+
 int32_t qsc_ge448_from_bytes_negate_vartime(qsc_ge448_p3* h, const uint8_t* s)
 {
-    QSC_ASSERT(h != NULL);
-    QSC_ASSERT(s != NULL);
+	if (h == NULL || s == NULL)
+	{
+		return -1;
+	}
 
-    qsc_fe448 y;
-    qsc_fe448 ysq;
-    qsc_fe448 u;
-    qsc_fe448 v;
-    qsc_fe448 vinv;
-    qsc_fe448 x2;
-    qsc_fe448 x;
-    qsc_fe448 check;
-    qsc_fe448 one;
-    uint8_t ybytes[56U] = { 0U };
-    int32_t bit;
-    int32_t i;
-    int32_t r;
-    int32_t sign;
+	ed448_point point;
+	ed448_fe u;
+	ed448_fe v;
+	ed448_fe t;
+	ed448_fe x222;
+	ed448_fe x223;
+	uint8_t check[56U];
+	uint8_t expected[56U];
+	int32_t result;
 
-    r = -1;
+	result = -1;
 
-    if (h != NULL && s != NULL)
-    {
-        if (qsc_ge448_is_canonical(s) != 0 && qsc_ge448_has_small_order(s) == 0)
-        {
-            sign = (int32_t)((s[56U] >> 7) & 1U);
+	if (qsc_ge448_is_canonical(s) != 0 && qsc_ge448_has_small_order(s) == 0)
+	{
+		ed448_load(&point.y, s);
+		ed448_square(&t, &point.y);
+		ed448_sub(&u, &ed448_one, &t);
+		ed448_mul_small(&v, &t, 39081U);
+		ed448_add(&v, &ed448_one, &v);
+		/* sqrt(u/v) = u * (u*v)^((p-3)/4), p = 3 mod 4.
+         * (p-3)/4 = (2^223-1)*2^223 + (2^222-1). */
+		ed448_mul(&t, &u, &v);
+		ed448_pow222(&x222, &x223, &t);
+		ed448_square_n(&t, &x223, 223U);
+		ed448_mul(&t, &t, &x222);
+		ed448_mul(&point.x, &u, &t);
+		ed448_square(&t, &point.x);
+		ed448_mul(&t, &t, &v);
+		ed448_store(check, &t);
+		ed448_store(expected, &u);
+		if (qsc_memutils_are_equal(check, expected, 56U))
+		{
+			ed448_store(check, &point.x);
 
-            for (i = 0; i < 56; ++i)
-            {
-                ybytes[i] = s[i];
-            }
+			if ((check[0U] & 1U) == (s[56U] >> 7))
+			{
+				ed448_sub(&point.x, &ed448_zero, &point.x);
+			}
 
-            qsc_fe448_from_bytes(y, ybytes);
-            qsc_fe448_1(one);
-
-            qsc_fe448_sq(ysq, y);
-            qsc_fe448_sub(u, one, ysq);
-            qsc_fe448_mul(v, FE448_D, ysq);
-            qsc_fe448_sub(v, one, v);
-
-            if (qsc_fe448_is_zero(v) == 0)
-            {
-                qsc_fe448_invert(vinv, v);
-                qsc_fe448_mul(x2, u, vinv);
-                qsc_fe448_1(x);
-
-                for (i = 55; i >= 0; --i)
-                {
-                    const uint8_t byteval = FE448_SQRT_EXP[i];
-
-                    for (bit = 7; bit >= 0; --bit)
-                    {
-                        qsc_fe448_sq(x, x);
-
-                        if (((byteval >> bit) & 1U) != 0U)
-                        {
-                            qsc_fe448_mul(x, x, x2);
-                        }
-                    }
-                }
-
-                qsc_fe448_sq(check, x);
-                qsc_fe448_mul(check, check, v);
-                qsc_fe448_sub(check, check, u);
-
-                if (qsc_fe448_is_zero(check) != 0)
-                {
-                    if ((qsc_fe448_is_zero(x) != 0) && (sign != 0))
-                    {
-                        r = -1;
-                    }
-                    else
-                    {
-                        /*
-                         * This is the negate-vartime decode, matching the working Ed25519 path:
-                         * when the recovered x parity already equals the encoded sign bit,
-                         * negate x so the returned point is the negated representative.
-                         */
-                        if (qsc_fe448_is_negative(x) == sign)
-                        {
-                            qsc_fe448_neg(x, x);
-                        }
-
-                        qsc_fe448_copy(h->x, x);
-                        qsc_fe448_copy(h->y, y);
-                        qsc_fe448_1(h->z);
-                        qsc_fe448_mul(h->t, h->x, h->y);
-                        r = 0;
-                    }
-                }
-            }
-        }
-    }
-
-    return r;
+			point.z = ed448_one;
+			ed448_mul(&point.t, &point.x, &point.y);
+			ed448_point_export(h, &point);
+			result = 0;
+		}
+	}
+	return result;
 }
 
-/* ============================================================
- * Scalar base point multiplication
- *
- * Uses a simple double-and-add loop over the 446-bit scalar.
- * A production implementation would use a precomputed table with
- * a windowed NAF; this reference implementation is constant-time
- * via the add-always pattern.
- * ============================================================ */
-void qsc_ge448_scalarmult_base(qsc_ge448_p3* h, const uint8_t* a)
+/* Public-input width-five non-adjacent recoding; 457 slots include carry. */
+/*! \brief Recode a public 57-byte scalar as 457 width-five non-adjacent digits, including carry.
+ * \param digits: Caller-owned array of 457 signed output digits.
+ * \param scalar: Read-only 57-byte little-endian scalar.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_slide(int8_t digits[457U], const uint8_t scalar[57U])
 {
-    QSC_ASSERT(h != NULL);
-    QSC_ASSERT(a != NULL);
+	int32_t shifted;
+	int32_t combined;
+	size_t i;
+	size_t distance;
+	size_t carry;
 
-    qsc_ge448_p3 B;
-    qsc_ge448_p3 Q;
-    int32_t i;
-    int32_t bit;
+	for (i = 0U; i < 456U; ++i)
+	{
+		digits[i] = (int8_t)((scalar[i / 8U] >> (i % 8U)) & 1U);
+	}
 
-    if (h != NULL && a != NULL)
-    {
-        if (qsc_ge448_from_bytes_negate_vartime(&B, ED448_BASEPOINT) != 0)
-        {
-            fe448_p3_identity(h);
-        }
-        else
-        {
-            qsc_fe448_neg(B.x, B.x);
-            fe448_p3_identity(&Q);
+	digits[456U] = 0;
 
-            for (i = 56; i >= 0; --i)
-            {
-                const uint8_t byteval = a[i];
+	for (i = 0U; i < 457U; ++i)
+	{
+		if (digits[i] != 0)
+		{
+			for (distance = 1U; distance <= 6U && i + distance < 457U; ++distance)
+			{
+				if (digits[i + distance] != 0)
+				{
+					shifted = (int32_t)digits[i + distance] * (int32_t)(1U << distance);
+					combined = (int32_t)digits[i] + shifted;
 
-                for (bit = 7; bit >= 0; --bit)
-                {
-                    qsc_ge448_p1p1 dbl;
-                    qsc_ge448_p1p1 add;
-                    qsc_ge448_p3 qdbl;
-                    qsc_ge448_p3 qadd;
-                    const uint32_t sel = (uint32_t)((byteval >> bit) & 1U);
+					if (combined <= 15)
+					{
+						digits[i] = (int8_t)combined;
+						digits[i + distance] = 0;
+					}
+					else
+					{
+						combined = (int32_t)digits[i] - shifted;
 
-                    ge448_p3_dbl(&dbl, &Q);
-                    qsc_ge448_p1p1_to_p3(&qdbl, &dbl);
+						if (combined < -15)
+						{
+							break;
+						}
 
-                    {
-                        qsc_ge448_cached bc;
-                        qsc_ge448_p3_to_cached(&bc, &B);
-                        qsc_ge448_add_cached(&add, &qdbl, &bc);
-                        qsc_ge448_p1p1_to_p3(&qadd, &add);
-                    }
+						digits[i] = (int8_t)combined;
 
-                    qsc_fe448_copy(Q.x, qdbl.x);
-                    qsc_fe448_copy(Q.y, qdbl.y);
-                    qsc_fe448_copy(Q.z, qdbl.z);
-                    qsc_fe448_copy(Q.t, qdbl.t);
-                    fe448_p3_cmov(&Q, &qadd, sel);
-                }
-            }
+						for (carry = i + distance; carry < 457U; ++carry)
+						{
+							if (digits[carry] == 0)
+							{
+								digits[carry] = 1;
+								break;
+							}
 
-            qsc_fe448_copy(h->x, Q.x);
-            qsc_fe448_copy(h->y, Q.y);
-            qsc_fe448_copy(h->z, Q.z);
-            qsc_fe448_copy(h->t, Q.t);
-        }
-    }
+							digits[carry] = 0;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
-/* Double scalar multiplication r = a*A + b*B (variable-time, for verification) */
+/*! \brief Add the public signed odd multiple selected from an eight-entry point table.
+ * \param out: Caller-owned output; its exact size and representation follow the declared type.
+ * \param p: Read-only table of eight odd multiples of a public point.
+ * \param digit: Nonzero public odd digit in [-15,15].
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_point_add_signed(ed448_point* out, const ed448_point* p, int8_t digit)
+{
+	ed448_point selected;
+	int32_t magnitude;
+
+	magnitude = digit < 0 ? -(int32_t)digit : (int32_t)digit;
+	selected = p[(size_t)magnitude / 2U];
+
+	if (digit < 0)
+	{
+		ed448_sub(&selected.x, &ed448_zero, &selected.x);
+		ed448_sub(&selected.t, &ed448_zero, &selected.t);
+	}
+
+	ed448_point_add(out, out, &selected);
+}
+
+/*! \brief Immutable odd multiples B, 3B, ..., 15B for public-input verification. */
+static const ed448_affine ed448_verify_base[8U] = 
+{
+	{{{UINT64_C(0x2626A82BC70CC05E), UINT64_C(0x433B80E18B00938E), UINT64_C(0x12AE1AF72AB66511), UINT64_C(0xEA6DE324A3D3A464), UINT64_C(0x9E146570470F1767), UINT64_C(0x221D15A622BF36DA), UINT64_C(0x4F1970C66BED0DED)}}, {{UINT64_C(0x9808795BF230FA14), UINT64_C(0xFDBD132C4ED7C8AD), UINT64_C(0x3AD3FF1CE67C39C4), UINT64_C(0x87789C1E05A0C2D7), UINT64_C(0x4BEA73736CA39840), UINT64_C(0x8876203756C9C762), UINT64_C(0x693F46716EB6BC24)}}, {{UINT64_C(0x0E6A7C93790D43B1), UINT64_C(0x4AE485EE44C273B4), UINT64_C(0x3A6626961292E516), UINT64_C(0x5CB41037F1CE00E8), UINT64_C(0xB86E90478111129E), UINT64_C(0x5B8A5541C3FAF4D1), UINT64_C(0x26AFA9E48A9AA167)}}},
+	{{{UINT64_C(0x5728173286FF2F8F), UINT64_C(0xE862B769465DA857), UINT64_C(0xDAA9CBF7F6271FD6), UINT64_C(0xE2BA077A4A3FCFE8), UINT64_C(0x32241B8B8CDA82C7), UINT64_C(0x55BD64316CB69433), UINT64_C(0x0865886B9108AF64)}}, {{UINT64_C(0xB822AC13588ED6FC), UINT64_C(0xBFFA9A68FED02DAF), UINT64_C(0xBB3A331BDB6767F0), UINT64_C(0xFCE43C82EC4E1D58), UINT64_C(0x9A4A8D952356C3B9), UINT64_C(0x06CBDA7AD43AA644), UINT64_C(0xE005A8DBD5125CF7)}}, {{UINT64_C(0x16CD3A416E267A3A), UINT64_C(0x1129884610E5C7D8), UINT64_C(0x6492407E3E42F403), UINT64_C(0x8379C2B40D31D305), UINT64_C(0xDA309EC353ACF419), UINT64_C(0x037A60E8DFC2C41B), UINT64_C(0x4F44D997609BBB10)}}},
+	{{{UINT64_C(0xD0A99D1092030034), UINT64_C(0xF07B2D8CEFC6F950), UINT64_C(0x8BC0D57A920C3C96), UINT64_C(0x56D761E895881280), UINT64_C(0x80CBCF728562ADA7), UINT64_C(0x2BA7601EEDB50DEF), UINT64_C(0x7A9F9335A48DCB0E)}}, {{UINT64_C(0x43B4731472F435EB), UINT64_C(0x58405512881F2254), UINT64_C(0x27D7A4EE59D2B33C), UINT64_C(0xD86551F7B6980171), UINT64_C(0x260CA1823AB18FCE), UINT64_C(0xB9109CE4FD580ADE), UINT64_C(0xADFD751A2517EDD3)}}, {{UINT64_C(0xE06C3E8E1F5BB305), UINT64_C(0xC7057034F02B36B2), UINT64_C(0xF84B332D67133823), UINT64_C(0x542CA4513AE3E790), UINT64_C(0x1A66A8A9DBE6491F), UINT64_C(0xAE0CF80DCE8E4B25), UINT64_C(0x67FE268FC13B327A)}}},
+	{{{UINT64_C(0xD7DF9567CEB5EAF7), UINT64_C(0x6E0B110A6B478AC7), UINT64_C(0xB5A2092D33501470), UINT64_C(0xD568E6840DF9C7B0), UINT64_C(0xF2D8C3719BBA4223), UINT64_C(0x467B9A5291B6D78A), UINT64_C(0x079748E5C89BEF77)}}, {{UINT64_C(0x09E20D3FADAC377F), UINT64_C(0xBBB734E866972B5C), UINT64_C(0x2F84C9D8687A3C40), UINT64_C(0xCA78F50E7B3946FD), UINT64_C(0x94417E7179D00E40), UINT64_C(0x7373BCB23583B875), UINT64_C(0x7DDEDA3C90FD699C)}}, {{UINT64_C(0x84FAE64438EDF0D0), UINT64_C(0x4DE825186AA89F80), UINT64_C(0xF60EE2B4BBC907A5), UINT64_C(0x2338FDD5E1E5F106), UINT64_C(0x5F4BCF6588DAE6CE), UINT64_C(0x6ABE2815418A340F), UINT64_C(0x6B8BE3AE56F3CA79)}}},
+	{{{UINT64_C(0x793D0DEF76AB686B), UINT64_C(0x89ED1A467EC49F7C), UINT64_C(0x30A0D93E53F4FC89), UINT64_C(0x18AD44EE101E3444), UINT64_C(0x6CDAE1D134A3AE73), UINT64_C(0x8CD7D824AD4DAEFA), UINT64_C(0xEF1650CED584FCAA)}}, {{UINT64_C(0x8BA74DF674F4754F), UINT64_C(0x1140F52CEA8EF3FB), UINT64_C(0x256FBB47C32D4297), UINT64_C(0xBA605671391C15DA), UINT64_C(0x8C687993B9C165FA), UINT64_C(0xAF7ACBD5A84DF251), UINT64_C(0x1560B6298F12AE2D)}}, {{UINT64_C(0x60B1F14701B36165), UINT64_C(0x6770221C7D6637DD), UINT64_C(0xC05D3041228A0D3D), UINT64_C(0x09C3DA0EE7AFA4B2), UINT64_C(0x4EC8DFF1A77A3DAC), UINT64_C(0xBC126C03F1FE3817), UINT64_C(0x25E7AAA8AB328FFE)}}},
+	{{{UINT64_C(0xB8EF4DA0254DC10A), UINT64_C(0x294863118655940D), UINT64_C(0x581DBAE20B14982F), UINT64_C(0x104F502967B93775), UINT64_C(0x0DB5122D34422EE7), UINT64_C(0xE56D71A4C6405D44), UINT64_C(0xBF12ABBC2408EEB1)}}, {{UINT64_C(0xAB0CC9F86016AF01), UINT64_C(0xFE1288366ABF3D8C), UINT64_C(0xD0067485DDA13A2E), UINT64_C(0x06D187F7390DF605), UINT64_C(0x00FF0C5D20F18F58), UINT64_C(0x308123E0173328C9), UINT64_C(0x42D35B554BF2FDAD)}}, {{UINT64_C(0x1B3D0B9089F16D84), UINT64_C(0x566D86A8FCD5D663), UINT64_C(0xA5E30766D095F43E), UINT64_C(0xE8D4C06D6A227455), UINT64_C(0x0112453F9C5BE52D), UINT64_C(0x4B8D0C0726D97FBA), UINT64_C(0xBF233049E130FCD3)}}},
+	{{{UINT64_C(0x05009135F2FFB1F1), UINT64_C(0xFA5A099FC7E8F9C6), UINT64_C(0x44552BCC67DA626B), UINT64_C(0x01B339E1C186D123), UINT64_C(0x44FC9708C5B52325), UINT64_C(0xBAAEC1E928E770A5), UINT64_C(0x0BAEDD2EF0F50F06)}}, {{UINT64_C(0xE9535D6D8BF479E5), UINT64_C(0x9BE2156E536E4EC3), UINT64_C(0x9FD7363165741DDB), UINT64_C(0x82E33DDD988AF715), UINT64_C(0x4214E6900213D8A7), UINT64_C(0xD56E0804A2685460), UINT64_C(0xC59B84F0E52A4C34)}}, {{UINT64_C(0x3C2589550573FA9F), UINT64_C(0x429F0CA8F32A4E2D), UINT64_C(0x1285B494668CDED1), UINT64_C(0xFF2C383064DA4A88), UINT64_C(0xAF724A1439472F79), UINT64_C(0x3E221CFDE20D9EC7), UINT64_C(0x5A5AA306A43FF3AB)}}},
+	{{{UINT64_C(0x27525D45F24729D9), UINT64_C(0x35DB5768ABA87123), UINT64_C(0x27EF21A25E43B430), UINT64_C(0x1605611215A1EE89), UINT64_C(0xFBFD508AF9A785D2), UINT64_C(0xF721A37BA96945E2), UINT64_C(0x30D6D8C216D8D3B6)}}, {{UINT64_C(0x4E3065E0852074C3), UINT64_C(0xF955FA40B4A2A068), UINT64_C(0xF25900851325A763), UINT64_C(0x9F665756D4EF19C9), UINT64_C(0x2223312990799C86), UINT64_C(0x86C2B28DB8027B05), UINT64_C(0xF48FB8F28ADE0AC9)}}, {{UINT64_C(0xEA5F3C04DCF5E88E), UINT64_C(0xEF1E914D896E4EB0), UINT64_C(0xF49DA06A53E17AC9), UINT64_C(0xB5B564C6FC9849C2), UINT64_C(0x2705F183F3EAFC74), UINT64_C(0xC3619C2A76FB4742), UINT64_C(0x30FFA3268750BB15)}}}
+};
+
 void qsc_ge448_double_scalarmult_vartime(qsc_ge448_p2* r, const uint8_t* a, const qsc_ge448_p3* A, const uint8_t* b)
 {
-    QSC_ASSERT(r != NULL);
-    QSC_ASSERT(a != NULL);
-    QSC_ASSERT(A != NULL);
-    QSC_ASSERT(b != NULL);
+	if (r == NULL || a == NULL || A == NULL || b == NULL)
+	{
+		return;
+	}
 
-    qsc_ge448_p3 B;
-    qsc_ge448_p3 aA;
-    qsc_ge448_p3 bB;
-    qsc_ge448_p3 sum;
-    qsc_ge448_p1p1 tmp;
-    qsc_ge448_cached ac;
-    qsc_ge448_cached bc;
-    int32_t i;
-    int32_t bit;
+	ed448_point table[8U];
+	ed448_affine selected;
+	int32_t digit;
+	ed448_point twice;
+	ed448_point sum;
+	int8_t adigits[457U];
+	int8_t bdigits[457U];
+	size_t i;
 
-    if (r != NULL && a != NULL && A != NULL && b != NULL)
-    {
-        if (qsc_ge448_from_bytes_negate_vartime(&B, ED448_BASEPOINT) != 0)
-        {
-            fe448_p2_identity(r);
-        }
-        else
-        {
-            qsc_fe448_neg(B.x, B.x);
-            fe448_p3_identity(&aA);
-            fe448_p3_identity(&bB);
+	ed448_point_import(&table[0U], A);
+	ed448_point_double(&twice, &table[0U]);
 
-            for (i = 56; i >= 0; --i)
-            {
-                const uint8_t av = a[i];
-                const uint8_t bv = b[i];
+	for (i = 1U; i < 8U; ++i)
+	{
+		ed448_point_add(&table[i], &table[i - 1U], &twice);
+	}
 
-                for (bit = 7; bit >= 0; --bit)
-                {
-                    ge448_p3_dbl(&tmp, &aA);
-                    qsc_ge448_p1p1_to_p3(&aA, &tmp);
+	ed448_slide(adigits, a);
+	ed448_slide(bdigits, b);
+	ed448_identity(&sum);
+	i = 457U;
 
-                    if (((av >> bit) & 1U) != 0U)
-                    {
-                        qsc_ge448_p3_to_cached(&ac, A);
-                        qsc_ge448_add_cached(&tmp, &aA, &ac);
-                        qsc_ge448_p1p1_to_p3(&aA, &tmp);
-                    }
+	while (i > 0U && adigits[i - 1U] == 0 && bdigits[i - 1U] == 0)
+	{
+		--i;
+	}
 
-                    ge448_p3_dbl(&tmp, &bB);
-                    qsc_ge448_p1p1_to_p3(&bB, &tmp);
+	for (; i > 0U; --i)
+	{
+		ed448_point_double(&sum, &sum);
 
-                    if (((bv >> bit) & 1U) != 0U)
-                    {
-                        qsc_ge448_p3_to_cached(&bc, &B);
-                        qsc_ge448_add_cached(&tmp, &bB, &bc);
-                        qsc_ge448_p1p1_to_p3(&bB, &tmp);
-                    }
-                }
-            }
+		if (adigits[i - 1U] != 0)
+		{
+			ed448_point_add_signed(&sum, table, adigits[i - 1U]);
+		}
 
-            {
-                qsc_ge448_cached bbc;
-                qsc_ge448_p1p1 stmp;
+		if (bdigits[i - 1U] != 0)
+		{
+			digit = bdigits[i - 1U];
+			selected = ed448_verify_base[(size_t)(digit < 0 ? -digit : digit) / 2U];
 
-                qsc_ge448_p3_to_cached(&bbc, &bB);
-                qsc_ge448_add_cached(&stmp, &aA, &bbc);
-                qsc_ge448_p1p1_to_p3(&sum, &stmp);
-            }
+			if (digit < 0)
+			{
+				ed448_sub(&selected.x, &ed448_zero, &selected.x);
+				ed448_sub(&selected.td, &ed448_zero, &selected.td);
+			}
 
-            qsc_fe448_copy(r->x, sum.x);
-            qsc_fe448_copy(r->y, sum.y);
-            qsc_fe448_copy(r->z, sum.z);
-        }
-    }
+			ed448_point_add_affine(&sum, &sum, &selected);
+		}
+	}
+
+	ed448_to_legacy(r->x, &sum.x);
+	ed448_to_legacy(r->y, &sum.y);
+	ed448_to_legacy(r->z, &sum.z);
 }
 
+void qsc_fe448_0(qsc_fe448 h)
+{
+	qsc_memutils_clear(h, sizeof(qsc_fe448));
+}
+
+void qsc_fe448_1(qsc_fe448 h)
+{
+	qsc_fe448_0(h);
+	h[0U] = 1;
+}
+
+void qsc_fe448_copy(qsc_fe448 h, const qsc_fe448 f)
+{
+	size_t i;
+	for (i = 0U; i < 16U; ++i)
+	{
+		h[i] = f[i];
+	}
+}
+
+void qsc_fe448_add(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
+{
+	ed448_fe a;
+	ed448_fe b;
+	ed448_from_legacy(&a, f);
+	ed448_from_legacy(&b, g);
+	ed448_add(&a, &a, &b);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_sub(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
+{
+	ed448_fe a;
+	ed448_fe b;
+	ed448_from_legacy(&a, f);
+	ed448_from_legacy(&b, g);
+	ed448_sub(&a, &a, &b);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_mul(qsc_fe448 h, const qsc_fe448 f, const qsc_fe448 g)
+{
+	ed448_fe a;
+	ed448_fe b;
+	ed448_from_legacy(&a, f);
+	ed448_from_legacy(&b, g);
+	ed448_mul(&a, &a, &b);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_neg(qsc_fe448 h, const qsc_fe448 f)
+{
+	ed448_fe a;
+	ed448_from_legacy(&a, f);
+	ed448_sub(&a, &ed448_zero, &a);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_sq(qsc_fe448 h, const qsc_fe448 f)
+{
+	ed448_fe a;
+	ed448_from_legacy(&a, f);
+	ed448_square(&a, &a);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_sq2(qsc_fe448 h, const qsc_fe448 f)
+{
+	ed448_fe a;
+	ed448_from_legacy(&a, f);
+	ed448_square(&a, &a);
+	ed448_add(&a, &a, &a);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_invert(qsc_fe448 h, const qsc_fe448 f)
+{
+	ed448_fe a;
+	ed448_from_legacy(&a, f);
+	ed448_invert(&a, &a);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_reduce(qsc_fe448 h, const qsc_fe448 f)
+{
+	ed448_fe a;
+	ed448_from_legacy(&a, f);
+
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_mul32(qsc_fe448 h, const qsc_fe448 f, uint32_t n)
+{
+	ed448_fe a;
+	ed448_from_legacy(&a, f);
+	ed448_mul_small(&a, &a, n);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_from_bytes(qsc_fe448 h, const uint8_t* s)
+{
+	ed448_fe a;
+	ed448_load(&a, s);
+	ed448_to_legacy(h, &a);
+}
+
+void qsc_fe448_to_bytes(uint8_t* s, const qsc_fe448 h)
+{
+	if (s == NULL)
+	{
+		return;
+	}
+
+	ed448_fe a;
+
+	ed448_from_legacy(&a, h);
+	ed448_store(s, &a);
+}
+
+int32_t qsc_fe448_is_negative(const qsc_fe448 f)
+{
+	uint8_t encoded[56U];
+
+	qsc_fe448_to_bytes(encoded, f);
+
+	return (int32_t)(encoded[0U] & 1U);
+}
+
+int32_t qsc_fe448_is_zero(const qsc_fe448 f)
+{
+	uint8_t encoded[56U];
+	uint8_t value;
+	size_t i;
+
+	qsc_fe448_to_bytes(encoded, f);
+	value = 0U;
+
+	for (i = 0U; i < 56U; ++i)
+	{
+		value |= encoded[i];
+	}
+
+	return (int32_t)(value == 0U);
+}
+
+void qsc_fe448_cmov(qsc_fe448 f, const qsc_fe448 g, uint32_t b)
+{
+	uint32_t mask;
+	uint32_t value;
+	size_t i;
+
+	mask = (uint32_t)ed448_mask_barrier(UINT64_C(0) - (b & 1U));
+
+	for (i = 0U; i < 16U; ++i)
+	{
+		value = ((uint32_t)f[i] & ~mask) | ((uint32_t)g[i] & mask);
+		qsc_memutils_copy(&f[i], &value, sizeof(value));
+	}
+}
+
+void qsc_fe448_cswap(qsc_fe448 f, qsc_fe448 g, uint32_t b)
+{
+	qsc_fe448 saved;
+	qsc_fe448_copy(saved, f);
+	qsc_fe448_cmov(f, g, b);
+	qsc_fe448_cmov(g, saved, b);
+	qsc_memutils_secure_erase(saved, sizeof(saved));
+}
+
+void qsc_ge448_p1p1_to_p2(qsc_ge448_p2* r, const qsc_ge448_p1p1* p)
+{
+	qsc_ge448_p2 result;
+
+	qsc_fe448_mul(result.x, p->x, p->t);
+	qsc_fe448_mul(result.y, p->y, p->z);
+	qsc_fe448_mul(result.z, p->z, p->t);
+	*r = result;
+}
+
+void qsc_ge448_p1p1_to_p3(qsc_ge448_p3* r, const qsc_ge448_p1p1* p)
+{
+	qsc_ge448_p3 result;
+
+	qsc_fe448_mul(result.x, p->x, p->t);
+	qsc_fe448_mul(result.y, p->y, p->z);
+	qsc_fe448_mul(result.z, p->z, p->t);
+	qsc_fe448_mul(result.t, p->x, p->y);
+	*r = result;
+}
+
+void qsc_ge448_p3_to_cached(qsc_ge448_cached* r, const qsc_ge448_p3* p)
+{
+	qsc_ge448_cached result;
+
+	qsc_fe448_add(result.yplusx, p->y, p->x);
+	qsc_fe448_sub(result.yminusx, p->y, p->x);
+	qsc_fe448_copy(result.z, p->z);
+	qsc_fe448_mul32(result.t2d, p->t, 78162U);
+	qsc_fe448_neg(result.t2d, result.t2d);
+	*r = result;
+}
+
+/*! \brief Add or subtract a valid cached point and export completed coordinates without inversion.
+ * \param r: Caller-owned completed-coordinate point output.
+ * \param p: Read-only point operand with valid coordinates and a nonzero projective denominator.
+ * \param q: Read-only point operand in the declared coordinate representation.
+ * \param subtract: Public operation selector; true computes subtraction, false addition.
+ * \details Operands are borrowed and non-NULL. No dynamic ownership or shared mutable state.
+ */
+static void ed448_cached_add(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_cached* q, bool subtract)
+{
+	ed448_point a;
+	ed448_point b;
+	ed448_fe plus;
+	ed448_fe minus;
+
+	ed448_point_import(&a, p);
+	ed448_from_legacy(&plus, q->yplusx);
+	ed448_from_legacy(&minus, q->yminusx);
+	ed448_sub(&b.x, &plus, &minus);
+	ed448_mul(&b.x, &b.x, &ed448_half);
+	ed448_add(&b.y, &plus, &minus);
+	ed448_mul(&b.y, &b.y, &ed448_half);
+	ed448_from_legacy(&b.z, q->z);
+	ed448_from_legacy(&b.t, q->t2d);
+	ed448_mul(&b.t, &b.t, &ed448_inv2d);
+
+	if (subtract)
+	{
+		ed448_sub(&b.x, &ed448_zero, &b.x);
+		ed448_sub(&b.t, &ed448_zero, &b.t);
+	}
+
+	ed448_point_add(&a, &a, &b);
+	ed448_to_legacy(r->x, &a.x);
+	ed448_to_legacy(r->y, &a.y);
+	ed448_to_legacy(r->z, &a.z);
+	ed448_to_legacy(r->t, &a.z);
+}
+
+void qsc_ge448_add_cached(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_cached* q)
+{
+	ed448_cached_add(r, p, q, false);
+}
+
+void qsc_ge448_sub_cached(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_cached* q)
+{
+	ed448_cached_add(r, p, q, true);
+}
+
+void qsc_ge448_add_precomp(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_precomp* q)
+{
+	qsc_ge448_cached cached;
+	qsc_fe448_copy(cached.yplusx, q->yplusx);
+	qsc_fe448_copy(cached.yminusx, q->yminusx);
+	qsc_fe448_1(cached.z);
+	qsc_fe448_copy(cached.t2d, q->xy2d);
+	ed448_cached_add(r, p, &cached, false);
+}
+
+void qsc_ge448_sub_precomp(qsc_ge448_p1p1* r, const qsc_ge448_p3* p, const qsc_ge448_precomp* q)
+{
+	qsc_ge448_cached cached;
+	qsc_fe448_copy(cached.yplusx, q->yplusx);
+	qsc_fe448_copy(cached.yminusx, q->yminusx);
+	qsc_fe448_1(cached.z);
+	qsc_fe448_copy(cached.t2d, q->xy2d);
+	ed448_cached_add(r, p, &cached, true);
+}
+
+
+void qsc_ge448_basepoint_to_bytes(uint8_t* out, const uint8_t* scalar)
+{
+	ed448_point point;
+
+	ed448_base_multiply(&point, scalar);
+	ed448_point_encode(out, &point);
+	qsc_memutils_secure_erase(&point, sizeof(point));
+}
+
+/* \endcond NO_DOCUMENT */

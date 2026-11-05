@@ -793,10 +793,10 @@ static bool test_ticket_codec_duplicate_extension(void)
 
     if (res == true)
     {
-        memcpy(duplicate, encoded, written);
+        qsc_memutils_copy(duplicate, encoded, written);
         duplicate[13U] = (uint8_t)(((extlen * 2U) >> 8U) & 0xFFU);
         duplicate[14U] = (uint8_t)((extlen * 2U) & 0xFFU);
-        memcpy(duplicate + written, encoded + 15U, extlen);
+        qsc_memutils_copy(duplicate + written, encoded + 15U, extlen);
         status = qsc_tls_session_ticket_decode(duplicate, written + extlen, &decoded);
         res = (status == qsc_tls_status_invalid_message);
     }

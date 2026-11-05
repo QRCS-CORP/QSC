@@ -49,6 +49,23 @@
  * Contact: contact@qrcscorp.ca
  */
 
+ /* Implementation acknowledgements:
+ *
+ * This QRCS implementation was developed with reference to the
+ * Botan cryptographic library, established cryptographic research,
+ * applicable NIST and IETF standards, and published algorithms.
+ *
+ * The implementation has been adapted and optimized for the QSC
+ * architecture, including its arithmetic engines, memory management,
+ * platform-specific acceleration, and security requirements.
+ *
+ * Reference: Botan Cryptographic Library
+ * https://botan.randombit.net/
+ *
+ * Copyright and licensing of third-party derived material remain
+ * subject to the applicable original license terms.
+ */
+
 #ifndef QSC_ED25519_H
 #define QSC_ED25519_H
 
@@ -134,9 +151,9 @@ typedef int32_t qsc_fe25519[10U];
  */
 typedef struct 
 {
-    qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
-    qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
-    qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
+	qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
+	qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
+	qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
 } qsc_ge25519_p2;
 
 /*! 
@@ -148,10 +165,10 @@ typedef struct
  */
 typedef struct 
 {
-    qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
-    qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
-    qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
-    qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
+	qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
+	qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
+	qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
+	qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
 } qsc_ge25519_p3;
 
 /*! 
@@ -162,10 +179,10 @@ typedef struct
  */
 typedef struct 
 {
-    qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
-    qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
-    qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
-    qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
+	qsc_fe25519 x; /*!< [qsc_fe25519] The X-coordinate. */
+	qsc_fe25519 y; /*!< [qsc_fe25519] The Y-coordinate. */
+	qsc_fe25519 z; /*!< [qsc_fe25519] The Z-coordinate. */
+	qsc_fe25519 t; /*!< [qsc_fe25519] The T-coordinate. */
 } qsc_ge25519_p1p1;
 
 /*! 
@@ -176,9 +193,9 @@ typedef struct
  */
 typedef struct 
 {
-    qsc_fe25519 yplusx;  /*!< [qsc_fe25519] The sum of Y and X coordinates. */
-    qsc_fe25519 yminusx; /*!< [qsc_fe25519] The difference of Y and X coordinates. */
-    qsc_fe25519 xy2d;    /*!< [qsc_fe25519] The product of X and Y, multiplied by 2d. */
+	qsc_fe25519 yplusx;  /*!< [qsc_fe25519] The sum of Y and X coordinates. */
+	qsc_fe25519 yminusx; /*!< [qsc_fe25519] The difference of Y and X coordinates. */
+	qsc_fe25519 xy2d;    /*!< [qsc_fe25519] The product of X and Y, multiplied by 2d. */
 } qsc_ge25519_precomp;
 
 /*! 
@@ -189,10 +206,10 @@ typedef struct
  */
 typedef struct 
 {
-    qsc_fe25519 yplusx; /*!< [qsc_fe25519] The sum of Y and X coordinates. */
-    qsc_fe25519 yminusx;/*!< [qsc_fe25519] The difference of Y and X coordinates. */
-    qsc_fe25519 z;      /*!< [qsc_fe25519] The Z-coordinate. */
-    qsc_fe25519 t2d;    /*!< [qsc_fe25519] The T-coordinate multiplied by 2d. */
+	qsc_fe25519 yplusx; /*!< [qsc_fe25519] The sum of Y and X coordinates. */
+	qsc_fe25519 yminusx;/*!< [qsc_fe25519] The difference of Y and X coordinates. */
+	qsc_fe25519 z;      /*!< [qsc_fe25519] The Z-coordinate. */
+	qsc_fe25519 t2d;    /*!< [qsc_fe25519] The T-coordinate multiplied by 2d. */
 } qsc_ge25519_cached;
 
 /**
@@ -603,6 +620,23 @@ void qsc_sc25519_reduce(uint8_t s[64U]);
  * \return [int32_t] Returns 0 if all \a n bytes of \a x and \a y are equal; returns -1 if they differ.
  */
 int32_t qsc_sc25519_verify(const uint8_t* x, const uint8_t* y, const size_t n);
+
+/*! \brief Computes the raw RFC 7748 X25519 result using the shared five-limb field engine.
+ * \param out: Caller-owned 32-byte output; may alias an input buffer.
+ * \param scalar: Caller-owned 32-byte private scalar; clamped internally.
+ * \param u: Caller-owned 32-byte peer u-coordinate.
+ * \details Internal interface. All pointers must be non-null. No allocation or shared mutable state.
+ * Low-order and all-zero checks are performed by the public EDDH wrapper. The clamped copy is erased.
+ */
+void qsc_ed25519_x25519_exchange(uint8_t out[32U], const uint8_t scalar[32U], const uint8_t u[32U]);
+
+/*! \brief Derives an X25519 public key with the immutable Edwards basepoint table.
+ * \param out: Caller-owned 32-byte public-key output; may alias the input buffer.
+ * \param scalar: Caller-owned 32-byte private scalar; clamped internally.
+ * \details Internal interface. Both pointers must be non-null. No allocation or shared mutable state.
+ * Uses subgroup-order reduction and the Edwards-to-Montgomery coordinate map. The clamped copy is erased.
+ */
+void qsc_ed25519_x25519_generate(uint8_t out[32U], const uint8_t scalar[32U]);
 
 QSC_CPLUSPLUS_ENABLED_END
 

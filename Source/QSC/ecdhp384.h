@@ -49,144 +49,156 @@
  * Contact: contact@qrcscorp.ca
  */
 
+ /* Implementation acknowledgements:
+ *
+ * This QRCS implementation was developed with reference to the
+ * Botan cryptographic library, established cryptographic research,
+ * applicable NIST and IETF standards, and published algorithms.
+ *
+ * The implementation has been adapted and optimized for the QSC
+ * architecture, including its arithmetic engines, memory management,
+ * platform-specific acceleration, and security requirements.
+ *
+ * Reference: Botan Cryptographic Library
+ * https://botan.randombit.net/
+ *
+ * Copyright and licensing of third-party derived material remain
+ * subject to the applicable original license terms.
+ */
+
 #ifndef QSC_ECDHP384_H
 #define QSC_ECDHP384_H
 
 #include "qsccommon.h"
 
-/*!
- * \par Public API contract
- * All buffers are allocated and owned by the caller; no ownership is transferred.
- * Public keys contain raw big-endian affine X and Y coordinates without a SEC1
- * prefix; private scalars and shared secrets use big-endian byte strings.
- * The functions have no shared mutable state. A caller-supplied RNG must be safe
- * for concurrent use when key generation is called from multiple threads.
- * Key generation and public derivation return void: callers must check for a
- * nonzero output rather than assume success. Key agreement reports failure.
- */
-
-/**
- * \file ecdhp384.h
- * \brief Elliptic Curve Diffie-Hellman over the NIST P-384 domain.
- *
- * \details
- * This header exposes the low-level public interface for the QSC P-384
- * Elliptic Curve Diffie-Hellman implementation. The functions in this module
- * provide private to public key derivation, random or seed-based key-pair
- * generation, and shared secret derivation using a peer public key and a
- * local private key.
- *
- * The public key is encoded as a fixed-size byte array of
- * QSC_ECDHP384_PUBLICKEY_SIZE bytes. The private key, shared secret, and
- * deterministic seed are each encoded as fixed-size byte arrays of their
- * respective constant sizes.
- *
- * This interface is intended for base ECDH key establishment operations.
- * Callers are responsible for providing correctly sized buffers and, where
- * applicable, a cryptographically secure random generator callback.
- *
- * Example:
- * \code
- * uint8_t puba[QSC_ECDHP384_PUBLICKEY_SIZE];
- * uint8_t pria[QSC_ECDHP384_PRIVATEKEY_SIZE];
- * uint8_t pubb[QSC_ECDHP384_PUBLICKEY_SIZE];
- * uint8_t prib[QSC_ECDHP384_PRIVATEKEY_SIZE];
- * uint8_t seca[QSC_ECDHP384_SHAREDSECRET_SIZE];
- * uint8_t secb[QSC_ECDHP384_SHAREDSECRET_SIZE];
- *
- * qsc_p384_generate_keypair(puba, pria, rng_generate);
- * qsc_p384_generate_keypair(pubb, prib, rng_generate);
- *
- * if (qsc_p384_key_exchange(seca, pubb, pria) == true &&
- *     qsc_p384_key_exchange(secb, puba, prib) == true)
- * {
- *     // seca and secb should contain the same shared secret
- * }
- * \endcode
- */
+ /* \cond NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
-/*!
- * \def QSC_ECDHP384_PUBLICKEY_SIZE
- * \brief The byte size of a serialized P-384 public key.
+/*! \file ecdhp384.h
+ * \brief NIST P-384 ECDH key generation and raw agreement.
+ * \details Keys retain the established raw encoding: 48-byte big-endian private
+ * scalar in [1,n), 96-byte public X||Y, and 48-byte shared X coordinate.
+ * Seed processing is unchanged. Fresh QSC CSP entropy is required independently
+ * for scalar and coordinate blinding, including deterministic seeded generation.
+ * Failure clears each supplied output. Inputs/outputs must not overlap; callers
+ * provide the full fixed-size buffers. All storage remains caller-owned.
+ * No heap allocation or mutable global state; independent calls are thread-safe.
+ * Raw ECDH output must be processed by an appropriate protocol KDF. This module
+ * does not authenticate the peer or define a key-confirmation protocol.
+ */
+
+/*! \def QSC_ECDHP384_PUBLICKEY_SIZE
+ * \brief P-384 publickey length in bytes.
  */
 #define QSC_ECDHP384_PUBLICKEY_SIZE 96U
 
-/*!
- * \def QSC_ECDHP384_PRIVATEKEY_SIZE
- * \brief The byte size of a P-384 private key.
+/*! \def QSC_ECDHP384_PRIVATEKEY_SIZE
+ * \brief P-384 privatekey length in bytes.
  */
 #define QSC_ECDHP384_PRIVATEKEY_SIZE 48U
 
-/*!
- * \def QSC_ECDHP384_SHAREDSECRET_SIZE
- * \brief The byte size of the derived P-384 shared secret.
+/*! \def QSC_ECDHP384_SHAREDSECRET_SIZE
+ * \brief P-384 sharedsecret length in bytes.
  */
 #define QSC_ECDHP384_SHAREDSECRET_SIZE 48U
 
-/*!
- * \def QSC_ECDHP384_SEED_SIZE
- * \brief The byte size of the deterministic seed used to derive a P-384 key-pair.
+/*! \def QSC_ECDHP384_SEED_SIZE
+ * \brief P-384 seed length in bytes.
  */
 #define QSC_ECDHP384_SEED_SIZE 48U
 
-/**
- * \brief Derive a serialized P-384 public key from a private key.
- *
- * \param publickey: [uint8_t*] The output buffer that receives the serialized public key;
- * must be at least QSC_ECDHP384_PUBLICKEY_SIZE bytes.
- * \param privatekey: [const uint8_t*] The input private key buffer;
- * must contain QSC_ECDHP384_PRIVATEKEY_SIZE bytes.
- *
- * \return [void] This function does not return a value.
+/*! \brief Derive the public point of a raw private scalar.
+ * \param publickey Caller-owned 96-byte X||Y output, cleared on failure.
+ * \param privatekey Read-only 48-byte big-endian scalar in [1,n).
+ * \return Zero on success; -1 for null input, -2 for zero scalar, -3 for an
+ * out-of-range scalar, -9 for unavailable blinding entropy; other negatives fail.
+ */
+QSC_EXPORT_API int32_t qsc_ecdhp384_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
+
+/*! \brief Multiply a validated peer point by a raw private scalar.
+ * \param secret Caller-owned 48-byte X-coordinate output, cleared on failure.
+ * \param privatekey Read-only 48-byte big-endian scalar in [1,n).
+ * \param publickey Read-only 96-byte canonical peer X||Y point.
+ * \return Zero on success; -1 for null input, -2 for zero scalar, -3 for scalar
+ * range, -4 for coordinate range, -5 for an off-curve point, -9 for entropy failure.
+ * Other negative values indicate arithmetic failure. The low-level result may be
+ * all zero; use key_exchange for the established all-zero rejection policy.
+ */
+QSC_EXPORT_API int32_t qsc_ecdhp384_scalar_multiply(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
+
+/*! \brief Generate a key pair from a caller-supplied seed.
+ * \param publickey Caller-owned 96-byte X||Y output, cleared on failure.
+ * \param privatekey Caller-owned 48-byte raw scalar output, erased on failure.
+ * \param seed Read-only 48-byte seed; must not overlap either output.
+ * \return True on success; false on null inputs, zero derived scalar or CSP failure.
+ */
+QSC_EXPORT_API bool qsc_ecdhp384_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+/*! \brief Generate a key pair from a fresh callback-supplied seed.
+ * \param publickey Caller-owned 96-byte X||Y output, cleared on failure.
+ * \param privatekey Caller-owned 48-byte raw scalar output, erased on failure.
+ * \param rng_generate Callback writing exactly its requested byte count and returning
+ * true only when all bytes are cryptographically random. Invoked once for 48 bytes;
+ * borrowed buffers must not be retained. Callback state must be thread-safe when
+ * shared. Blinding separately uses the QSC CSP and may independently fail.
+ * \return True on success; false on null inputs, callback failure or derivation failure.
+ */
+QSC_EXPORT_API bool qsc_ecdhp384_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+/*! \brief Validate the peer and derive a nonzero raw ECDH agreement value.
+ * \param secret Caller-owned 48-byte shared output, cleared on failure.
+ * \param publickey Read-only 96-byte peer X||Y.
+ * \param privatekey Read-only 48-byte canonical scalar.
+ * \return True on success; false on invalid inputs, CSP failure or all-zero output.
+ * \warning This curve API takes the public key before the private key, unlike qsc_ecdh_key_exchange.
+ */
+QSC_EXPORT_API bool qsc_ecdhp384_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey);
+
+/*! \brief Compatibility entry point for qsc_ecdhp384_publickey_from_privatekey.
+ * \param publickey Caller-owned 96-byte X||Y output, cleared on failure.
+ * \param privatekey Read-only 48-byte big-endian scalar in [1,n).
+ * \details No return status. Use the canonical API to distinguish validation and
+ * entropy failures. The same nonoverlap and thread-safety contracts apply.
  */
 QSC_EXPORT_API void qsc_p384_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 
-/**
- * \brief Generate a random P-384 public and private key-pair.
- *
- * \param publickey: [uint8_t*] The output buffer that receives the serialized public key;
- * must be at least QSC_ECDHP384_PUBLICKEY_SIZE bytes.
- * \param privatekey: [uint8_t*] The output buffer that receives the private key;
- * must be at least QSC_ECDHP384_PRIVATEKEY_SIZE bytes.
- * \param rng_generate: [bool (*)(uint8_t*, size_t)] A pointer to a cryptographically secure
- * random generator function that fills a buffer with random bytes and returns true on success.
- *
- * \return [void] This function does not return a value.
- */
-QSC_EXPORT_API void qsc_p384_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
-
-/**
- * \brief Generate a deterministic P-384 public and private key-pair from a seed.
- *
- * \param publickey: [uint8_t*] The output buffer that receives the serialized public key;
- * must be at least QSC_ECDHP384_PUBLICKEY_SIZE bytes.
- * \param privatekey: [uint8_t*] The output buffer that receives the private key;
- * must be at least QSC_ECDHP384_PRIVATEKEY_SIZE bytes.
- * \param seed: [const uint8_t*] The input seed buffer;
- * must contain QSC_ECDHP384_SEED_SIZE bytes.
- *
- * \return [void] This function does not return a value.
+/*! \brief Compatibility entry point for qsc_ecdhp384_generate_seeded_keypair.
+ * \param publickey Caller-owned 96-byte X||Y output, cleared on failure.
+ * \param privatekey Caller-owned 48-byte scalar output, erased on failure.
+ * \param seed Read-only 48-byte seed; must not overlap either output.
+ * \details No return status. Use the canonical API to detect failure. Fresh CSP
+ * entropy is required for blinding; independent calls are thread-safe.
  */
 QSC_EXPORT_API void qsc_p384_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
-/**
- * \brief Derive a P-384 shared secret using a peer public key and a local private key.
- *
- * \param secret: [uint8_t*] The output buffer that receives the shared secret;
- * must be at least QSC_ECDHP384_SHAREDSECRET_SIZE bytes.
- * \param publickey: [const uint8_t*] The peer serialized public key;
- * must contain QSC_ECDHP384_PUBLICKEY_SIZE bytes.
- * \param privatekey: [const uint8_t*] The local private key;
- * must contain QSC_ECDHP384_PRIVATEKEY_SIZE bytes.
- *
- * \warning Unlike qsc_ecdh_key_exchange(), the parameter-specific API accepts the peer public key before the private key.
- * \return [bool] Returns true if the shared secret was generated successfully;
- * returns false on failure.
+/*! \brief Compatibility entry point for qsc_ecdhp384_generate_keypair.
+ * \param publickey Caller-owned 96-byte X||Y output, cleared on failure.
+ * \param privatekey Caller-owned 48-byte scalar output, erased on failure.
+ * \param rng_generate Borrowed callback with the same ownership, randomness and
+ * thread-safety contract as qsc_ecdhp384_generate_keypair.
+ * \details No return status. Use the canonical API to detect callback or CSP
+ * failure. Inputs and outputs must not overlap.
+ */
+QSC_EXPORT_API void qsc_p384_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
+
+/*! \brief Compatibility entry point for qsc_ecdhp384_key_exchange.
+ * \copydetails qsc_ecdhp384_key_exchange
  */
 QSC_EXPORT_API bool qsc_p384_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey);
 
+/*! \brief Compatibility entry point for qsc_ecdhp384_publickey_from_privatekey.
+ * \copydetails qsc_ecdhp384_publickey_from_privatekey
+ */
+QSC_EXPORT_API int32_t qsc_crypto_scalarmult_secp384r1_base(uint8_t* publickey, const uint8_t* privatekey);
+
+/*! \brief Compatibility entry point for qsc_ecdhp384_scalar_multiply.
+ * \copydetails qsc_ecdhp384_scalar_multiply
+ */
+QSC_EXPORT_API int32_t qsc_crypto_scalarmult_secp384r1(uint8_t* secret, const uint8_t* privatekey, const uint8_t* publickey);
+
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond NO_DOCUMENT */
 
 #endif

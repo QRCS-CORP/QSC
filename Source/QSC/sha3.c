@@ -508,15 +508,9 @@ static void keccak_permute_p2x1600_arm(uint64x2_t state[QSC_KECCAK_STATE_SIZE], 
 
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
-/**
- * \brief Apply QSC rounds to 8 independent interleaved Keccak states.
- * \param state: Mutable 25-vector state, aligned for 512-bit vectors.
- * \param rounds: Even public count from 0 through 48; 24 selects Keccak-f[1600].
- * \note Borrowed storage; no allocation or shared state. Reentrant with independent
- * states and disjoint outputs. Callers validate storage and public lengths.
- */
 static void qsc_keccak_permute_p8x1600(__m512i state[QSC_KECCAK_STATE_SIZE], size_t rounds)
 {
+	/* apply QSC rounds to 8 independent interleaved Keccak states */
 	QSC_ASSERT(rounds % 2U == 0U);
 
 	__m512i a0;

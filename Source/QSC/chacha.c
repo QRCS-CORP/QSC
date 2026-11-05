@@ -20,6 +20,17 @@
 #	define CHACHA_AVX512BLOCK_SIZE (16U * QSC_CHACHA_BLOCK_SIZE)
 #endif
 
+/*! \brief Rotate a 32-bit ChaCha word with an inlinable, fixed shift.
+ * \param value 32-bit word to rotate.
+ * \param shift Nonzero public rotation count strictly less than 32.
+ * \return Rotated word with no secret-dependent control flow.
+ * \note No side effects, shared state, memory access or ownership transfer.
+ */
+static inline uint32_t chacha_rotl32(uint32_t value, size_t shift)
+{
+	return (value << shift) | (value >> (32U - shift));
+}
+
 static void chacha_increment(qsc_chacha_state* ctx)
 {
 	if (ctx->state[12U] == UINT32_MAX)
@@ -74,69 +85,69 @@ static void chacha_permute_p512c(const qsc_chacha_state* ctx, uint8_t* output)
 	while (ctr != 0U)
 	{
 		x0 += x4;
-		x12 = qsc_intutils_rotl32(x12 ^ x0, 16U);
+		x12 = chacha_rotl32(x12 ^ x0, 16U);
 		x8 += x12;
-		x4 = qsc_intutils_rotl32(x4 ^ x8, 12U);
+		x4 = chacha_rotl32(x4 ^ x8, 12U);
 		x0 += x4;
-		x12 = qsc_intutils_rotl32(x12 ^ x0, 8U);
+		x12 = chacha_rotl32(x12 ^ x0, 8U);
 		x8 += x12;
-		x4 = qsc_intutils_rotl32(x4 ^ x8, 7U);
+		x4 = chacha_rotl32(x4 ^ x8, 7U);
 		x1 += x5;
-		x13 = qsc_intutils_rotl32(x13 ^ x1, 16U);
+		x13 = chacha_rotl32(x13 ^ x1, 16U);
 		x9 += x13;
-		x5 = qsc_intutils_rotl32(x5 ^ x9, 12U);
+		x5 = chacha_rotl32(x5 ^ x9, 12U);
 		x1 += x5;
-		x13 = qsc_intutils_rotl32(x13 ^ x1, 8U);
+		x13 = chacha_rotl32(x13 ^ x1, 8U);
 		x9 += x13;
-		x5 = qsc_intutils_rotl32(x5 ^ x9, 7U);
+		x5 = chacha_rotl32(x5 ^ x9, 7U);
 		x2 += x6;
-		x14 = qsc_intutils_rotl32(x14 ^ x2, 16U);
+		x14 = chacha_rotl32(x14 ^ x2, 16U);
 		x10 += x14;
-		x6 = qsc_intutils_rotl32(x6 ^ x10, 12U);
+		x6 = chacha_rotl32(x6 ^ x10, 12U);
 		x2 += x6;
-		x14 = qsc_intutils_rotl32(x14 ^ x2, 8U);
+		x14 = chacha_rotl32(x14 ^ x2, 8U);
 		x10 += x14;
-		x6 = qsc_intutils_rotl32(x6 ^ x10, 7U);
+		x6 = chacha_rotl32(x6 ^ x10, 7U);
 		x3 += x7;
-		x15 = qsc_intutils_rotl32(x15 ^ x3, 16U);
+		x15 = chacha_rotl32(x15 ^ x3, 16U);
 		x11 += x15;
-		x7 = qsc_intutils_rotl32(x7 ^ x11, 12U);
+		x7 = chacha_rotl32(x7 ^ x11, 12U);
 		x3 += x7;
-		x15 = qsc_intutils_rotl32(x15 ^ x3, 8U);
+		x15 = chacha_rotl32(x15 ^ x3, 8U);
 		x11 += x15;
-		x7 = qsc_intutils_rotl32(x7 ^ x11, 7U);
+		x7 = chacha_rotl32(x7 ^ x11, 7U);
 		x0 += x5;
-		x15 = qsc_intutils_rotl32(x15 ^ x0, 16U);
+		x15 = chacha_rotl32(x15 ^ x0, 16U);
 		x10 += x15;
-		x5 = qsc_intutils_rotl32(x5 ^ x10, 12U);
+		x5 = chacha_rotl32(x5 ^ x10, 12U);
 		x0 += x5;
-		x15 = qsc_intutils_rotl32(x15 ^ x0, 8U);
+		x15 = chacha_rotl32(x15 ^ x0, 8U);
 		x10 += x15;
-		x5 = qsc_intutils_rotl32(x5 ^ x10, 7U);
+		x5 = chacha_rotl32(x5 ^ x10, 7U);
 		x1 += x6;
-		x12 = qsc_intutils_rotl32(x12 ^ x1, 16U);
+		x12 = chacha_rotl32(x12 ^ x1, 16U);
 		x11 += x12;
-		x6 = qsc_intutils_rotl32(x6 ^ x11, 12U);
+		x6 = chacha_rotl32(x6 ^ x11, 12U);
 		x1 += x6;
-		x12 = qsc_intutils_rotl32(x12 ^ x1, 8U);
+		x12 = chacha_rotl32(x12 ^ x1, 8U);
 		x11 += x12;
-		x6 = qsc_intutils_rotl32(x6 ^ x11, 7U);
+		x6 = chacha_rotl32(x6 ^ x11, 7U);
 		x2 += x7;
-		x13 = qsc_intutils_rotl32(x13 ^ x2, 16U);
+		x13 = chacha_rotl32(x13 ^ x2, 16U);
 		x8 += x13;
-		x7 = qsc_intutils_rotl32(x7 ^ x8, 12U);
+		x7 = chacha_rotl32(x7 ^ x8, 12U);
 		x2 += x7;
-		x13 = qsc_intutils_rotl32(x13 ^ x2, 8U);
+		x13 = chacha_rotl32(x13 ^ x2, 8U);
 		x8 += x13;
-		x7 = qsc_intutils_rotl32(x7 ^ x8, 7U);
+		x7 = chacha_rotl32(x7 ^ x8, 7U);
 		x3 += x4;
-		x14 = qsc_intutils_rotl32(x14 ^ x3, 16U);
+		x14 = chacha_rotl32(x14 ^ x3, 16U);
 		x9 += x14;
-		x4 = qsc_intutils_rotl32(x4 ^ x9, 12U);
+		x4 = chacha_rotl32(x4 ^ x9, 12U);
 		x3 += x4;
-		x14 = qsc_intutils_rotl32(x14 ^ x3, 8U);
+		x14 = chacha_rotl32(x14 ^ x3, 8U);
 		x9 += x14;
-		x4 = qsc_intutils_rotl32(x4 ^ x9, 7U);
+		x4 = chacha_rotl32(x4 ^ x9, 7U);
 		ctr -= 2U;
 	}
 
@@ -325,16 +336,28 @@ static void chacha_permute_p4x512_arm(const uint32x4_t* state, uint32x4_t* outpu
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
-static void chacha_xor8_avx2(uint8_t* output, const uint8_t* input, const __m256i* words)
+/*! \brief Transpose and XOR eight ChaCha20 blocks with reusable secret scratch space.
+ * \param output Writable eight-block destination, exact input alias supported.
+ * \param input Readable eight-block plaintext/ciphertext source.
+ * \param words Sixteen vectors of eight ChaCha keystream words.
+ * \param scratch Borrowed 24-vector scratch region, initialized within this call.
+ * \note The owning transform must securely erase scratch before returning.
+ * This function does not retain pointers or allocate storage.
+ */
+static void chacha_xor8_avx2(uint8_t* output, const uint8_t* input, const __m256i* words, __m256i scratch[24U])
 {
 	/* transpose sixteen word vectors into eight contiguous 64-byte ChaCha20 blocks */
 
-	__m256i t[8U];
-	__m256i u[8U];
-	__m256i v[8U];
+	__m256i* t;
+	__m256i* u;
+	__m256i* v;
 	__m256i x;
 	size_t group;
 	size_t i;
+
+	t = scratch;
+	u = scratch + 8U;
+	v = scratch + 16U;
 
 	for (group = 0U; group < 2U; ++group)
 	{
@@ -370,9 +393,7 @@ static void chacha_xor8_avx2(uint8_t* output, const uint8_t* input, const __m256
 		}
 	}
 
-	qsc_memutils_secure_erase(t, sizeof(t));
-	qsc_memutils_secure_erase(u, sizeof(u));
-	qsc_memutils_secure_erase(v, sizeof(v));
+	/* Caller erases the reused buffer once after the full transform. */
 }
 #endif
 
@@ -921,6 +942,7 @@ static void chacha_transform_blocks(qsc_chacha_state* ctx, uint8_t* output, cons
 			chacha_avx512_state ctxw;
 			uint32_t ctrblk[16U];
 			__m256i lane[16U];
+			__m256i scratch[24U];
 
 			for (i = 0U; i < 16U; ++i)
 			{
@@ -947,14 +969,14 @@ static void chacha_transform_blocks(qsc_chacha_state* ctx, uint8_t* output, cons
 					lane[i] = _mm512_castsi512_si256(ctxw.outw[i]);
 				}
 
-				chacha_xor8_avx2(output + oft, input + oft, lane);
+				chacha_xor8_avx2(output + oft, input + oft, lane, scratch);
 
 				for (i = 0U; i < 16U; ++i)
 				{
 					lane[i] = _mm512_extracti64x4_epi64(ctxw.outw[i], 1);
 				}
 
-				chacha_xor8_avx2(output + oft + 8U * QSC_CHACHA_BLOCK_SIZE, input + oft + 8U * QSC_CHACHA_BLOCK_SIZE, lane);
+				chacha_xor8_avx2(output + oft + 8U * QSC_CHACHA_BLOCK_SIZE, input + oft + 8U * QSC_CHACHA_BLOCK_SIZE, lane, scratch);
 
 				oft += CHACHA_AVX512BLOCK_SIZE;
 				length -= CHACHA_AVX512BLOCK_SIZE;
@@ -962,6 +984,7 @@ static void chacha_transform_blocks(qsc_chacha_state* ctx, uint8_t* output, cons
 
 			qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
 			qsc_memutils_secure_erase(lane, sizeof(lane));
+			qsc_memutils_secure_erase(scratch, sizeof(scratch));
 		}
 
 #elif defined(QSC_SYSTEM_HAS_AVX2)
@@ -970,6 +993,7 @@ static void chacha_transform_blocks(qsc_chacha_state* ctx, uint8_t* output, cons
 		{
 			chacha_avx2_state ctxw;
 			uint32_t ctrblk[8U];
+			__m256i scratch[24U];
 
 			for (i = 0U; i < 16U; ++i)
 			{
@@ -987,13 +1011,14 @@ static void chacha_transform_blocks(qsc_chacha_state* ctx, uint8_t* output, cons
 				ctxw.state[12U] = _mm256_setr_epi32(ctrblk[0U], ctrblk[1U], ctrblk[2U], ctrblk[3U], ctrblk[4U], ctrblk[5U], ctrblk[6U], ctrblk[7U]);
 
 				chacha_permute_p8x512h(&ctxw);
-				chacha_xor8_avx2(output + oft, input + oft, ctxw.outw);
+				chacha_xor8_avx2(output + oft, input + oft, ctxw.outw, scratch);
 
 				oft += CHACHA_AVX2BLOCK_SIZE;
 				length -= CHACHA_AVX2BLOCK_SIZE;
 			}
 
 			qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
+			qsc_memutils_secure_erase(scratch, sizeof(scratch));
 		}
 
 #endif

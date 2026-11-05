@@ -683,35 +683,26 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_SYSTEM_IS_LITTLE_ENDIAN
- * \brief Defined if the system is little endian.
- */
-#if !defined(__BIG_ENDIAN__)
-#   if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
-#       define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
-#   elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-#       define QSC_SYSTEM_IS_LITTLE_ENDIAN 0U
-#   elif defined(_WIN32) || defined(__LITTLE_ENDIAN__)
-#       define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
-#   elif defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__AARCH64EL__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
-#   define QSC_SYSTEM_IS_LITTLE_ENDIAN 1U
-#   endif
-#endif
-
-#if (!defined(QSC_SYSTEM_IS_LITTLE_ENDIAN))
-#	if defined(__sparc) || defined(__sparc__) || defined(__hppa__) || defined(__PPC__) || defined(__mips__) || (defined(__MWERKS__) && !defined(__INTEL__))
-        /*!
-        * \def QSC_SYSTEM_IS_BIG_ENDIAN
-        * \brief Defined if the system is big endian.
-        */
+* \def QSC_SYSTEM_IS_XXX_ENDIAN
+* \brief Defined if the system is big-endian.
+*/
+#if !defined(QSC_SYSTEM_IS_LITTLE_ENDIAN) && !defined(QSC_SYSTEM_IS_BIG_ENDIAN)
+#	if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#		define QSC_SYSTEM_IS_LITTLE_ENDIAN
+#	elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#		define QSC_SYSTEM_IS_BIG_ENDIAN
+#	elif defined(_WIN32) || defined(_WIN64)
+#		define QSC_SYSTEM_IS_LITTLE_ENDIAN
+#	elif defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__AARCH64EL__) || defined(__MIPSEL__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#		define QSC_SYSTEM_IS_LITTLE_ENDIAN
+#	elif defined(__BIG_ENDIAN__) || defined(__ARMEB__) || defined(__AARCH64EB__) || defined(__MIPSEB__) || defined(__sparc__) || defined(__hppa__) || defined(__s390x__)
 #		define QSC_SYSTEM_IS_BIG_ENDIAN
 #	else
-        /*!
-        * \def QSC_SYSTEM_IS_LITTLE_ENDIAN
-        * \brief Defined if the system is little endian.
-        */
-#		define QSC_SYSTEM_IS_LITTLE_ENDIAN
+#		error "QSC: Unable to determine system byte order."
 #	endif
+#endif
+#if defined(QSC_SYSTEM_IS_LITTLE_ENDIAN) && defined(QSC_SYSTEM_IS_BIG_ENDIAN)
+#	error "QSC: Conflicting system byte-order definitions."
 #endif
 
 /*!

@@ -107,6 +107,12 @@ void qsctest_benchmark_rcs_run(void);
 */
 void qsctest_benchmark_shake_run(void);
 
+/**
+ * \brief Benchmark SHA-2 and SHA-3 message digests using three fixed workloads.
+ * \details Each message includes independent setup, absorption and finalization.
+ */
+void qsctest_benchmark_hash_run(void);
+
 /* QMAC removed for further development */
 /**
 * \brief Tests the QMAC implementations performance.

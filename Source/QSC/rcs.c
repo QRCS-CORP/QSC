@@ -147,6 +147,58 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, __m128i output[2U], cons
 	_mm_storeu_si128(&output[1U], blk2);
 }
 
+#if !defined(QSC_SYSTEM_HAS_VAES512) && !(defined(QSC_RCS_ENABLE_VAES256) && defined(__AVX2__) && defined(__VAES__))
+
+static void rcs_transform_256x2(const qsc_rcs_state* ctx, __m128i output[4U], const __m128i input[4U])
+{
+	/* encrypt two independent 256-bit RCS counter blocks through interleaved AES-NI rounds */
+	const __m128i blend = _mm_set_epi32(INT32_MIN, -2139095040, -2139095040, -2139062272);
+	const __m128i shift = _mm_set_epi8(3, 2, 13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0);
+	const size_t last = ctx->roundkeylen - 3U;
+	__m128i a0;
+	__m128i a1;
+	__m128i b0;
+	__m128i b1;
+	__m128i t0;
+	__m128i t1;
+	__m128i t2;
+	__m128i t3;
+	size_t k;
+
+	a0 = _mm_xor_si128(input[0U], ctx->roundkeys[0U]);
+	a1 = _mm_xor_si128(input[1U], ctx->roundkeys[1U]);
+	b0 = _mm_xor_si128(input[2U], ctx->roundkeys[0U]);
+	b1 = _mm_xor_si128(input[3U], ctx->roundkeys[1U]);
+	k = 1U;
+
+	while (k != last)
+	{
+		t0 = _mm_shuffle_epi8(_mm_blendv_epi8(a0, a1, blend), shift);
+		t1 = _mm_shuffle_epi8(_mm_blendv_epi8(a1, a0, blend), shift);
+		t2 = _mm_shuffle_epi8(_mm_blendv_epi8(b0, b1, blend), shift);
+		t3 = _mm_shuffle_epi8(_mm_blendv_epi8(b1, b0, blend), shift);
+		++k;
+		a0 = _mm_aesenc_si128(t0, ctx->roundkeys[k]);
+		b0 = _mm_aesenc_si128(t2, ctx->roundkeys[k]);
+		++k;
+		a1 = _mm_aesenc_si128(t1, ctx->roundkeys[k]);
+		b1 = _mm_aesenc_si128(t3, ctx->roundkeys[k]);
+	}
+
+	t0 = _mm_shuffle_epi8(_mm_blendv_epi8(a0, a1, blend), shift);
+	t1 = _mm_shuffle_epi8(_mm_blendv_epi8(a1, a0, blend), shift);
+	t2 = _mm_shuffle_epi8(_mm_blendv_epi8(b0, b1, blend), shift);
+	t3 = _mm_shuffle_epi8(_mm_blendv_epi8(b1, b0, blend), shift);
+	++k;
+	output[0U] = _mm_aesenclast_si128(t0, ctx->roundkeys[k]);
+	output[2U] = _mm_aesenclast_si128(t2, ctx->roundkeys[k]);
+	++k;
+	output[1U] = _mm_aesenclast_si128(t1, ctx->roundkeys[k]);
+	output[3U] = _mm_aesenclast_si128(t3, ctx->roundkeys[k]);
+}
+
+#endif
+
 #if defined(QSC_RCS_ENABLE_VAES256) && defined(__AVX2__) && defined(__VAES__) && !defined(QSC_SYSTEM_HAS_VAES512)
 
 static inline __m256i rcs_shuffle256_vaes(const __m256i x)
@@ -216,7 +268,7 @@ __m512i rcs_shuffle512(const __m512i* value, const __m512i* k0, const __m512i* k
 {
 #if defined(__AVX512VBMI__)
 	/* RCS's fixed 32-byte ShiftRows permutation for two adjacent blocks.
-	 * The indices are public, and the permutation remains constant-time. */
+	 * the indices are public, and the permutation remains constant-time. */
 	const __m512i indices = _mm512_set_epi64(
 		0x23223D3C2F3E3938ULL,
 		0x2B2A353427262130ULL,
@@ -462,6 +514,43 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
     }
 #endif
 
+#if !defined(QSC_SYSTEM_HAS_VAES512) && !(defined(QSC_RCS_ENABLE_VAES256) && defined(__AVX2__) && defined(__VAES__))
+	/* interleave two independent AES-NI Rijndael-256 blocks to hide round latency */
+	if (length >= (2U * QSC_RCS_BLOCK_SIZE))
+	{
+		__m128i counters[4U];
+		__m128i streams[4U];
+		__m128i data[4U];
+
+		while (length >= (2U * QSC_RCS_BLOCK_SIZE))
+		{
+			counters[0U] = _mm_loadu_si128((const __m128i*)(const void*)ctx->nonce);
+			counters[1U] = _mm_loadu_si128((const __m128i*)(const void*)(ctx->nonce + HLFBLK));
+			qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
+			counters[2U] = _mm_loadu_si128((const __m128i*)(const void*)ctx->nonce);
+			counters[3U] = _mm_loadu_si128((const __m128i*)(const void*)(ctx->nonce + HLFBLK));
+			qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
+			rcs_transform_256x2(ctx, streams, counters);
+
+			data[0U] = _mm_loadu_si128((const __m128i*)(const void*)(input + oft));
+			data[1U] = _mm_loadu_si128((const __m128i*)(const void*)(input + oft + HLFBLK));
+			data[2U] = _mm_loadu_si128((const __m128i*)(const void*)(input + oft + QSC_RCS_BLOCK_SIZE));
+			data[3U] = _mm_loadu_si128((const __m128i*)(const void*)(input + oft + QSC_RCS_BLOCK_SIZE + HLFBLK));
+			_mm_storeu_si128((__m128i*)(void*)(output + oft), _mm_xor_si128(streams[0U], data[0U]));
+			_mm_storeu_si128((__m128i*)(void*)(output + oft + HLFBLK), _mm_xor_si128(streams[1U], data[1U]));
+			_mm_storeu_si128((__m128i*)(void*)(output + oft + QSC_RCS_BLOCK_SIZE), _mm_xor_si128(streams[2U], data[2U]));
+			_mm_storeu_si128((__m128i*)(void*)(output + oft + QSC_RCS_BLOCK_SIZE + HLFBLK), _mm_xor_si128(streams[3U], data[3U]));
+			oft += (2U * QSC_RCS_BLOCK_SIZE);
+			length -= (2U * QSC_RCS_BLOCK_SIZE);
+		}
+
+		qsc_memutils_secure_erase(counters, sizeof(counters));
+		qsc_memutils_secure_erase(streams, sizeof(streams));
+		qsc_memutils_secure_erase(data, sizeof(data));
+	}
+
+#endif
+
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
 		tmpn[0U] = _mm_loadu_si128((const __m128i*)ctx->nonce);
@@ -540,7 +629,7 @@ static inline void rcs_swap8(uint32_t* x, uint32_t* y)
 	rcs_swapn(0x0F0F0F0FU, 0xF0F0F0F0U, 4U, x, y);
 }
 
-static void rcs_ct_ortho(uint32_t* q)
+static inline void rcs_ct_ortho(uint32_t* q)
 {
 	rcs_swap2(&q[0U], &q[1U]);
 	rcs_swap2(&q[2U], &q[3U]);
@@ -558,7 +647,7 @@ static void rcs_ct_ortho(uint32_t* q)
 	rcs_swap8(&q[3U], &q[7U]);
 }
 
-static void rcs_ct_sbox(uint32_t* q)
+static inline void rcs_ct_sbox(uint32_t* q)
 {
 	/* adapted from bearssl, author Thomas Pornin.
 	 * This S-box implementation is a straightforward translation of
@@ -835,215 +924,664 @@ static void rcs_ct_sbox(uint32_t* q)
 	q[0U] = s7;
 }
 
-static void rcs_sub_bytes(uint8_t* ctx)
+/*! \brief Prepare a complete Rijndael-256 schedule in a persistent bitsliced representation.
+ * \param ctx Borrowed initialized RCS cipher context containing expanded round keys.
+ * \param keys Writable schedule of RCS512_ROUND_COUNT + 1 rounds, eight words per round.
+ * \note Round-key bytes are unchanged; this is a fixed-work representation conversion.
+ *       The caller owns and securely erases the output. Reentrant for independent contexts.
+ */
+static void rcs_bitslice_prepare_keys(const qsc_rcs_state* ctx, uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
 {
-	/* apply the constant-operation AES S-box and erase its explicit scratch array */
-	uint32_t q[8U] = { 0U };
+	uint8_t block[QSC_RCS_BLOCK_SIZE];
+	uint32_t* q;
+	size_t i;
+	size_t j;
 
-	q[0U] = ctx[0U];
-	q[1U] = ctx[1U];
-	q[2U] = ctx[2U];
-	q[3U] = ctx[3U];
-	q[4U] = ctx[4U];
-	q[5U] = ctx[5U];
-	q[6U] = ctx[6U];
-	q[7U] = ctx[7U];
+	for (i = 0U; i <= ctx->rounds; ++i)
+	{
+		for (j = 0U; j < 8U; ++j)
+		{
+			qsc_intutils_be32to8(block + (j * sizeof(uint32_t)), ctx->roundkeys[(i * 8U) + j]);
+		}
+
+		q = keys[i];
+
+		for (j = 0U; j < 8U; ++j)
+		{
+			q[j] = (uint32_t)block[j] | ((uint32_t)block[j + 8U] << 8U) |
+				((uint32_t)block[j + 16U] << 16U) | ((uint32_t)block[j + 24U] << 24U);
+		}
+
+		rcs_ct_ortho(q);
+	}
+
+	qsc_memutils_secure_erase(block, sizeof(block));
+}
+
+/*! \brief Apply Rijndael-256 ShiftRows directly to eight 32-bit AES bitplanes.
+ * \param q Eight writable bitplanes representing the complete 32-byte block.
+ * \note Uses the standard 8-column Rijndael shifts of 0, 1, 3 and 4 columns.
+ *       The shifts and masks are fixed, independent of key and data.
+ */
+static inline void rcs_bitslice_shift_rows(uint32_t q[8U])
+{
+	uint32_t x;
+	size_t i;
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		x = q[i];
+		q[i] = (x & UINT32_C(0x11111111)) |
+			((x & UINT32_C(0x22222222)) >> 4U) | ((x & UINT32_C(0x22222222)) << 28U) |
+			((x & UINT32_C(0x44444444)) >> 12U) | ((x & UINT32_C(0x44444444)) << 20U) |
+			((x & UINT32_C(0x88888888)) >> 16U) | ((x & UINT32_C(0x88888888)) << 16U);
+	}
+}
+
+/*! \brief Rotate each four-bit column of a bitslice one row toward the first row.
+ * \param x The input 32-bit bitplane.
+ * \return The fixed-permutation bitplane, preserving all eight columns.
+ */
+static inline uint32_t rcs_bitslice_rotate_right(uint32_t x)
+{
+	return ((x & UINT32_C(0xEEEEEEEE)) >> 1U) | ((x & UINT32_C(0x11111111)) << 3U);
+}
+
+/*! \brief Rotate each four-bit column of a bitslice one row toward the last row.
+ * \param x The input 32-bit bitplane.
+ * \return The fixed-permutation bitplane, preserving all eight columns.
+ */
+static inline uint32_t rcs_bitslice_rotate_left(uint32_t x)
+{
+	return ((x & UINT32_C(0x77777777)) << 1U) | ((x & UINT32_C(0x88888888)) >> 3U);
+}
+
+/*! \brief Rotate each four-bit column of a bitslice by two rows.
+ * \param x The input 32-bit bitplane.
+ * \return The fixed-permutation bitplane, preserving all eight columns.
+ */
+static inline uint32_t rcs_bitslice_rotate_two(uint32_t x)
+{
+	return ((x & UINT32_C(0x33333333)) << 2U) | ((x & UINT32_C(0xCCCCCCCC)) >> 2U);
+}
+
+/*! \brief Multiply all 32 lane elements of a bitsliced state by x in GF(2^8).
+ * \param q Eight writable bitplanes, updated in place.
+ * \note Fixed-work AES/Rijndael reduction polynomial 0x11B, no lookup tables.
+ */
+static inline void rcs_bitslice_xtime(uint32_t q[8U])
+{
+	uint32_t high;
+
+	high = q[7U];
+	q[7U] = q[6U];
+	q[6U] = q[5U];
+	q[5U] = q[4U];
+	q[4U] = q[3U] ^ high;
+	q[3U] = q[2U] ^ high;
+	q[2U] = q[1U];
+	q[1U] = q[0U] ^ high;
+	q[0U] = high;
+}
+
+/*! \brief Apply Rijndael-256 MixColumns across all eight bitsliced columns.
+ * \param q Eight writable bitplanes containing the state.
+ * \param scratch Eight borrowed scratch words; the caller securely erases them.
+ * \note All operations are fixed-work and branchless with respect to secret data.
+ */
+static inline void rcs_bitslice_mix_columns(uint32_t q[8U], uint32_t scratch[8U])
+{
+	uint32_t col;
+	uint32_t pair;
+	size_t i;
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		scratch[i] = q[i] ^ rcs_bitslice_rotate_right(q[i]);
+	}
+
+	rcs_bitslice_xtime(scratch);
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		col = q[i];
+		pair = col ^ rcs_bitslice_rotate_two(col);
+		q[i] = col ^ pair ^ rcs_bitslice_rotate_left(pair) ^ scratch[i];
+	}
+}
+
+static void rcs_transform_256_bitsliced(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, const uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
+{
+	/* encrypt one 32-byte Rijndael-256 counter block with persistent bitplanes */
+	uint32_t q[8U];
+	uint32_t scratch[8U];
+	size_t i;
+	size_t round;
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		q[i] = (uint32_t)input[i] | ((uint32_t)input[i + 8U] << 8U) |
+			((uint32_t)input[i + 16U] << 16U) | ((uint32_t)input[i + 24U] << 24U);
+	}
 
 	rcs_ct_ortho(q);
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		q[i] ^= keys[0U][i];
+	}
+
+	for (round = 1U; round < ctx->rounds; ++round)
+	{
+		rcs_ct_sbox(q);
+		rcs_bitslice_shift_rows(q);
+		rcs_bitslice_mix_columns(q, scratch);
+
+		for (i = 0U; i < 8U; ++i)
+		{
+			q[i] ^= keys[round][i];
+		}
+	}
+
 	rcs_ct_sbox(q);
-	rcs_ct_ortho(q);
+	rcs_bitslice_shift_rows(q);
 
-	ctx[0U] = (uint8_t)q[0U];
-	ctx[1U] = (uint8_t)q[1U];
-	ctx[2U] = (uint8_t)q[2U];
-	ctx[3U] = (uint8_t)q[3U];
-	ctx[4U] = (uint8_t)q[4U];
-	ctx[5U] = (uint8_t)q[5U];
-	ctx[6U] = (uint8_t)q[6U];
-	ctx[7U] = (uint8_t)q[7U];
-
-	q[0U] = ctx[8U];
-	q[1U] = ctx[9U];
-	q[2U] = ctx[10U];
-	q[3U] = ctx[11U];
-	q[4U] = ctx[12U];
-	q[5U] = ctx[13U];
-	q[6U] = ctx[14U];
-	q[7U] = ctx[15U];
+	for (i = 0U; i < 8U; ++i)
+	{
+		q[i] ^= keys[ctx->rounds][i];
+	}
 
 	rcs_ct_ortho(q);
-	rcs_ct_sbox(q);
-	rcs_ct_ortho(q);
 
-	ctx[8U] = (uint8_t)q[0U];
-	ctx[9U] = (uint8_t)q[1U];
-	ctx[10U] = (uint8_t)q[2U];
-	ctx[11U] = (uint8_t)q[3U];
-	ctx[12U] = (uint8_t)q[4U];
-	ctx[13U] = (uint8_t)q[5U];
-	ctx[14U] = (uint8_t)q[6U];
-	ctx[15U] = (uint8_t)q[7U];
+	for (i = 0U; i < 8U; ++i)
+	{
+		output[i] = (uint8_t)q[i];
+		output[i + 8U] = (uint8_t)(q[i] >> 8U);
+		output[i + 16U] = (uint8_t)(q[i] >> 16U);
+		output[i + 24U] = (uint8_t)(q[i] >> 24U);
+	}
 
-
-	q[0U] = ctx[16U];
-	q[1U] = ctx[17U];
-	q[2U] = ctx[18U];
-	q[3U] = ctx[19U];
-	q[4U] = ctx[20U];
-	q[5U] = ctx[21U];
-	q[6U] = ctx[22U];
-	q[7U] = ctx[23U];
-
-	rcs_ct_ortho(q);
-	rcs_ct_sbox(q);
-	rcs_ct_ortho(q);
-
-	ctx[16U] = (uint8_t)q[0U];
-	ctx[17U] = (uint8_t)q[1U];
-	ctx[18U] = (uint8_t)q[2U];
-	ctx[19U] = (uint8_t)q[3U];
-	ctx[20U] = (uint8_t)q[4U];
-	ctx[21U] = (uint8_t)q[5U];
-	ctx[22U] = (uint8_t)q[6U];
-	ctx[23U] = (uint8_t)q[7U];
-
-	q[0U] = ctx[24U];
-	q[1U] = ctx[25U];
-	q[2U] = ctx[26U];
-	q[3U] = ctx[27U];
-	q[4U] = ctx[28U];
-	q[5U] = ctx[29U];
-	q[6U] = ctx[30U];
-	q[7U] = ctx[31U];
-
-	rcs_ct_ortho(q);
-	rcs_ct_sbox(q);
-	rcs_ct_ortho(q);
-
-	ctx[24U] = (uint8_t)q[0U];
-	ctx[25U] = (uint8_t)q[1U];
-	ctx[26U] = (uint8_t)q[2U];
-	ctx[27U] = (uint8_t)q[3U];
-	ctx[28U] = (uint8_t)q[4U];
-	ctx[29U] = (uint8_t)q[5U];
-	ctx[30U] = (uint8_t)q[6U];
-	ctx[31U] = (uint8_t)q[7U];
+	qsc_memutils_secure_erase(scratch, sizeof(scratch));
 	qsc_memutils_secure_erase(q, sizeof(q));
 }
 
-static void rcs_add_roundkey(uint8_t* state, const uint32_t *skeys)
-{
-	uint32_t k;
 
-	for (size_t i = 0U; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
+#if UINTPTR_MAX > UINT32_MAX
+
+static inline void rcs_ct_ortho64(uint64_t q[8U])
+{
+	/* transpose two parallel eight-byte-lane Rijndael states into bitplanes */
+	uint64_t a;
+	uint64_t b;
+	uint64_t t;
+	size_t i;
+
+	for (i = 0U; i < 8U; i += 2U)
 	{
-		k = *skeys;
-		state[i] ^= (uint8_t)(k >> 24);
-		state[i + 1U] ^= (uint8_t)(k >> 16) & 0xFFU;
-		state[i + 2U] ^= (uint8_t)(k >> 8) & 0xFFU;
-		state[i + 3U] ^= (uint8_t)k & 0xFFU;
-		++skeys;
+		a = q[i];
+		b = q[i + 1U];
+		t = ((a >> 1U) ^ b) & UINT64_C(0x5555555555555555);
+		q[i] = a ^ (t << 1U);
+		q[i + 1U] = b ^ t;
+	}
+
+	for (i = 0U; i < 8U; i += 4U)
+	{
+		a = q[i];
+		b = q[i + 2U];
+		t = ((a >> 2U) ^ b) & UINT64_C(0x3333333333333333);
+		q[i] = a ^ (t << 2U);
+		q[i + 2U] = b ^ t;
+		a = q[i + 1U];
+		b = q[i + 3U];
+		t = ((a >> 2U) ^ b) & UINT64_C(0x3333333333333333);
+		q[i + 1U] = a ^ (t << 2U);
+		q[i + 3U] = b ^ t;
+	}
+
+	for (i = 0U; i < 4U; ++i)
+	{
+		a = q[i];
+		b = q[i + 4U];
+		t = ((a >> 4U) ^ b) & UINT64_C(0x0F0F0F0F0F0F0F0F);
+		q[i] = a ^ (t << 4U);
+		q[i + 4U] = b ^ t;
 	}
 }
 
-static void rcs_mix_columns(uint8_t* state)
+/*! \brief Apply the original Boolean Rijndael S-box to two independent 256-bit blocks.
+ * \param q Eight writable 64-bit bitplanes: lower and upper 32-bit lanes are separate blocks.
+ * \note Fixed Boolean circuit with no indexed tables, allocations or shared mutable state.
+ * Each 32-bit half follows the same Boolean operations as rcs_ct_sbox().
+ */
+static inline void rcs_ct_sbox64(uint64_t* q)
 {
-	uint32_t s0;
-	uint32_t s1;
-	uint32_t s2;
-	uint32_t s3;
-	uint32_t t0;
-	uint32_t t1;
-	uint32_t t2;
-	uint32_t t3;
+	/* adapted from bearssl, author Thomas Pornin.
+	 * This S-box implementation is a straightforward translation of
+	 * the circuit described by Boyar and Peralta in "A new
+	 * combinational logic minimization technique with applications
+	 * to cryptology" (https://eprint.iacr.org/2009/191.pdf).
+	 *
+	 * Note that variables x* (input) and s* (output) are numbered
+	 * in "reverse" order (x0 is the high bit, x7 is the low bit). */
 
-	for (size_t i = 0U; i < QSC_RCS_BLOCK_SIZE; i += sizeof(uint32_t))
+	uint64_t s0;
+	uint64_t s1;
+	uint64_t s2;
+	uint64_t s3;
+	uint64_t s4;
+	uint64_t s5;
+	uint64_t s6;
+	uint64_t s7;
+	uint64_t t0;
+	uint64_t t1;
+	uint64_t t2;
+	uint64_t t3;
+	uint64_t t4;
+	uint64_t t5;
+	uint64_t t6;
+	uint64_t t7;
+	uint64_t t8;
+	uint64_t t9;
+	uint64_t t10;
+	uint64_t t11;
+	uint64_t t12;
+	uint64_t t13;
+	uint64_t t14;
+	uint64_t t15;
+	uint64_t t16;
+	uint64_t t17;
+	uint64_t t18;
+	uint64_t t19;
+	uint64_t t20;
+	uint64_t t21;
+	uint64_t t22;
+	uint64_t t23;
+	uint64_t t24;
+	uint64_t t25;
+	uint64_t t26;
+	uint64_t t27;
+	uint64_t t28;
+	uint64_t t29;
+	uint64_t t30;
+	uint64_t t31;
+	uint64_t t32;
+	uint64_t t33;
+	uint64_t t34;
+	uint64_t t35;
+	uint64_t t36;
+	uint64_t t37;
+	uint64_t t38;
+	uint64_t t39;
+	uint64_t t40;
+	uint64_t t41;
+	uint64_t t42;
+	uint64_t t43;
+	uint64_t t44;
+	uint64_t t45;
+	uint64_t t46;
+	uint64_t t47;
+	uint64_t t48;
+	uint64_t t49;
+	uint64_t t50;
+	uint64_t t51;
+	uint64_t t52;
+	uint64_t t53;
+	uint64_t t54;
+	uint64_t t55;
+	uint64_t t56;
+	uint64_t t57;
+	uint64_t t58;
+	uint64_t t59;
+	uint64_t t60;
+	uint64_t t61;
+	uint64_t t62;
+	uint64_t t63;
+	uint64_t t64;
+	uint64_t t65;
+	uint64_t t66;
+	uint64_t t67;
+	uint64_t x0;
+	uint64_t x1;
+	uint64_t x2;
+	uint64_t x3;
+	uint64_t x4;
+	uint64_t x5;
+	uint64_t x6;
+	uint64_t x7;
+	uint64_t y1;
+	uint64_t y2;
+	uint64_t y3;
+	uint64_t y4;
+	uint64_t y5;
+	uint64_t y6;
+	uint64_t y7;
+	uint64_t y8;
+	uint64_t y9;
+	uint64_t y10;
+	uint64_t y11;
+	uint64_t y12;
+	uint64_t y13;
+	uint64_t y14;
+	uint64_t y15;
+	uint64_t y16;
+	uint64_t y17;
+	uint64_t y18;
+	uint64_t y19;
+	uint64_t y20;
+	uint64_t y21;
+	uint64_t z0;
+	uint64_t z1;
+	uint64_t z2;
+	uint64_t z3;
+	uint64_t z4;
+	uint64_t z5;
+	uint64_t z6;
+	uint64_t z7;
+	uint64_t z8;
+	uint64_t z9;
+	uint64_t z10;
+	uint64_t z11;
+	uint64_t z12;
+	uint64_t z13;
+	uint64_t z14;
+	uint64_t z15;
+	uint64_t z16;
+	uint64_t z17;
+
+	x0 = q[7U];
+	x1 = q[6U];
+	x2 = q[5U];
+	x3 = q[4U];
+	x4 = q[3U];
+	x5 = q[2U];
+	x6 = q[1U];
+	x7 = q[0U];
+
+	/* top linear transformation */
+	y14 = x3 ^ x5;
+	y13 = x0 ^ x6;
+	y9 = x0 ^ x3;
+	y8 = x0 ^ x5;
+	t0 = x1 ^ x2;
+	y1 = t0 ^ x7;
+	y4 = y1 ^ x3;
+	y12 = y13 ^ y14;
+	y2 = y1 ^ x0;
+	y5 = y1 ^ x6;
+	y3 = y5 ^ y8;
+	t1 = x4 ^ y12;
+	y15 = t1 ^ x5;
+	y20 = t1 ^ x1;
+	y6 = y15 ^ x7;
+	y10 = y15 ^ t0;
+	y11 = y20 ^ y9;
+	y7 = x7 ^ y11;
+	y17 = y10 ^ y11;
+	y19 = y10 ^ y8;
+	y16 = t0 ^ y11;
+	y21 = y13 ^ y16;
+	y18 = x0 ^ y16;
+
+	/* non-linear section */
+	t2 = y12 & y15;
+	t3 = y3 & y6;
+	t4 = t3 ^ t2;
+	t5 = y4 & x7;
+	t6 = t5 ^ t2;
+	t7 = y13 & y16;
+	t8 = y5 & y1;
+	t9 = t8 ^ t7;
+	t10 = y2 & y7;
+	t11 = t10 ^ t7;
+	t12 = y9 & y11;
+	t13 = y14 & y17;
+	t14 = t13 ^ t12;
+	t15 = y8 & y10;
+	t16 = t15 ^ t12;
+	t17 = t4 ^ t14;
+	t18 = t6 ^ t16;
+	t19 = t9 ^ t14;
+	t20 = t11 ^ t16;
+	t21 = t17 ^ y20;
+	t22 = t18 ^ y19;
+	t23 = t19 ^ y21;
+	t24 = t20 ^ y18;
+
+	t25 = t21 ^ t22;
+	t26 = t21 & t23;
+	t27 = t24 ^ t26;
+	t28 = t25 & t27;
+	t29 = t28 ^ t22;
+	t30 = t23 ^ t24;
+	t31 = t22 ^ t26;
+	t32 = t31 & t30;
+	t33 = t32 ^ t24;
+	t34 = t23 ^ t33;
+	t35 = t27 ^ t33;
+	t36 = t24 & t35;
+	t37 = t36 ^ t34;
+	t38 = t27 ^ t36;
+	t39 = t29 & t38;
+	t40 = t25 ^ t39;
+
+	t41 = t40 ^ t37;
+	t42 = t29 ^ t33;
+	t43 = t29 ^ t40;
+	t44 = t33 ^ t37;
+	t45 = t42 ^ t41;
+	z0 = t44 & y15;
+	z1 = t37 & y6;
+	z2 = t33 & x7;
+	z3 = t43 & y16;
+	z4 = t40 & y1;
+	z5 = t29 & y7;
+	z6 = t42 & y11;
+	z7 = t45 & y17;
+	z8 = t41 & y10;
+	z9 = t44 & y12;
+	z10 = t37 & y3;
+	z11 = t33 & y4;
+	z12 = t43 & y13;
+	z13 = t40 & y5;
+	z14 = t29 & y2;
+	z15 = t42 & y9;
+	z16 = t45 & y14;
+	z17 = t41 & y8;
+
+	/* bottom linear transformation */
+	t46 = z15 ^ z16;
+	t47 = z10 ^ z11;
+	t48 = z5 ^ z13;
+	t49 = z9 ^ z10;
+	t50 = z2 ^ z12;
+	t51 = z2 ^ z5;
+	t52 = z7 ^ z8;
+	t53 = z0 ^ z3;
+	t54 = z6 ^ z7;
+	t55 = z16 ^ z17;
+	t56 = z12 ^ t48;
+	t57 = t50 ^ t53;
+	t58 = z4 ^ t46;
+	t59 = z3 ^ t54;
+	t60 = t46 ^ t57;
+	t61 = z14 ^ t57;
+	t62 = t52 ^ t58;
+	t63 = t49 ^ t58;
+	t64 = z4 ^ t59;
+	t65 = t61 ^ t62;
+	t66 = z1 ^ t63;
+	s0 = t59 ^ t63;
+	s6 = t56 ^ ~t62;
+	s7 = t48 ^ ~t60;
+	t67 = t64 ^ t65;
+	s3 = t53 ^ t66;
+	s4 = t51 ^ t66;
+	s5 = t47 ^ t65;
+	s1 = t64 ^ ~s3;
+	s2 = t55 ^ ~t67;
+
+	q[7U] = s0;
+	q[6U] = s1;
+	q[5U] = s2;
+	q[4U] = s3;
+	q[3U] = s4;
+	q[2U] = s5;
+	q[1U] = s6;
+	q[0U] = s7;
+}
+
+static inline void rcs_bitslice_shift_rows64(uint64_t q[8U])
+{
+	/* apply Rijndael-256 ShiftRows independently to both 32-bit bitplane halves */
+	uint64_t x;
+	size_t i;
+
+	for (i = 0U; i < 8U; ++i)
 	{
-		s0 = state[i + 0U];
-		s1 = state[i + 1U];
-		s2 = state[i + 2U];
-		s3 = state[i + 3U];
-
-		t0 = (s0 << 1) ^ s1 ^ (s1 << 1) ^ s2 ^ s3;
-		t1 = s0 ^ (s1 << 1) ^ s2 ^ (s2 << 1) ^ s3;
-		t2 = s0 ^ s1 ^ (s2 << 1) ^ s3 ^ (s3 << 1);
-		t3 = s0 ^ (s0 << 1) ^ s1 ^ s2 ^ (s3 << 1);
-
-		state[i + 0U] = (uint8_t)(t0 ^ ((~(t0 >> 8) + 1) & 0x0000011BUL));
-		state[i + 1U] = (uint8_t)(t1 ^ ((~(t1 >> 8) + 1) & 0x0000011BUL));
-		state[i + 2U] = (uint8_t)(t2 ^ ((~(t2 >> 8) + 1) & 0x0000011BUL));
-		state[i + 3U] = (uint8_t)(t3 ^ ((~(t3 >> 8) + 1) & 0x0000011BUL));
+		x = q[i];
+		q[i] = (x & UINT64_C(0x1111111111111111)) |
+			((x & UINT64_C(0x2222222022222220)) >> 4U) | ((x & UINT64_C(0x0000000200000002)) << 28U) |
+			((x & UINT64_C(0x4444400044444000)) >> 12U) | ((x & UINT64_C(0x0000044400000444)) << 20U) |
+			((x & UINT64_C(0x8888000088880000)) >> 16U) | ((x & UINT64_C(0x0000888800008888)) << 16U);
 	}
 }
 
-static void rcs_shift_rows(uint8_t* state)
+static inline uint64_t rcs_bitslice_rotate_right64(uint64_t x)
 {
-	uint8_t tmp;
-
-	tmp = state[1U];
-	state[1U] = state[5U];
-	state[5U] = state[9U];
-	state[9U] = state[13U];
-	state[13U] = state[17U];
-	state[17U] = state[21U];
-	state[21U] = state[25U];
-	state[25U] = state[29U];
-	state[29U] = tmp;
-
-	tmp = state[2U];
-	state[2U] = state[14U];
-	state[14U] = state[26U];
-	state[26U] = state[6U];
-	state[6U] = state[18U];
-	state[18U] = state[30U];
-	state[30U] = state[10U];
-	state[10U] = state[22U];
-	state[22U] = tmp;
-
-	tmp = state[3U];
-	state[3U] = state[19U];
-	state[19U] = tmp;
-
-	tmp = state[7U];
-	state[7U] = state[23U];
-	state[23U] = tmp;
-
-	tmp = state[11U];
-	state[11U] = state[27U];
-	state[27U] = tmp;
-
-	tmp = state[15U];
-	state[15U] = state[31U];
-	state[31U] = tmp;
+	/* rotate each Rijndael column one row toward the first row in both blocks */
+	return ((x & UINT64_C(0xEEEEEEEEEEEEEEEE)) >> 1U) | ((x & UINT64_C(0x1111111111111111)) << 3U);
 }
 
-static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
+static inline uint64_t rcs_bitslice_rotate_left64(uint64_t x)
 {
-	/* encrypt one 32-byte Rijndael block with the expanded schedule */
-	uint8_t buf[QSC_RCS_BLOCK_SIZE];
+	/* rotate each Rijndael column one row toward the last row in both blocks */
+	return ((x & UINT64_C(0x7777777777777777)) << 1U) | ((x & UINT64_C(0x8888888888888888)) >> 3U);
+}
 
-	qsc_memutils_copy(buf, input, QSC_RCS_BLOCK_SIZE);
-	rcs_add_roundkey(buf, ctx->roundkeys);
+static inline uint64_t rcs_bitslice_rotate_two64(uint64_t x)
+{
+	/* rotate Rijndael columns by two rows in both blocks */
+	return ((x & UINT64_C(0x3333333333333333)) << 2U) | ((x & UINT64_C(0xCCCCCCCCCCCCCCCC)) >> 2U);
+}
 
-	for (size_t i = 1U; i < ctx->rounds; ++i)
+static inline void rcs_bitslice_xtime64(uint64_t q[8U])
+{
+	/* multiply 64 byte lanes by x under the Rijndael field polynomial */
+	uint64_t high;
+
+	high = q[7U];
+	q[7U] = q[6U];
+	q[6U] = q[5U];
+	q[5U] = q[4U];
+	q[4U] = q[3U] ^ high;
+	q[3U] = q[2U] ^ high;
+	q[2U] = q[1U];
+	q[1U] = q[0U] ^ high;
+	q[0U] = high;
+}
+
+static inline void rcs_bitslice_mix_columns64(uint64_t q[8U], uint64_t scratch[8U])
+{
+	/* apply Rijndael MixColumns to two 256-bit blocks simultaneously */
+	uint64_t col;
+	uint64_t pair;
+	size_t i;
+
+	for (i = 0U; i < 8U; ++i)
 	{
-		rcs_sub_bytes(buf);
-		rcs_shift_rows(buf);
-		rcs_mix_columns(buf);
-		rcs_add_roundkey(buf, ctx->roundkeys + (i << 3));
+		scratch[i] = q[i] ^ rcs_bitslice_rotate_right64(q[i]);
 	}
 
-	rcs_sub_bytes(buf);
-	rcs_shift_rows(buf);
-	rcs_add_roundkey(buf, ctx->roundkeys + (ctx->rounds << 3));
-	qsc_memutils_copy(output, buf, QSC_RCS_BLOCK_SIZE);
-	qsc_memutils_secure_erase(buf, sizeof(buf));
+	rcs_bitslice_xtime64(scratch);
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		col = q[i];
+		pair = col ^ rcs_bitslice_rotate_two64(col);
+		q[i] = col ^ pair ^ rcs_bitslice_rotate_left64(pair) ^ scratch[i];
+	}
 }
+
+static void rcs_transform_512_bitsliced(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, const uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
+{
+	/* encrypt two independent Rijndael-256 counter blocks with one Boolean circuit */
+	uint64_t q[8U];
+	uint64_t scratch[8U];
+	uint64_t key;
+	size_t i;
+	size_t round;
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		q[i] = (uint64_t)input[i] | ((uint64_t)input[i + 8U] << 8U) |
+			((uint64_t)input[i + 16U] << 16U) | ((uint64_t)input[i + 24U] << 24U) |
+			((uint64_t)input[i + 32U] << 32U) | ((uint64_t)input[i + 40U] << 40U) |
+			((uint64_t)input[i + 48U] << 48U) | ((uint64_t)input[i + 56U] << 56U);
+	}
+
+	rcs_ct_ortho64(q);
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		key = (uint64_t)keys[0U][i];
+		q[i] ^= key | (key << 32U);
+	}
+
+	for (round = 1U; round < ctx->rounds; ++round)
+	{
+		rcs_ct_sbox64(q);
+		rcs_bitslice_shift_rows64(q);
+		rcs_bitslice_mix_columns64(q, scratch);
+
+		for (i = 0U; i < 8U; ++i)
+		{
+			key = (uint64_t)keys[round][i];
+			q[i] ^= key | (key << 32U);
+		}
+	}
+
+	rcs_ct_sbox64(q);
+	rcs_bitslice_shift_rows64(q);
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		key = (uint64_t)keys[ctx->rounds][i];
+		q[i] ^= key | (key << 32U);
+	}
+
+	rcs_ct_ortho64(q);
+
+	for (i = 0U; i < 8U; ++i)
+	{
+		output[i] = (uint8_t)q[i];
+		output[i + 8U] = (uint8_t)(q[i] >> 8U);
+		output[i + 16U] = (uint8_t)(q[i] >> 16U);
+		output[i + 24U] = (uint8_t)(q[i] >> 24U);
+		output[i + 32U] = (uint8_t)(q[i] >> 32U);
+		output[i + 40U] = (uint8_t)(q[i] >> 40U);
+		output[i + 48U] = (uint8_t)(q[i] >> 48U);
+		output[i + 56U] = (uint8_t)(q[i] >> 56U);
+	}
+
+	qsc_memutils_secure_erase(scratch, sizeof(scratch));
+	qsc_memutils_secure_erase(q, sizeof(q));
+	qsc_memutils_secure_erase(&key, sizeof(key));
+}
+
+#endif
 
 #else
 
+/*! \def QSC_RCS_ARM_PRECONVERT_KEYS
+ * \brief Opt-in preconversion of ARM Rijndael-256 round keys once per CTR call.
+ * \note Experimental: requires native ARM correctness and throughput qualification
+ * before enabling in product builds. Default path is unchanged.
+ */
+
 static uint8x16_t rcs_load_roundkey_arm(const uint32_t* key)
 {
+	/* convert four big-endian RCS round-key words to a NEON byte vector */
 	/* load a 16-byte RCS subkey from four big-endian schedule words */
 	uint8x16_t tmp;
 
@@ -1055,8 +1593,13 @@ static uint8x16_t rcs_load_roundkey_arm(const uint32_t* key)
 	return tmp;
 }
 
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, const uint8x16x2_t keys[RCS512_ROUND_COUNT + 1U])
+#else
 static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input)
+#endif
 {
+	/* encrypt a Rijndael-256 counter block using preconverted ARM AES round keys */
 	/* encrypt one 32-byte Rijndael block with the expanded schedule */
 	/* transform one Rijndael-256 block using ARM AES rounds */
 	/* first half's public byte indices before AES ShiftRows */
@@ -1070,21 +1613,45 @@ static void rcs_transform_256(const qsc_rcs_state* ctx, uint8_t* output, const u
 	uint8x16_t first;
 	uint8x16_t second;
 
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	block.val[0U] = veorq_u8(vld1q_u8(input), keys[0U].val[0U]);
+#else
 	block.val[0U] = veorq_u8(vld1q_u8(input), rcs_load_roundkey_arm(ctx->roundkeys));
+#endif
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	block.val[1U] = veorq_u8(vld1q_u8(input + 16U), keys[0U].val[1U]);
+#else
 	block.val[1U] = veorq_u8(vld1q_u8(input + 16U), rcs_load_roundkey_arm(ctx->roundkeys + 4U));
+#endif
 
 	for (size_t i = 1U; i < ctx->rounds; ++i)
 	{
 		first = vaeseq_u8(vqtbl2q_u8(block, shuffle0), zero);
 		second = vaeseq_u8(vqtbl2q_u8(block, shuffle1), zero);
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+		block.val[0U] = veorq_u8(vaesmcq_u8(first), keys[i].val[0U]);
+#else
 		block.val[0U] = veorq_u8(vaesmcq_u8(first), rcs_load_roundkey_arm(ctx->roundkeys + (i * 8U)));
+#endif
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+		block.val[1U] = veorq_u8(vaesmcq_u8(second), keys[i].val[1U]);
+#else
 		block.val[1U] = veorq_u8(vaesmcq_u8(second), rcs_load_roundkey_arm(ctx->roundkeys + (i * 8U) + 4U));
+#endif
 	}
 
 	first = vaeseq_u8(vqtbl2q_u8(block, shuffle0), zero);
 	second = vaeseq_u8(vqtbl2q_u8(block, shuffle1), zero);
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	first = veorq_u8(first, keys[ctx->rounds].val[0U]);
+#else
 	first = veorq_u8(first, rcs_load_roundkey_arm(ctx->roundkeys + (ctx->rounds * 8U)));
+#endif
+#if defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	second = veorq_u8(second, keys[ctx->rounds].val[1U]);
+#else
 	second = veorq_u8(second, rcs_load_roundkey_arm(ctx->roundkeys + (ctx->rounds * 8U) + 4U));
+#endif
 	vst1q_u8(output, first);
 	vst1q_u8(output + 16U, second);
 	qsc_memutils_secure_erase(&block, sizeof(block));
@@ -1102,15 +1669,77 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 	QSC_ASSERT(output != NULL);
 
 	uint8_t stream[QSC_RCS_BLOCK_SIZE] = { 0U };
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
+	uint32_t keys[RCS512_ROUND_COUNT + 1U][8U];
+#elif defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	uint8x16x2_t armkeys[RCS512_ROUND_COUNT + 1U];
+#endif
 	size_t i;
 	size_t oft;
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
+	bool keys_prepared;
+#endif
 
 	oft = 0U;
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
+	keys_prepared = (length != 0U);
+
+	if (keys_prepared == true)
+	{
+		rcs_bitslice_prepare_keys(ctx, keys);
+	}
+#elif defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	/* convert endian-adjusted Rijndael-256 round keys once per CTR call.
+	 * each element contains the two independent 128-bit halves of a round.
+	 * the upper bound comes from the published RCS extended-round profile. */
+	if (length != 0U)
+	{
+		for (i = 0U; i <= ctx->rounds; ++i)
+		{
+			armkeys[i].val[0U] = rcs_load_roundkey_arm(ctx->roundkeys + (i * 8U));
+			armkeys[i].val[1U] = rcs_load_roundkey_arm(ctx->roundkeys + (i * 8U) + 4U);
+		}
+	}
+#endif
+
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED) && UINTPTR_MAX > UINT32_MAX
+	if (length >= (2U * QSC_RCS_BLOCK_SIZE))
+	{
+		uint8_t counterblocks[2U * QSC_RCS_BLOCK_SIZE];
+		uint8_t streams[2U * QSC_RCS_BLOCK_SIZE];
+
+		while (length >= (2U * QSC_RCS_BLOCK_SIZE))
+		{
+			qsc_memutils_copy(counterblocks, ctx->nonce, QSC_RCS_BLOCK_SIZE);
+			qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
+			qsc_memutils_copy(counterblocks + QSC_RCS_BLOCK_SIZE, ctx->nonce, QSC_RCS_BLOCK_SIZE);
+			qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
+			rcs_transform_512_bitsliced(ctx, streams, counterblocks, keys);
+
+			for (i = 0U; i < sizeof(streams); ++i)
+			{
+				output[oft + i] = input[oft + i] ^ streams[i];
+			}
+
+			oft += sizeof(streams);
+			length -= sizeof(streams);
+		}
+
+		qsc_memutils_secure_erase(counterblocks, sizeof(counterblocks));
+		qsc_memutils_secure_erase(streams, sizeof(streams));
+	}
+#endif
 
 	while (length >= QSC_RCS_BLOCK_SIZE)
 	{
 		/* Keep the input live until the keystream XOR has completed. */
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
+		rcs_transform_256_bitsliced(ctx, stream, ctx->nonce, keys);
+#elif defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+		rcs_transform_256(ctx, stream, ctx->nonce, armkeys);
+#else
 		rcs_transform_256(ctx, stream, ctx->nonce);
+#endif
 
 		for (i = 0U; i < QSC_RCS_BLOCK_SIZE; ++i)
 		{
@@ -1124,7 +1753,13 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 
 	if (length != 0U)
 	{
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
+		rcs_transform_256_bitsliced(ctx, stream, ctx->nonce, keys);
+#elif defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+		rcs_transform_256(ctx, stream, ctx->nonce, armkeys);
+#else
 		rcs_transform_256(ctx, stream, ctx->nonce);
+#endif
 
 		for (i = 0U; i < length; ++i)
 		{
@@ -1134,6 +1769,14 @@ static void rcs_ctr_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8_t
 		qsc_intutils_le8increment(ctx->nonce, QSC_RCS_BLOCK_SIZE);
 	}
 
+#if !defined(QSC_SYSTEM_ARM_AES_ENABLED)
+	if (keys_prepared == true)
+	{
+		qsc_memutils_secure_erase(keys, sizeof(keys));
+	}
+#elif defined(QSC_RCS_ARM_PRECONVERT_KEYS)
+	qsc_memutils_secure_erase(armkeys, sizeof(armkeys));
+#endif
 	qsc_memutils_secure_erase(stream, sizeof(stream));
 }
 

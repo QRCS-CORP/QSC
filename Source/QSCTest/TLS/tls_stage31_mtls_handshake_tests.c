@@ -392,7 +392,7 @@ static bool process_certificate_request_message(const uint8_t* body, size_t body
 
     if (ok == true)
     {
-        memcpy(hs + hsoff, body, bodylen);
+        qsc_memutils_copy(hs + hsoff, body, bodylen);
         hsoff += bodylen;
         recordlen = 0U;
         status = qsc_tls_record_encode_plaintext(record, sizeof(record), &recordlen, qsc_tls_record_content_handshake, hs, hsoff);

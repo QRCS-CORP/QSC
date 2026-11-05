@@ -483,6 +483,233 @@ static void poly1305_blocks4_avx2(qsc_poly1305_state* ctx, const uint8_t* messag
 	qsc_memutils_secure_erase(d, sizeof(d));
 	_mm256_zeroupper();
 }
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_AVX512) && defined(__AVX512DQ__)
+
+/*! \brief Authenticate complete Poly1305 blocks in eight independent AVX-512 lanes.
+ * \param ctx Initialized writable Poly1305 state, whose accumulator is updated.
+ * \param message Borrowed input containing a multiple of eight full 16-byte blocks.
+ * \param length Input byte count, a multiple of 128 bytes and at least 128.
+ * \note Uses fixed-work radix-2^26 field arithmetic and the unchanged 2^130-5 modulus.
+ *       No heap allocation or shared mutable state. Temporary key material is erased.
+ *       The caller retains ownership of the input and state.
+ */
+static void poly1305_blocks8_avx512(qsc_poly1305_state* ctx, const uint8_t* message, size_t length)
+{
+	/* accumulate full Poly1305 block groups with eight persistent AVX-512 lanes */
+	uint32_t powers[8U][5U] = { { 0U } };
+	uint64_t h[5U];
+	__m512i r[5U];
+	__m512i s[4U];
+	__m512i rk[5U];
+	__m512i sk[4U];
+	__m512i v[5U];
+	__m512i m[5U];
+	__m512i d[5U];
+	__m512i carry;
+	__m512i lo;
+	__m512i hi;
+	__m512i block0;
+	__m512i block1;
+	const __m512i index_lo = _mm512_setr_epi64(0LL, 2LL, 4LL, 6LL, 8LL, 10LL, 12LL, 14LL);
+	const __m512i index_hi = _mm512_setr_epi64(1LL, 3LL, 5LL, 7LL, 9LL, 11LL, 13LL, 15LL);
+
+	const __m512i hibit = _mm512_set1_epi64(1LL << 24);
+	const __m512i mask = _mm512_set1_epi64(0x3FFFFFFLL);
+	uint64_t sum;
+	uint64_t c;
+	size_t i;
+
+	for (i = 0U; i < 5U; ++i)
+	{
+		powers[7U][i] = ctx->r[i];
+		h[i] = ctx->h[i];
+	}
+
+	for (i = 7U; i > 0U; --i)
+	{
+		poly1305_multiply26(powers[i - 1U], powers[i], powers[7U]);
+	}
+
+	/* keep only the common r^8 multiplier active in the bulk loop. */
+	for (i = 0U; i < 5U; ++i)
+	{
+		rk[i] = _mm512_set1_epi64(powers[0U][i]);
+	}
+
+	for (i = 0U; i < 4U; ++i)
+	{
+		sk[i] = _mm512_add_epi64(_mm512_slli_epi64(rk[i + 1U], 2U), rk[i + 1U]);
+	}
+
+	/* read the first group into eight accumulator lanes. */
+
+	block0 = _mm512_loadu_si512((const void*)message);
+	block1 = _mm512_loadu_si512((const void*)(message + 64U));
+	lo = _mm512_permutex2var_epi64(block0, index_lo, block1);
+	hi = _mm512_permutex2var_epi64(block0, index_hi, block1);
+	m[0U] = _mm512_and_si512(lo, mask);
+	m[1U] = _mm512_and_si512(_mm512_srli_epi64(lo, 26U), mask);
+	m[2U] = _mm512_and_si512(_mm512_or_si512(_mm512_srli_epi64(lo, 52U), _mm512_slli_epi64(hi, 12U)), mask);
+	m[3U] = _mm512_and_si512(_mm512_srli_epi64(hi, 14U), mask);
+	m[4U] = _mm512_or_si512(_mm512_srli_epi64(hi, 40U), hibit);
+
+	for (i = 0U; i < 5U; ++i)
+	{
+		v[i] = _mm512_add_epi64(m[i], _mm512_setr_epi64(h[i], 0, 0, 0, 0, 0, 0, 0));
+	}
+
+	message += 8U * QSC_POLY1305_BLOCK_SIZE;
+	length -= 8U * QSC_POLY1305_BLOCK_SIZE;
+
+	/* all subsequent groups reuse r^8 and preserve the eight lanes. */
+	while (length >= 8U * QSC_POLY1305_BLOCK_SIZE)
+	{
+		block0 = _mm512_loadu_si512((const void*)message);
+		block1 = _mm512_loadu_si512((const void*)(message + 64U));
+		lo = _mm512_permutex2var_epi64(block0, index_lo, block1);
+		hi = _mm512_permutex2var_epi64(block0, index_hi, block1);
+		m[0U] = _mm512_and_si512(lo, mask);
+		m[1U] = _mm512_and_si512(_mm512_srli_epi64(lo, 26U), mask);
+		m[2U] = _mm512_and_si512(_mm512_or_si512(_mm512_srli_epi64(lo, 52U), _mm512_slli_epi64(hi, 12U)), mask);
+		m[3U] = _mm512_and_si512(_mm512_srli_epi64(hi, 14U), mask);
+		m[4U] = _mm512_or_si512(_mm512_srli_epi64(hi, 40U), hibit);
+
+		/* parallel multiplication by r^8, followed by the new messages. */
+		d[0U] = _mm512_mul_epu32(v[0U], rk[0U]);
+		d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[1U], sk[3U]));
+		d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[2U], sk[2U]));
+		d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[3U], sk[1U]));
+		d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[4U], sk[0U]));
+		d[1U] = _mm512_mul_epu32(v[0U], rk[1U]);
+		d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[1U], rk[0U]));
+		d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[2U], sk[3U]));
+		d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[3U], sk[2U]));
+		d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[4U], sk[1U]));
+		d[2U] = _mm512_mul_epu32(v[0U], rk[2U]);
+		d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[1U], rk[1U]));
+		d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[2U], rk[0U]));
+		d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[3U], sk[3U]));
+		d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[4U], sk[2U]));
+		d[3U] = _mm512_mul_epu32(v[0U], rk[3U]);
+		d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[1U], rk[2U]));
+		d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[2U], rk[1U]));
+		d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[3U], rk[0U]));
+		d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[4U], sk[3U]));
+		d[4U] = _mm512_mul_epu32(v[0U], rk[4U]);
+		d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[1U], rk[3U]));
+		d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[2U], rk[2U]));
+		d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[3U], rk[1U]));
+		d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[4U], rk[0U]));
+
+		for (i = 0U; i < 4U; ++i)
+		{
+			carry = _mm512_srli_epi64(d[i], 26U);
+			d[i] = _mm512_and_si512(d[i], mask);
+			d[i + 1U] = _mm512_add_epi64(d[i + 1U], carry);
+		}
+
+		carry = _mm512_srli_epi64(d[4U], 26U);
+		d[4U] = _mm512_and_si512(d[4U], mask);
+		d[0U] = _mm512_add_epi64(d[0U], _mm512_add_epi64(_mm512_slli_epi64(carry, 2U), carry));
+		carry = _mm512_srli_epi64(d[0U], 26U);
+		d[0U] = _mm512_and_si512(d[0U], mask);
+		d[1U] = _mm512_add_epi64(d[1U], carry);
+
+		for (i = 0U; i < 5U; ++i)
+		{
+			v[i] = _mm512_add_epi64(d[i], m[i]);
+		}
+
+		message += 8U * QSC_POLY1305_BLOCK_SIZE;
+		length -= 8U * QSC_POLY1305_BLOCK_SIZE;
+	}
+
+	/* construct distinct final-fold powers only after the bulk kernel has
+	 * finished, keeping nine vector registers out of the hot loop's live set. */
+	for (i = 0U; i < 5U; ++i)
+	{
+		r[i] = _mm512_setr_epi64(powers[0U][i], powers[1U][i], powers[2U][i], powers[3U][i], powers[4U][i], powers[5U][i], powers[6U][i], powers[7U][i]);
+	}
+
+	for (i = 0U; i < 4U; ++i)
+	{
+		s[i] = _mm512_add_epi64(_mm512_slli_epi64(r[i + 1U], 2U), r[i + 1U]);
+	}
+
+	/* fold the lanes once, weighting by r^8 through r. */
+	d[0U] = _mm512_mul_epu32(v[0U], r[0U]);
+	d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[1U], s[3U]));
+	d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[2U], s[2U]));
+	d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[3U], s[1U]));
+	d[0U] = _mm512_add_epi64(d[0U], _mm512_mul_epu32(v[4U], s[0U]));
+	d[1U] = _mm512_mul_epu32(v[0U], r[1U]);
+	d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[1U], r[0U]));
+	d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[2U], s[3U]));
+	d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[3U], s[2U]));
+	d[1U] = _mm512_add_epi64(d[1U], _mm512_mul_epu32(v[4U], s[1U]));
+	d[2U] = _mm512_mul_epu32(v[0U], r[2U]);
+	d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[1U], r[1U]));
+	d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[2U], r[0U]));
+	d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[3U], s[3U]));
+	d[2U] = _mm512_add_epi64(d[2U], _mm512_mul_epu32(v[4U], s[2U]));
+	d[3U] = _mm512_mul_epu32(v[0U], r[3U]);
+	d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[1U], r[2U]));
+	d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[2U], r[1U]));
+	d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[3U], r[0U]));
+	d[3U] = _mm512_add_epi64(d[3U], _mm512_mul_epu32(v[4U], s[3U]));
+	d[4U] = _mm512_mul_epu32(v[0U], r[4U]);
+	d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[1U], r[3U]));
+	d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[2U], r[2U]));
+	d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[3U], r[1U]));
+	d[4U] = _mm512_add_epi64(d[4U], _mm512_mul_epu32(v[4U], r[0U]));
+
+	for (i = 0U; i < 4U; ++i)
+	{
+		carry = _mm512_srli_epi64(d[i], 26U);
+		d[i] = _mm512_and_si512(d[i], mask);
+		d[i + 1U] = _mm512_add_epi64(d[i + 1U], carry);
+	}
+
+	carry = _mm512_srli_epi64(d[4U], 26U);
+	d[4U] = _mm512_and_si512(d[4U], mask);
+	d[0U] = _mm512_add_epi64(d[0U], _mm512_add_epi64(_mm512_slli_epi64(carry, 2U), carry));
+	carry = _mm512_srli_epi64(d[0U], 26U);
+	d[0U] = _mm512_and_si512(d[0U], mask);
+	d[1U] = _mm512_add_epi64(d[1U], carry);
+
+	for (i = 0U; i < 5U; ++i)
+	{
+		sum = (uint64_t)_mm512_reduce_add_epi64(d[i]);
+		h[i] = sum;
+	}
+
+	for (i = 0U; i < 4U; ++i)
+	{
+		c = h[i] >> 26U;
+		h[i] &= 0x3FFFFFFULL;
+		h[i + 1U] += c;
+	}
+
+	c = h[4U] >> 26U;
+	h[4U] &= 0x3FFFFFFULL;
+	h[0U] += c * 5U;
+
+	for (i = 0U; i < 5U; ++i)
+	{
+		ctx->h[i] = (uint32_t)h[i];
+	}
+
+	qsc_memutils_secure_erase(powers, sizeof(powers));
+	qsc_memutils_secure_erase(h, sizeof(h));
+	qsc_memutils_secure_erase(r, sizeof(r));
+	qsc_memutils_secure_erase(s, sizeof(s));
+	qsc_memutils_secure_erase(rk, sizeof(rk));
+	qsc_memutils_secure_erase(sk, sizeof(sk));
+	qsc_memutils_secure_erase(v, sizeof(v));
+	qsc_memutils_secure_erase(m, sizeof(m));
+	qsc_memutils_secure_erase(d, sizeof(d));
+}
+#endif
 #endif
 
 void qsc_poly1305_blockupdate(qsc_poly1305_state* ctx, const uint8_t* message)
@@ -720,8 +947,18 @@ void qsc_poly1305_update(qsc_poly1305_state* ctx, const uint8_t* message, size_t
 		if (msglen >= QSC_POLY1305_BLOCK_SIZE)
 		{
 			rmd = msglen & ~(size_t)(QSC_POLY1305_BLOCK_SIZE - 1U);
+#if defined(QSC_SYSTEM_HAS_AVX2) && defined(QSC_SYSTEM_HAS_AVX512) && defined(__AVX512DQ__)
+			if (rmd >= 8192U)
+			{
+				const size_t vlen = rmd & ~(size_t)127U;
+				poly1305_blocks8_avx512(ctx, message, vlen);
+				message += vlen;
+				msglen -= vlen;
+				rmd -= vlen;
+			}
+#endif
 #if defined(QSC_SYSTEM_HAS_AVX2)
-			if (rmd >= 512U)
+			if (rmd >= 1024U)
 			{
 				const size_t vlen = rmd & ~(size_t)63U;
 				poly1305_blocks4_avx2(ctx, message, vlen);

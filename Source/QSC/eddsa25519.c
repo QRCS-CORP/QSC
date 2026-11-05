@@ -77,9 +77,9 @@ static int32_t eddsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 
 	/* move 2nd half of sk to 2nd half of sig */
 	qsc_memutils_copy(sm + 32U, sk + 32U, 32U);
-    /* reduce nonce */
+	/* reduce nonce */
 	qsc_sc25519_reduce(nonce);
-    /* scalar on nonce */
+	/* scalar on nonce */
 	qsc_ge25519_scalarmult_base(&R, nonce);
 	/* scalar to 1st half of sig */
 	qsc_ge25519_p3_to_bytes(sm, &R);
@@ -91,7 +91,7 @@ static int32_t eddsa_ed25519_sign(uint8_t* sm, size_t* smlen, const uint8_t* m, 
 	qsc_sha512_update(&ctx, m, mlen);
 	/* finalize to hram */
 	qsc_sha512_finalize(&ctx, hram);
-    /* reduce hram */
+	/* reduce hram */
 	qsc_sc25519_reduce(hram);
 	/* clamp az */
 	qsc_sc25519_clamp(az);

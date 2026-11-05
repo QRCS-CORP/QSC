@@ -48,9 +48,9 @@ void qsc_sha256_dispose(qsc_sha256_state* ctx)
 static void sha256_compress_blocks(uint32_t* state, const uint8_t* message, size_t nblocks);
 #endif
 
-/** \brief One-rate SHA-256 one-shot hashing without general-purpose state buffering. */
 static void sha256_oneshot_small(uint8_t* output, const uint8_t* message, size_t msglen)
 {
+	/* one-rate SHA-256 one-shot hashing without general-purpose state buffering */
     uint32_t state[8U];
     uint8_t block[128U] = { 0U };
     size_t i;
@@ -1501,92 +1501,34 @@ static inline uint64_t sha512_load_be64(const uint8_t* input)
 
 /** SHA-512 round constants, retained in read-only memory. */
 
-#if defined(QSC_SYSTEM_X86) && defined(__AVX2__)
+/* keep the accepted volatile-table path except for GCC AVX-512, where
+ * generated code incurs unnecessary round-constant memory loads */
+#if defined(QSC_SYSTEM_X86) && defined(__AVX2__) && !(defined(__GNUC__) && !defined(__clang__) && defined(__AVX512F__))
 static volatile const uint64_t sha512_round_constant_words[80U] =
 #else
 static const uint64_t sha512_round_constant_words[80U] =
 #endif
 {
-    0x428a2f98d728ae22ULL,
-    0x7137449123ef65cdULL,
-    0xb5c0fbcfec4d3b2fULL,
-    0xe9b5dba58189dbbcULL,
-    0x3956c25bf348b538ULL,
-    0x59f111f1b605d019ULL,
-    0x923f82a4af194f9bULL,
-    0xab1c5ed5da6d8118ULL,
-    0xd807aa98a3030242ULL,
-    0x12835b0145706fbeULL,
-    0x243185be4ee4b28cULL,
-    0x550c7dc3d5ffb4e2ULL,
-    0x72be5d74f27b896fULL,
-    0x80deb1fe3b1696b1ULL,
-    0x9bdc06a725c71235ULL,
-    0xc19bf174cf692694ULL,
-    0xe49b69c19ef14ad2ULL,
-    0xefbe4786384f25e3ULL,
-    0x0fc19dc68b8cd5b5ULL,
-    0x240ca1cc77ac9c65ULL,
-    0x2de92c6f592b0275ULL,
-    0x4a7484aa6ea6e483ULL,
-    0x5cb0a9dcbd41fbd4ULL,
-    0x76f988da831153b5ULL,
-    0x983e5152ee66dfabULL,
-    0xa831c66d2db43210ULL,
-    0xb00327c898fb213fULL,
-    0xbf597fc7beef0ee4ULL,
-    0xc6e00bf33da88fc2ULL,
-    0xd5a79147930aa725ULL,
-    0x06ca6351e003826fULL,
-    0x142929670a0e6e70ULL,
-    0x27b70a8546d22ffcULL,
-    0x2e1b21385c26c926ULL,
-    0x4d2c6dfc5ac42aedULL,
-    0x53380d139d95b3dfULL,
-    0x650a73548baf63deULL,
-    0x766a0abb3c77b2a8ULL,
-    0x81c2c92e47edaee6ULL,
-    0x92722c851482353bULL,
-    0xa2bfe8a14cf10364ULL,
-    0xa81a664bbc423001ULL,
-    0xc24b8b70d0f89791ULL,
-    0xc76c51a30654be30ULL,
-    0xd192e819d6ef5218ULL,
-    0xd69906245565a910ULL,
-    0xf40e35855771202aULL,
-    0x106aa07032bbd1b8ULL,
-    0x19a4c116b8d2d0c8ULL,
-    0x1e376c085141ab53ULL,
-    0x2748774cdf8eeb99ULL,
-    0x34b0bcb5e19b48a8ULL,
-    0x391c0cb3c5c95a63ULL,
-    0x4ed8aa4ae3418acbULL,
-    0x5b9cca4f7763e373ULL,
-    0x682e6ff3d6b2b8a3ULL,
-    0x748f82ee5defb2fcULL,
-    0x78a5636f43172f60ULL,
-    0x84c87814a1f0ab72ULL,
-    0x8cc702081a6439ecULL,
-    0x90befffa23631e28ULL,
-    0xa4506cebde82bde9ULL,
-    0xbef9a3f7b2c67915ULL,
-    0xc67178f2e372532bULL,
-    0xca273eceea26619cULL,
-    0xd186b8c721c0c207ULL,
-    0xeada7dd6cde0eb1eULL,
-    0xf57d4f7fee6ed178ULL,
-    0x06f067aa72176fbaULL,
-    0x0a637dc5a2c898a6ULL,
-    0x113f9804bef90daeULL,
-    0x1b710b35131c471bULL,
-    0x28db77f523047d84ULL,
-    0x32caab7b40c72493ULL,
-    0x3c9ebe0a15c9bebcULL,
-    0x431d67c49c100d4cULL,
-    0x4cc5d4becb3e42b6ULL,
-    0x597f299cfc657e2aULL,
-    0x5fcb6fab3ad6faecULL,
-    0x6c44198c4a475817ULL
+    0x428A2F98D728AE22ULL, 0x7137449123EF65CDULL, 0xB5C0FBCFEC4D3B2FULL, 0xE9B5DBA58189DBBCULL,
+    0x3956C25BF348B538ULL, 0x59F111F1B605D019ULL, 0x923F82A4AF194F9BULL, 0xAB1C5ED5DA6D8118ULL,
+    0xD807AA98A3030242ULL, 0x12835B0145706FBEULL, 0x243185BE4EE4B28CULL, 0x550C7DC3D5FFB4E2ULL,
+    0x72BE5D74F27B896FULL, 0x80DEB1FE3B1696B1ULL, 0x9BDC06A725C71235ULL, 0xC19BF174CF692694ULL,
+    0xE49B69C19EF14AD2ULL, 0xEFBE4786384F25E3ULL, 0x0FC19DC68B8CD5B5ULL, 0x240CA1CC77AC9C65ULL,
+    0x2DE92C6F592B0275ULL, 0x4A7484AA6EA6E483ULL, 0x5CB0A9DCBD41FBD4ULL, 0x76F988DA831153B5ULL,
+    0x983E5152EE66DFABULL, 0xA831C66D2DB43210ULL, 0xB00327C898FB213FULL, 0xBF597FC7BEEF0EE4ULL,
+    0xC6E00BF33DA88FC2ULL, 0xD5A79147930AA725ULL, 0x06CA6351E003826FULL, 0x142929670A0E6E70ULL,
+    0x27B70A8546D22FFCULL, 0x2E1B21385C26C926ULL, 0x4D2C6DFC5AC42AEDULL, 0x53380D139D95B3DFULL,
+    0x650A73548BAF63DEULL, 0x766A0ABB3C77B2A8ULL, 0x81C2C92E47EDAEE6ULL, 0x92722C851482353BULL,
+    0xA2BFE8A14CF10364ULL, 0xA81A664BBC423001ULL, 0xC24B8B70D0F89791ULL, 0xC76C51A30654BE30ULL,
+    0xD192E819D6EF5218ULL, 0xD69906245565A910ULL, 0xF40E35855771202AULL, 0x106AA07032BBD1B8ULL,
+    0x19A4C116B8D2D0C8ULL, 0x1E376C085141AB53ULL, 0x2748774CDF8EEB99ULL, 0x34B0BCB5E19B48A8ULL,
+    0x391C0CB3C5C95A63ULL, 0x4ED8AA4AE3418ACBULL, 0x5B9CCA4F7763E373ULL, 0x682E6FF3D6B2B8A3ULL,
+    0x748F82EE5DEFB2FCULL, 0x78A5636F43172F60ULL, 0x84C87814A1F0AB72ULL, 0x8CC702081A6439ECULL,
+    0x90BEFFFA23631E28ULL, 0xA4506CEBDE82BDE9ULL, 0xBEF9A3F7B2C67915ULL, 0xC67178F2E372532BULL,
+    0xCA273ECEEA26619CULL, 0xD186B8C721C0C207ULL, 0xEADA7DD6CDE0EB1EULL, 0xF57D4F7FEE6ED178ULL,
+    0x06F067AA72176FBAULL, 0x0A637DC5A2C898A6ULL, 0x113F9804BEF90DAEULL, 0x1B710B35131C471BULL,
+    0x28DB77F523047D84ULL, 0x32CAAB7B40C72493ULL, 0x3C9EBE0A15C9BEBCULL, 0x431D67C49C100D4CULL,
+    0x4CC5D4BECB3E42B6ULL, 0x597F299CFC657E2AULL, 0x5FCB6FAB3AD6FAECULL, 0x6C44198C4A475817ULL
 };
 
 void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
@@ -1996,6 +1938,18 @@ void qsc_sha512_permute(uint64_t* output, const uint8_t* message)
  */
 #if defined(QSC_SYSTEM_X86) && defined(__AVX2__) && defined(__BMI2__)
 
+/*! \def SHA512_INTERLEAVED_CHOICE(x, y, z)
+ * \brief Fixed-work SHA-512 Choice for the private interleaved compression loop.
+ * \note The GCC AVX-512 expression preserves scalar SHA-512 logic while
+ *       avoiding inefficient XMM instruction selection. Other targets retain
+ *       the accepted Boolean expression and machine-code generation.
+ */
+#if defined(QSC_SYSTEM_X86) && defined(__GNUC__) && !defined(__clang__) && defined(__AVX512F__)
+#define SHA512_INTERLEAVED_CHOICE(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
+#else
+#define SHA512_INTERLEAVED_CHOICE(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
+#endif
+
 static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message)
 {
     uint64_t a;
@@ -2038,52 +1992,52 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     g = output[6U];
     h = output[7U];
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[0U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[0U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[1U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[1U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[2U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[2U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[3U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[3U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[4U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[4U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[5U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[5U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[6U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[6U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[7U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[7U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[8U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[8U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[9U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[9U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[10U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[10U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[11U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[11U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[12U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[12U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[13U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[13U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[14U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[14U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[15U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[15U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
     
@@ -2094,10 +2048,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v7, 19), _mm_slli_epi64(v7, 45)), _mm_or_si128(_mm_srli_epi64(v7, 61), _mm_slli_epi64(v7, 3))), _mm_srli_epi64(v7, 6));
     v0 = _mm_add_epi64(_mm_add_epi64(v0, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[16U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[16U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[17U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[17U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
     z0 = _mm_alignr_epi8(v2, v1, 8);
@@ -2107,10 +2061,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v0, 19), _mm_slli_epi64(v0, 45)), _mm_or_si128(_mm_srli_epi64(v0, 61), _mm_slli_epi64(v0, 3))), _mm_srli_epi64(v0, 6));
     v1 = _mm_add_epi64(_mm_add_epi64(v1, z1), z0);
 	
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[18U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[18U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[19U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[19U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
     
@@ -2121,10 +2075,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v1, 19), _mm_slli_epi64(v1, 45)), _mm_or_si128(_mm_srli_epi64(v1, 61), _mm_slli_epi64(v1, 3))), _mm_srli_epi64(v1, 6));
     v2 = _mm_add_epi64(_mm_add_epi64(v2, z1), z0);
 		
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[20U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[20U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[21U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[21U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
     
@@ -2135,10 +2089,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v2, 19), _mm_slli_epi64(v2, 45)), _mm_or_si128(_mm_srli_epi64(v2, 61), _mm_slli_epi64(v2, 3))), _mm_srli_epi64(v2, 6));
     v3 = _mm_add_epi64(_mm_add_epi64(v3, z1), z0);
 		
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[22U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[22U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[23U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[23U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2149,10 +2103,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v3, 19), _mm_slli_epi64(v3, 45)), _mm_or_si128(_mm_srli_epi64(v3, 61), _mm_slli_epi64(v3, 3))), _mm_srli_epi64(v3, 6));
     v4 = _mm_add_epi64(_mm_add_epi64(v4, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[24U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[24U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[25U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[25U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
     
@@ -2163,10 +2117,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v4, 19), _mm_slli_epi64(v4, 45)), _mm_or_si128(_mm_srli_epi64(v4, 61), _mm_slli_epi64(v4, 3))), _mm_srli_epi64(v4, 6));
     v5 = _mm_add_epi64(_mm_add_epi64(v5, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[26U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[26U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[27U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[27U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2177,10 +2131,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v5, 19), _mm_slli_epi64(v5, 45)), _mm_or_si128(_mm_srli_epi64(v5, 61), _mm_slli_epi64(v5, 3))), _mm_srli_epi64(v5, 6));
     v6 = _mm_add_epi64(_mm_add_epi64(v6, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[28U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[28U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[29U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[29U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
 
@@ -2191,10 +2145,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v6, 19), _mm_slli_epi64(v6, 45)), _mm_or_si128(_mm_srli_epi64(v6, 61), _mm_slli_epi64(v6, 3))), _mm_srli_epi64(v6, 6));
     v7 = _mm_add_epi64(_mm_add_epi64(v7, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[30U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[30U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[31U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[31U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2205,10 +2159,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v7, 19), _mm_slli_epi64(v7, 45)), _mm_or_si128(_mm_srli_epi64(v7, 61), _mm_slli_epi64(v7, 3))), _mm_srli_epi64(v7, 6));
     v0 = _mm_add_epi64(_mm_add_epi64(v0, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[32U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[32U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[33U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[33U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
 
@@ -2219,10 +2173,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v0, 19), _mm_slli_epi64(v0, 45)), _mm_or_si128(_mm_srli_epi64(v0, 61), _mm_slli_epi64(v0, 3))), _mm_srli_epi64(v0, 6));
     v1 = _mm_add_epi64(_mm_add_epi64(v1, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[34U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[34U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[35U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[35U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2233,10 +2187,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v1, 19), _mm_slli_epi64(v1, 45)), _mm_or_si128(_mm_srli_epi64(v1, 61), _mm_slli_epi64(v1, 3))), _mm_srli_epi64(v1, 6));
     v2 = _mm_add_epi64(_mm_add_epi64(v2, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[36U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[36U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[37U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[37U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
 
@@ -2247,10 +2201,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v2, 19), _mm_slli_epi64(v2, 45)), _mm_or_si128(_mm_srli_epi64(v2, 61), _mm_slli_epi64(v2, 3))), _mm_srli_epi64(v2, 6));
     v3 = _mm_add_epi64(_mm_add_epi64(v3, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[38U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[38U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[39U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[39U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2261,10 +2215,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v3, 19), _mm_slli_epi64(v3, 45)), _mm_or_si128(_mm_srli_epi64(v3, 61), _mm_slli_epi64(v3, 3))), _mm_srli_epi64(v3, 6));
     v4 = _mm_add_epi64(_mm_add_epi64(v4, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[40U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[40U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[41U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[41U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
 
@@ -2275,10 +2229,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v4, 19), _mm_slli_epi64(v4, 45)), _mm_or_si128(_mm_srli_epi64(v4, 61), _mm_slli_epi64(v4, 3))), _mm_srli_epi64(v4, 6));
     v5 = _mm_add_epi64(_mm_add_epi64(v5, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[42U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[42U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[43U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[43U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2289,10 +2243,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v5, 19), _mm_slli_epi64(v5, 45)), _mm_or_si128(_mm_srli_epi64(v5, 61), _mm_slli_epi64(v5, 3))), _mm_srli_epi64(v5, 6));
     v6 = _mm_add_epi64(_mm_add_epi64(v6, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[44U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[44U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[45U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[45U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
     z0 = _mm_alignr_epi8(v0, v7, 8);
@@ -2302,10 +2256,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v6, 19), _mm_slli_epi64(v6, 45)), _mm_or_si128(_mm_srli_epi64(v6, 61), _mm_slli_epi64(v6, 3))), _mm_srli_epi64(v6, 6));
     v7 = _mm_add_epi64(_mm_add_epi64(v7, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[46U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[46U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[47U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[47U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2316,10 +2270,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v7, 19), _mm_slli_epi64(v7, 45)), _mm_or_si128(_mm_srli_epi64(v7, 61), _mm_slli_epi64(v7, 3))), _mm_srli_epi64(v7, 6));
     v0 = _mm_add_epi64(_mm_add_epi64(v0, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[48U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[48U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[49U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[49U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
 
@@ -2330,10 +2284,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v0, 19), _mm_slli_epi64(v0, 45)), _mm_or_si128(_mm_srli_epi64(v0, 61), _mm_slli_epi64(v0, 3))), _mm_srli_epi64(v0, 6));
     v1 = _mm_add_epi64(_mm_add_epi64(v1, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[50U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[50U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[51U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[51U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2344,10 +2298,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v1, 19), _mm_slli_epi64(v1, 45)), _mm_or_si128(_mm_srli_epi64(v1, 61), _mm_slli_epi64(v1, 3))), _mm_srli_epi64(v1, 6));
     v2 = _mm_add_epi64(_mm_add_epi64(v2, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[52U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[52U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[53U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[53U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
 
@@ -2358,10 +2312,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v2, 19), _mm_slli_epi64(v2, 45)), _mm_or_si128(_mm_srli_epi64(v2, 61), _mm_slli_epi64(v2, 3))), _mm_srli_epi64(v2, 6));
     v3 = _mm_add_epi64(_mm_add_epi64(v3, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[54U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[54U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[55U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[55U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2372,10 +2326,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v3, 19), _mm_slli_epi64(v3, 45)), _mm_or_si128(_mm_srli_epi64(v3, 61), _mm_slli_epi64(v3, 3))), _mm_srli_epi64(v3, 6));
     v4 = _mm_add_epi64(_mm_add_epi64(v4, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[56U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[56U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[57U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[57U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
 
@@ -2386,10 +2340,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v4, 19), _mm_slli_epi64(v4, 45)), _mm_or_si128(_mm_srli_epi64(v4, 61), _mm_slli_epi64(v4, 3))), _mm_srli_epi64(v4, 6));
     v5 = _mm_add_epi64(_mm_add_epi64(v5, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[58U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[58U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[59U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[59U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2400,10 +2354,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v5, 19), _mm_slli_epi64(v5, 45)), _mm_or_si128(_mm_srli_epi64(v5, 61), _mm_slli_epi64(v5, 3))), _mm_srli_epi64(v5, 6));
     v6 = _mm_add_epi64(_mm_add_epi64(v6, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[60U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[60U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[61U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[61U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
 
@@ -2414,10 +2368,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v6, 19), _mm_slli_epi64(v6, 45)), _mm_or_si128(_mm_srli_epi64(v6, 61), _mm_slli_epi64(v6, 3))), _mm_srli_epi64(v6, 6));
     v7 = _mm_add_epi64(_mm_add_epi64(v7, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[62U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[62U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[63U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[63U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2428,10 +2382,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v7, 19), _mm_slli_epi64(v7, 45)), _mm_or_si128(_mm_srli_epi64(v7, 61), _mm_slli_epi64(v7, 3))), _mm_srli_epi64(v7, 6));
     v0 = _mm_add_epi64(_mm_add_epi64(v0, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[64U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v0) + sha512_round_constant_words[64U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[65U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v0, 1) + sha512_round_constant_words[65U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
 
@@ -2442,10 +2396,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v0, 19), _mm_slli_epi64(v0, 45)), _mm_or_si128(_mm_srli_epi64(v0, 61), _mm_slli_epi64(v0, 3))), _mm_srli_epi64(v0, 6));
     v1 = _mm_add_epi64(_mm_add_epi64(v1, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[66U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v1) + sha512_round_constant_words[66U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[67U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v1, 1) + sha512_round_constant_words[67U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2456,10 +2410,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v1, 19), _mm_slli_epi64(v1, 45)), _mm_or_si128(_mm_srli_epi64(v1, 61), _mm_slli_epi64(v1, 3))), _mm_srli_epi64(v1, 6));
     v2 = _mm_add_epi64(_mm_add_epi64(v2, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[68U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v2) + sha512_round_constant_words[68U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[69U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v2, 1) + sha512_round_constant_words[69U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
 
@@ -2470,10 +2424,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v2, 19), _mm_slli_epi64(v2, 45)), _mm_or_si128(_mm_srli_epi64(v2, 61), _mm_slli_epi64(v2, 3))), _mm_srli_epi64(v2, 6));
     v3 = _mm_add_epi64(_mm_add_epi64(v3, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[70U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v3) + sha512_round_constant_words[70U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[71U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v3, 1) + sha512_round_constant_words[71U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2484,10 +2438,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v3, 19), _mm_slli_epi64(v3, 45)), _mm_or_si128(_mm_srli_epi64(v3, 61), _mm_slli_epi64(v3, 3))), _mm_srli_epi64(v3, 6));
     v4 = _mm_add_epi64(_mm_add_epi64(v4, z1), z0);
 
-	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + ((e & f) ^ (~e & g)) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[72U];
+	r = h + (((e << 50) | (e >> 14)) ^ ((e << 46) | (e >> 18)) ^ ((e << 23) | (e >> 41))) + SHA512_INTERLEAVED_CHOICE(e, f, g) + (uint64_t)_mm_cvtsi128_si64(v4) + sha512_round_constant_words[72U];
 	d += r;
 	h = r + (((a << 36) | (a >> 28)) ^ ((a << 30) | (a >> 34)) ^ ((a << 25) | (a >> 39))) + ((a & b) ^ (a & c) ^ (b & c));
-	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + ((d & e) ^ (~d & f)) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[73U];
+	r = g + (((d << 50) | (d >> 14)) ^ ((d << 46) | (d >> 18)) ^ ((d << 23) | (d >> 41))) + SHA512_INTERLEAVED_CHOICE(d, e, f) + (uint64_t)_mm_extract_epi64(v4, 1) + sha512_round_constant_words[73U];
 	c += r;
 	g = r + (((h << 36) | (h >> 28)) ^ ((h << 30) | (h >> 34)) ^ ((h << 25) | (h >> 39))) + ((h & a) ^ (h & b) ^ (a & b));
 
@@ -2498,10 +2452,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v4, 19), _mm_slli_epi64(v4, 45)), _mm_or_si128(_mm_srli_epi64(v4, 61), _mm_slli_epi64(v4, 3))), _mm_srli_epi64(v4, 6));
     v5 = _mm_add_epi64(_mm_add_epi64(v5, z1), z0);
 
-	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + ((c & d) ^ (~c & e)) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[74U];
+	r = f + (((c << 50) | (c >> 14)) ^ ((c << 46) | (c >> 18)) ^ ((c << 23) | (c >> 41))) + SHA512_INTERLEAVED_CHOICE(c, d, e) + (uint64_t)_mm_cvtsi128_si64(v5) + sha512_round_constant_words[74U];
 	b += r;
 	f = r + (((g << 36) | (g >> 28)) ^ ((g << 30) | (g >> 34)) ^ ((g << 25) | (g >> 39))) + ((g & h) ^ (g & a) ^ (h & a));
-	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + ((b & c) ^ (~b & d)) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[75U];
+	r = e + (((b << 50) | (b >> 14)) ^ ((b << 46) | (b >> 18)) ^ ((b << 23) | (b >> 41))) + SHA512_INTERLEAVED_CHOICE(b, c, d) + (uint64_t)_mm_extract_epi64(v5, 1) + sha512_round_constant_words[75U];
 	a += r;
 	e = r + (((f << 36) | (f >> 28)) ^ ((f << 30) | (f >> 34)) ^ ((f << 25) | (f >> 39))) + ((f & g) ^ (f & h) ^ (g & h));
 
@@ -2512,10 +2466,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v5, 19), _mm_slli_epi64(v5, 45)), _mm_or_si128(_mm_srli_epi64(v5, 61), _mm_slli_epi64(v5, 3))), _mm_srli_epi64(v5, 6));
     v6 = _mm_add_epi64(_mm_add_epi64(v6, z1), z0);
 
-	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + ((a & b) ^ (~a & c)) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[76U];
+	r = d + (((a << 50) | (a >> 14)) ^ ((a << 46) | (a >> 18)) ^ ((a << 23) | (a >> 41))) + SHA512_INTERLEAVED_CHOICE(a, b, c) + (uint64_t)_mm_cvtsi128_si64(v6) + sha512_round_constant_words[76U];
 	h += r;
 	d = r + (((e << 36) | (e >> 28)) ^ ((e << 30) | (e >> 34)) ^ ((e << 25) | (e >> 39))) + ((e & f) ^ (e & g) ^ (f & g));
-	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + ((h & a) ^ (~h & b)) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[77U];
+	r = c + (((h << 50) | (h >> 14)) ^ ((h << 46) | (h >> 18)) ^ ((h << 23) | (h >> 41))) + SHA512_INTERLEAVED_CHOICE(h, a, b) + (uint64_t)_mm_extract_epi64(v6, 1) + sha512_round_constant_words[77U];
 	g += r;
 	c = r + (((d << 36) | (d >> 28)) ^ ((d << 30) | (d >> 34)) ^ ((d << 25) | (d >> 39))) + ((d & e) ^ (d & f) ^ (e & f));
 
@@ -2526,10 +2480,10 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     z0 = _mm_xor_si128(_mm_xor_si128(_mm_or_si128(_mm_srli_epi64(v6, 19), _mm_slli_epi64(v6, 45)), _mm_or_si128(_mm_srli_epi64(v6, 61), _mm_slli_epi64(v6, 3))), _mm_srli_epi64(v6, 6));
     v7 = _mm_add_epi64(_mm_add_epi64(v7, z1), z0);
 
-	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + ((g & h) ^ (~g & a)) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[78U];
+	r = b + (((g << 50) | (g >> 14)) ^ ((g << 46) | (g >> 18)) ^ ((g << 23) | (g >> 41))) + SHA512_INTERLEAVED_CHOICE(g, h, a) + (uint64_t)_mm_cvtsi128_si64(v7) + sha512_round_constant_words[78U];
 	f += r;
 	b = r + (((c << 36) | (c >> 28)) ^ ((c << 30) | (c >> 34)) ^ ((c << 25) | (c >> 39))) + ((c & d) ^ (c & e) ^ (d & e));
-	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + ((f & g) ^ (~f & h)) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[79U];
+	r = a + (((f << 50) | (f >> 14)) ^ ((f << 46) | (f >> 18)) ^ ((f << 23) | (f >> 41))) + SHA512_INTERLEAVED_CHOICE(f, g, h) + (uint64_t)_mm_extract_epi64(v7, 1) + sha512_round_constant_words[79U];
 	e += r;
 	a = r + (((b << 36) | (b >> 28)) ^ ((b << 30) | (b >> 34)) ^ ((b << 25) | (b >> 39))) + ((b & c) ^ (b & d) ^ (c & d));
 
@@ -2542,6 +2496,7 @@ static void sha512_compress_interleaved(uint64_t* output, const uint8_t* message
     output[6U] += g;
     output[7U] += h;
 }
+#undef SHA512_INTERLEAVED_CHOICE
 
 #endif
 

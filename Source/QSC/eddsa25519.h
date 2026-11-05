@@ -49,10 +49,29 @@
  * Contact: contact@qrcscorp.ca
  */
 
+ /* Implementation acknowledgements:
+ *
+ * This QRCS implementation was developed with reference to the
+ * Botan cryptographic library, established cryptographic research,
+ * applicable NIST and IETF standards, and published algorithms.
+ *
+ * The implementation has been adapted and optimized for the QSC
+ * architecture, including its arithmetic engines, memory management,
+ * platform-specific acceleration, and security requirements.
+ *
+ * Reference: Botan Cryptographic Library
+ * https://botan.randombit.net/
+ *
+ * Copyright and licensing of third-party derived material remain
+ * subject to the applicable original license terms.
+ */
+
 #ifndef QSC_EDDSA25519_H
 #define QSC_EDDSA25519_H
 
 #include "qsccommon.h"
+
+ /* \cond NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -127,5 +146,7 @@ QSC_EXPORT_API bool qsc_ed25519_sign(uint8_t* signedmsg, size_t* smsglen, const 
 QSC_EXPORT_API bool qsc_ed25519_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond NO_DOCUMENT */
 
 #endif

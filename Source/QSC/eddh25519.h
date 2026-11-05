@@ -49,162 +49,130 @@
  * Contact: contact@qrcscorp.ca
  */
 
+ /* Implementation acknowledgements:
+ *
+ * This QRCS implementation was developed with reference to the
+ * Botan cryptographic library, established cryptographic research,
+ * applicable NIST and IETF standards, and published algorithms.
+ *
+ * The implementation has been adapted and optimized for the QSC
+ * architecture, including its arithmetic engines, memory management,
+ * platform-specific acceleration, and security requirements.
+ *
+ * Reference: Botan Cryptographic Library
+ * https://botan.randombit.net/
+ *
+ * Copyright and licensing of third-party derived material remain
+ * subject to the applicable original license terms.
+ */
+
 #ifndef QSC_EDDH25519_H
 #define QSC_EDDH25519_H
 
 #include "qsccommon.h"
 
+ /* \cond NO_DOCUMENT */
+
 QSC_CPLUSPLUS_ENABLED_START
 
-/** 
- * \def QSC_X25519_PUBLICKEY_SIZE
- * \brief X25519 public-key encoding size in bytes.
+/*! \file eddh25519.h
+ * \brief RFC 7748 X25519 key generation and Diffie-Hellman agreement.
+ * \details Encodings and public signatures are unchanged. All buffers are caller-owned;
+ * sizes below are mandatory. Public APIs assert non-null preconditions in debug builds
+ * and fail safely for null pointers in release builds. No heap allocation or mutable
+ * global state. Overlap is supported only where explicitly documented.
+ */
+
+/*! \def QSC_X25519_PUBLICKEY_SIZE
+ * \brief Public u-coordinate length in bytes.
  */
 #define QSC_X25519_PUBLICKEY_SIZE 32U
 
-/**
- * \def QSC_X25519_PRIVATEKEY_SIZE
- * \brief X25519 raw private-key size in bytes; clamping is internal.
+/*! \def QSC_X25519_PRIVATEKEY_SIZE
+ * \brief Unclamped private scalar length in bytes.
  */
 #define QSC_X25519_PRIVATEKEY_SIZE 32U
 
-/**
- * \def QSC_X25519_SECRET_SIZE
- * \brief X25519 Diffie-Hellman shared-secret size in bytes.
+/*! \def QSC_X25519_SECRET_SIZE
+ * \brief Raw agreement output length in bytes.
  */
 #define QSC_X25519_SECRET_SIZE 32U
 
-/**
- * \def QSC_X25519_SEED_SIZE
- * \brief X25519 seeded key-generation input size in bytes.
+/*! \def QSC_X25519_SEED_SIZE
+ * \brief Deterministic seed length in bytes.
  */
 #define QSC_X25519_SEED_SIZE 32U
 
-/*!
- * \file eddh25519.h
- * \brief Public X25519 key exchange API (RFC 7748).
- *
- * \details
- * This header defines functions for combining an external public key with an internal
- * private key to produce a shared secret, as well as for generating key pairs for the
- * RFC 7748 X25519 Diffie-Hellman key-agreement mechanism on the Montgomery Curve25519 curve.
- */
-
-/**
- * \brief Computes an X25519 scalar multiplication on Curve25519.
- *
- * This function is a Curve25519 scalar multiplication interface intended for use by higher-level
- * ECDH and key encapsulation mechanisms. It computes the scalar multiplication of a point \p p
- * by a scalar \p n and writes the resulting u-coordinate to \p q, encoded as 32 bytes in
- * little-endian form.
- *
- * The scalar \p n is treated as a 32-byte X25519 private key and is clamped internally in
- * accordance with RFC 7748.
- *
- * The input point \p p is interpreted as a Curve25519 u-coordinate encoded as 32 bytes in
- * little-endian form.
- *
- * \warning The output buffer \p q must be at least 32 bytes in length.
- * \warning The input buffers \p n and \p p must be at least 32 bytes in length.
- *
- * \param q: [uint8_t*] Pointer to the output u-coordinate array (32 bytes).
- * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
- * \param p: [const uint8_t*] Pointer to the input u-coordinate array (32 bytes).
- *
- * \return [int32_t] Returns 0 on success; a non-zero value indicates failure.
+/*! \brief Compute an RFC 7748 X25519 agreement value.
+ * \param q: Caller-owned 32-byte output; may alias either input.
+ * \param n: Read-only 32-byte private scalar; clamped internally.
+ * \param p: Read-only 32-byte little-endian peer u-coordinate.
+ * \return Zero on success; -1 for null inputs, rejected low-order input or all-zero output.
+ * \details A supplied output is cleared for null input. Noncanonical coordinates are accepted
+ * and the top input bit is ignored. No heap allocation or shared mutable state.
  */
 QSC_EXPORT_API int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p);
 
-/**
- * \brief Computes an X25519 scalar multiplication on Curve25519.
- *
- * This function computes the scalar multiplication of a Curve25519 point \p p by a scalar \p n
- * and writes the resulting u-coordinate to \p q, encoded as 32 bytes in little-endian form.
- *
- * The scalar \p n is treated as a 32-byte X25519 private key and is clamped internally in
- * accordance with RFC 7748.
- *
- * The input point \p p is interpreted as a Curve25519 u-coordinate encoded as 32 bytes in
- * little-endian form.
- *
- * For interoperability and side-channel safety, implementations commonly reject the all-zero
- * shared secret. If this function performs that check, it returns a non-zero value on failure.
- *
- * \warning The output buffer \p q must be at least 32 bytes in length.
- * \warning The input buffers \p n and \p p must be at least 32 bytes in length.
- *
- * \param q: [uint8_t*] Pointer to the output u-coordinate array (32 bytes).
- * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
- * \param p: [const uint8_t*] Pointer to the input u-coordinate array (32 bytes).
- *
- * \return   [int32_t] Returns 0 on success; a non-zero value indicates failure.
+/*! \brief Compatibility entry point for variable-base multiplication.
+ * \param q: Caller-owned 32-byte output; may alias either input.
+ * \param n: Read-only 32-byte raw scalar; clamped internally.
+ * \param p: Read-only 32-byte little-endian peer u-coordinate.
+ * \return Zero when the established low-order input check accepts the peer; -1 otherwise.
+ * \details The result is computed even when the peer is rejected; null inputs fail and clear
+ * a supplied output. Use qsc_x25519_key_exchange for the complete output check.
  */
 QSC_EXPORT_API int32_t qsc_crypto_scalarmult_curve25519_ref10(uint8_t* q, const uint8_t* n, const uint8_t* p);
 
-/**
- * \brief Computes an X25519 public key by performing a Curve25519 basepoint scalar multiplication.
- *
- * This function multiplies the Curve25519 standard basepoint by the scalar \p n and writes the
- * resulting u-coordinate to \p q, encoded as 32 bytes in little-endian form.
- *
- * The scalar \p n is treated as a 32-byte X25519 private key and is clamped internally in
- * accordance with RFC 7748.
- *
- * \warning The output buffer \p q must be at least 32 bytes in length.
- * \warning The input buffer \p n must be at least 32 bytes in length.
- *
- * \param q: [uint8_t*] Pointer to the output public-key array (32 bytes).
- * \param n: [const uint8_t*] Pointer to the input scalar/private-key array (32 bytes).
- *
- * \return [int32_t] Returns 0 on success; a non-zero value indicates failure.
+/*! \brief Compatibility entry point for base-point multiplication.
+ * \param q: Caller-owned 32-byte public output; may alias n.
+ * \param n: Read-only 32-byte raw scalar; clamped internally.
+ * \return Zero on success; -1 for null input.
+ * \details A supplied output is cleared for null input. The historical symbol is retained
+ * for ABI compatibility; it does not select a separate ref10 implementation.
  */
 QSC_EXPORT_API int32_t qsc_crypto_scalarmult_curve25519_ref10_base(uint8_t* q, const uint8_t* n);
 
-/**
- * \brief Generates public and private keys for the ECDH key encapsulation mechanism using a random function pointer.
- *
- * \warning Arrays must be sized to QSC_X25519_PUBLICKEY_SIZE and QSC_X25519_PRIVATEKEY_SIZE.
- *
- * \param publickey: [uint8_t*] Pointer to the output public-key array.
- * \param privatekey: [uint8_t*] Pointer to the output private-key array.
- * \param rng_generate: [bool (uint8_t*, size_t)] Pointer to the random generator function.
+/*! \brief Generate an X25519 key pair using a random callback.
+ * \param publickey: Caller-owned 32-byte public output; distinct from privatekey.
+ * \param privatekey: Caller-owned 32-byte raw private output; clamping does not modify it.
+ * \param rng_generate: Borrowed callback, invoked once for 32 bytes. Return true only after filling
+ * every requested byte with cryptographically secure randomness. Do not retain the buffer;
+ * synchronize callback state when shared between threads.
+ * \details Null input or callback failure clears each supplied output and securely erases
+ * the private output. The API returns void; no key pair is produced on failure.
  */
 QSC_EXPORT_API void qsc_x25519_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
-/**
- * \brief Generates public and private keys for the ECDH key encapsulation mechanism using a seed.
- *
- * \warning Arrays must be sized to QSC_X25519_PUBLICKEY_SIZE and QSC_X25519_PRIVATEKEY_SIZE using a seed.
- *
- * \param publickey: [uint8_t*] Pointer to the output public-key array.
- * \param privatekey: [uint8_t*] Pointer to the output private-key array.
- * \param seed: [const uint8_t*] Pointer to the random seed.
+/*! \brief Generate the established deterministic X25519 key pair from a seed.
+ * \param publickey: Caller-owned 32-byte public output; must not overlap the other buffers.
+ * \param privatekey: Caller-owned 32-byte raw private output; receives the unmodified seed.
+ * \param seed: Read-only 32-byte seed. May equal privatekey; other overlap is unsupported.
+ * \details No status return; null input clears each supplied output. Clamping applies
+ * only to an internal copy. Independent calls share no mutable state.
  */
 QSC_EXPORT_API void qsc_x25519_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
-/**
- * \brief Combine an external public key with an internal private key to produce a shared secret.
- *
- * \warning Arrays must be sized to QSC_X25519_PUBLICKEY_SIZE and QSC_X25519_PRIVATEKEY_SIZE.
- *
- * \param secret: [uint8_t*] Pointer to the shared secret.
- * \param publickey: [const uint8_t*] Pointer to the public-key array.
- * \param privatekey: [const uint8_t*] Pointer to the private-key array.
- *
- * \return Returns true on success.
+/*! \brief Compute an X25519 agreement value and reject all-zero output.
+ * \param secret: Caller-owned 32-byte shared output; may alias an input.
+ * \param publickey: Read-only 32-byte peer u-coordinate.
+ * \param privatekey: Read-only 32-byte raw private scalar; clamped internally.
+ * \return True for an accepted nonzero result; false for null inputs or a rejected result.
+ * \details Null inputs clear a supplied output. Rejected low-order peers produce zero.
+ * The entire output is checked without early exit. Apply a protocol KDF before use as a key;
+ * this function does not authenticate the peer. Independent calls are thread-safe.
  */
 QSC_EXPORT_API bool qsc_x25519_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint8_t* privatekey);
 
-/**
- * \brief Derive an X25519 public key from a raw private scalar.
- * \param publickey: [uint8_t*] Caller-owned output of QSC_X25519_PUBLICKEY_SIZE bytes.
- * \param privatekey: [const uint8_t*] Caller-owned input of QSC_X25519_PRIVATEKEY_SIZE bytes.
- * \details The private scalar is clamped internally per RFC 7748 without modifying the input.
- * Buffers must not overlap. No shared mutable state is accessed and concurrent calls are safe.
- * The function returns void; callers must supply valid buffers.
+/*! \brief Derive an X25519 public key from a raw private scalar.
+ * \param publickey: Caller-owned 32-byte public output; may alias privatekey.
+ * \param privatekey: Read-only 32-byte scalar; clamping uses an internal erased copy.
+ * \details No status return; null inputs clear a supplied output. No allocation or mutable
+ * global state; calls with independent output buffers are thread-safe.
  */
 QSC_EXPORT_API void qsc_x25519_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond NO_DOCUMENT */
 
 #endif

@@ -497,7 +497,6 @@ bool qsctest_fips_aes256_ecb()
 	uint8_t key[QSC_AES256_KEY_SIZE] = { 0 };
 
 	/* SP800-38a F1.5 */
-
 	qsctest_hex_to_bin("603DEB1015CA71BE2B73AEF0857D77811F352C073B6108D72D9810A30914DFF4", key, QSC_AES256_KEY_SIZE);
 
 	qsctest_hex_to_bin("F3EED1BDB5D2A03C064B5A7E3DB181F8", exp[0], QSC_AES_BLOCK_SIZE);
@@ -1297,8 +1296,305 @@ static bool aes_ctr_boundary_case(size_t length, bool bigendian, bool aes128, ui
 	return status;
 }
 
+/*! \brief Verify acceptance of the exact 256-byte HBA AAD limit in two chunks.
+ * \return True when both encryption and decryption authenticate the complete AAD.
+ * \note Local test buffers and contexts have no shared state; safe for sequential test execution.
+ */
+static bool aes_hba_aad_exact_limit_test(void)
+{
+	qsc_aes_hba256_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_HBA_MAXAAD_SIZE] = { 0U };
+	uint8_t cipher[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t plain[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0x37U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	status = true;
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, 128U);
+	qsc_aes_hba256_set_associated(&ctx, aad + 128U, 128U);
+	status = ctx.aadlen == QSC_HBA_MAXAAD_SIZE && qsc_aes_hba256_transform(&ctx, cipher, message, sizeof(message));
+	status = status && ctx.aadlen == 0U;
+	qsc_aes_hba256_dispose(&ctx);
+
+	qsc_memutils_clear(nonce, sizeof(nonce));
+	qsc_aes_hba256_initialize(&ctx, &kp, false);
+	qsc_aes_hba256_set_associated(&ctx, aad, 128U);
+	qsc_aes_hba256_set_associated(&ctx, aad + 128U, 128U);
+	status = status && qsc_aes_hba256_transform(&ctx, plain, cipher, sizeof(message));
+	status = status && qsc_memutils_are_equal(plain, message, sizeof(message));
+	qsc_aes_hba256_dispose(&ctx);
+	return status;
+}
+
+/*! \brief Ensure a single oversized HBA AAD chunk latches an authentication failure.
+ * \return True when 257 and, on 64-bit systems, >UINT32_MAX bytes are rejected without input reads or output writes.
+ */
+static bool aes_hba_aad_oversize_test(void)
+{
+	qsc_aes_hba256_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_HBA_MAXAAD_SIZE + 1U] = { 0U };
+	uint8_t cipher[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t reference[sizeof(cipher)] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0x71U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	qsc_memutils_set_value(cipher, sizeof(cipher), 0xA5U);
+	qsc_memutils_copy(reference, cipher, sizeof(cipher));
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, sizeof(aad));
+	status = ctx.aadlen > QSC_HBA_MAXAAD_SIZE;
+	status = status && !qsc_aes_hba256_transform(&ctx, cipher, message, sizeof(message));
+	status = status && qsc_memutils_are_equal(cipher, reference, sizeof(cipher));
+	qsc_aes_hba256_dispose(&ctx);
+
+#if SIZE_MAX > UINT32_MAX
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, (size_t)UINT32_MAX + 1U);
+	status = status && ctx.aadlen > QSC_HBA_MAXAAD_SIZE;
+	status = status && !qsc_aes_hba256_transform(&ctx, cipher, message, sizeof(message));
+	status = status && qsc_memutils_are_equal(cipher, reference, sizeof(cipher));
+	qsc_aes_hba256_dispose(&ctx);
+#endif
+	return status;
+}
+
+/*! \brief Verify that every byte of the 256-byte HBA AAD is authenticated.
+ * \return True when modifying the last byte causes MAC rejection without plaintext output.
+ */
+static bool aes_hba_aad_last_byte_test(void)
+{
+	qsc_aes_hba256_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_HBA_MAXAAD_SIZE] = { 0U };
+	uint8_t ciphertext[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t output[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t expected[sizeof(output)] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0x51U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, sizeof(aad));
+	status = qsc_aes_hba256_transform(&ctx, ciphertext, message, sizeof(message));
+	qsc_aes_hba256_dispose(&ctx);
+
+	qsc_memutils_clear(nonce, sizeof(nonce));
+	qsc_memutils_set_value(output, sizeof(output), 0xBEU);
+	qsc_memutils_copy(expected, output, sizeof(output));
+	aad[QSC_HBA_MAXAAD_SIZE - 1U] = 0x01U;
+	qsc_aes_hba256_initialize(&ctx, &kp, false);
+	qsc_aes_hba256_set_associated(&ctx, aad, sizeof(aad));
+	status = status && !qsc_aes_hba256_transform(&ctx, output, ciphertext, sizeof(message));
+	status = status && qsc_memutils_are_equal(output, expected, sizeof(output));
+	qsc_aes_hba256_dispose(&ctx);
+	return status;
+}
+
+/*! \brief Verify that cumulative HBA AAD overflow remains sticky across later valid setter calls.
+ * \return True when rejected AAD prevents both encryption and decryption without output modification.
+ */
+static bool aes_hba_aad_cumulative_test(void)
+{
+	qsc_aes_hba256_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_HBA_MAXAAD_SIZE + 1U] = { 0U };
+	uint8_t output[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t expected[sizeof(output)] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	qsc_memutils_set_value(output, sizeof(output), 0x7DU);
+	qsc_memutils_copy(expected, output, sizeof(output));
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, 200U);
+	qsc_aes_hba256_set_associated(&ctx, aad + 200U, 57U);
+	qsc_aes_hba256_set_associated(&ctx, aad, 1U);
+	status = ctx.aadlen > QSC_HBA_MAXAAD_SIZE;
+	status = status && !qsc_aes_hba256_transform(&ctx, output, message, sizeof(message));
+	status = status && qsc_memutils_are_equal(output, expected, sizeof(output));
+	qsc_aes_hba256_dispose(&ctx);
+
+	qsc_aes_hba256_initialize(&ctx, &kp, false);
+	qsc_aes_hba256_set_associated(&ctx, aad, 200U);
+	qsc_aes_hba256_set_associated(&ctx, aad + 200U, 57U);
+	status = status && !qsc_aes_hba256_transform(&ctx, output, message, sizeof(message));
+	status = status && qsc_memutils_are_equal(output, expected, sizeof(output));
+	qsc_aes_hba256_dispose(&ctx);
+	return status;
+}
+
+/*! \brief Verify that HBA reinitialization recovers from invalid AAD and the next message resets its AAD count.
+ * \return True when two successive valid messages succeed after reinitialization.
+ */
+static bool aes_hba_aad_recovery_test(void)
+{
+	qsc_aes_hba256_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_HBA_MAXAAD_SIZE + 1U] = { 0U };
+	uint8_t ciphertext[QSC_AES_BLOCK_SIZE + QSC_HBA256_MAC_SIZE] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0x21U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_AES_BLOCK_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, sizeof(aad));
+	status = !qsc_aes_hba256_transform(&ctx, ciphertext, message, sizeof(message));
+	qsc_aes_hba256_initialize(&ctx, &kp, true);
+	qsc_aes_hba256_set_associated(&ctx, aad, QSC_HBA_MAXAAD_SIZE);
+	status = status && qsc_aes_hba256_transform(&ctx, ciphertext, message, sizeof(message));
+	status = status && ctx.aadlen == 0U;
+	qsc_aes_hba256_set_associated(&ctx, aad, QSC_HBA_MAXAAD_SIZE);
+	status = status && qsc_aes_hba256_transform(&ctx, ciphertext, message, sizeof(message));
+	status = status && ctx.aadlen == 0U;
+	qsc_aes_hba256_dispose(&ctx);
+	return status;
+}
+
+/*! \brief Verify sticky AES-128-GCM rejected-AAD state and reinitialization.
+ * \return True when the rejected chunk prevents output and a fresh context encrypts successfully.
+ */
+static bool aes_gcm128_aad_recovery_test(void)
+{
+	qsc_aes_gcm128_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_GCM_MAXAAD_SIZE] = { 0U };
+	uint8_t ciphertext[QSC_AES_BLOCK_SIZE + QSC_GCM128_MAC_SIZE] = { 0U };
+	uint8_t expected[sizeof(ciphertext)] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES128_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_GCM_NONCE_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	qsc_memutils_set_value(ciphertext, sizeof(ciphertext), 0xB6U);
+	qsc_memutils_copy(expected, ciphertext, sizeof(ciphertext));
+	qsc_aes_gcm128_initialize(&ctx, &kp, true);
+	qsc_aes_gcm128_set_associated(&ctx, aad, sizeof(aad));
+	qsc_aes_gcm128_set_associated(&ctx, aad, 1U);
+	status = !qsc_aes_gcm128_transform(&ctx, ciphertext, message, sizeof(message));
+	status = status && qsc_memutils_are_equal(ciphertext, expected, sizeof(ciphertext));
+	qsc_aes_gcm128_dispose(&ctx);
+	qsc_aes_gcm128_initialize(&ctx, &kp, true);
+	qsc_aes_gcm128_set_associated(&ctx, aad, sizeof(aad));
+	status = status && qsc_aes_gcm128_transform(&ctx, ciphertext, message, sizeof(message));
+	qsc_aes_gcm128_dispose(&ctx);
+	return status;
+}
+
+/*! \brief Verify sticky AES-256-GCM rejected-AAD state and reinitialization.
+ * \return True when the rejected chunk prevents output and a fresh context encrypts successfully.
+ */
+static bool aes_gcm256_aad_recovery_test(void)
+{
+	qsc_aes_gcm256_state ctx = { 0U };
+	qsc_aes_keyparams kp;
+	uint8_t aad[QSC_GCM_MAXAAD_SIZE] = { 0U };
+	uint8_t ciphertext[QSC_AES_BLOCK_SIZE + QSC_GCM256_MAC_SIZE] = { 0U };
+	uint8_t expected[sizeof(ciphertext)] = { 0U };
+	uint8_t message[QSC_AES_BLOCK_SIZE] = { 0U };
+	uint8_t key[QSC_AES256_KEY_SIZE] = { 0U };
+	uint8_t nonce[QSC_GCM_NONCE_SIZE] = { 0U };
+	bool status;
+
+	kp = (qsc_aes_keyparams){ .key = key, .keylen = sizeof(key), .nonce = nonce, .noncelen = sizeof(nonce) };
+	qsc_memutils_set_value(ciphertext, sizeof(ciphertext), 0xB6U);
+	qsc_memutils_copy(expected, ciphertext, sizeof(ciphertext));
+	qsc_aes_gcm256_initialize(&ctx, &kp, true);
+	qsc_aes_gcm256_set_associated(&ctx, aad, sizeof(aad));
+	qsc_aes_gcm256_set_associated(&ctx, aad, 1U);
+	status = !qsc_aes_gcm256_transform(&ctx, ciphertext, message, sizeof(message));
+	status = status && qsc_memutils_are_equal(ciphertext, expected, sizeof(ciphertext));
+	qsc_aes_gcm256_dispose(&ctx);
+	qsc_aes_gcm256_initialize(&ctx, &kp, true);
+	qsc_aes_gcm256_set_associated(&ctx, aad, sizeof(aad));
+	status = status && qsc_aes_gcm256_transform(&ctx, ciphertext, message, sizeof(message));
+	qsc_aes_gcm256_dispose(&ctx);
+	return status;
+}
+
 void qsctest_aes_run()
 {
+	if (aes_hba_aad_last_byte_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-HBA-256 authenticates the last byte of maximum-length AAD.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-HBA-256 authenticates the last byte of maximum-length AAD.");
+	}
+
+
+	if (aes_hba_aad_exact_limit_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-HBA-256 exact 256-byte cumulative AAD acceptance and decryption.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-HBA-256 exact 256-byte cumulative AAD acceptance and decryption.");
+	}
+
+	if (aes_hba_aad_oversize_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-HBA-256 single oversized AAD rejection without output.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-HBA-256 single oversized AAD rejection without output.");
+	}
+
+	if (aes_hba_aad_cumulative_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-HBA-256 cumulative AAD overflow fail-closed encryption/decryption.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-HBA-256 cumulative AAD overflow fail-closed encryption/decryption.");
+	}
+
+	if (aes_hba_aad_recovery_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-HBA-256 AAD reinitialization and next-message reset.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-HBA-256 AAD reinitialization and next-message reset.");
+	}
+
+	if (aes_gcm128_aad_recovery_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-128-GCM cumulative AAD rejection and reinitialization.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-128-GCM cumulative AAD rejection and reinitialization.");
+	}
+
+	if (aes_gcm256_aad_recovery_test() == true)
+	{
+		qsctest_print_line("[PASS] AES-256-GCM cumulative AAD rejection and reinitialization.");
+	}
+	else
+	{
+		qsctest_print_line("[FAIL] AES-256-GCM cumulative AAD rejection and reinitialization.");
+	}
+
+
 	qsctest_print_line("AES-CTR 128-bit carry and four-block regression stage:");
 
 	if (aes_ctr_boundary_case(17U, true, true, 1U) == true)
@@ -1497,8 +1793,7 @@ void qsctest_aes_run()
 	if (aes_ctr_boundary_case(129U, false, false, 0U) == true)
 	{
 		qsctest_print_line("PASS: AES-256 CTR-LE eight-block plus tail.");
-	}
-	else
+	}else
 	{
 		qsctest_print_line("FAIL: AES-256 CTR-LE eight-block plus tail.");
 	}

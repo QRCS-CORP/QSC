@@ -1,1581 +1,3588 @@
-/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
- * All Rights Reserved.
- *
- * NOTICE:
- * This software and all accompanying materials are the exclusive property of
- * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
- * and technical concepts contained herein are proprietary to QRCS and are
- * protected under applicable Canadian, U.S., and international copyright,
- * patent, and trade secret laws.
- *
- * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
- * - This software includes implementations of cryptographic primitives and
- *   algorithms that are standardized or in the public domain, such as AES
- *   and SHA-3, which are not proprietary to QRCS.
- * - This software also includes cryptographic primitives, constructions, and
- *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
- *   related components, which are proprietary to QRCS.
- * - All source code, implementations, protocol compositions, optimizations,
- *   parameter selections, and engineering work contained in this software are
- *   original works of QRCS and are protected under this license.
- *
- * LICENSE AND USE RESTRICTIONS:
- * - This software is licensed under the Quantum Resistant Cryptographic Solutions
- *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
- * - Permission is granted solely for non-commercial evaluation, academic research,
- *   cryptographic analysis, interoperability testing, and feasibility assessment.
- * - Commercial use, production deployment, commercial redistribution, or
- *   integration into products or services is strictly prohibited without a
- *   separate written license agreement executed with QRCS.
- * - Licensing and authorized distribution are solely at the discretion of QRCS.
- *
- * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
- * Portions of this software may include experimental, novel, or evolving
- * cryptographic designs. Use of this software is entirely at the user's risk.
- *
- * DISCLAIMER:
- * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
- * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
- * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
- *
- * FULL LICENSE:
- * This software is subject to the Quantum Resistant Cryptographic Solutions
- * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
- * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
- *
- * Written by: John G. Underhill
- * Contact: contact@qrcscorp.ca
- */
-
 #include "ecdsap521.h"
+#include "async.h"
 #include "memutils.h"
+#include "intrinsics.h"
+#include "csp.h"
 #include "sha2.h"
+#include "intutils.h"
+#include <stdint.h>
+#include <stddef.h>
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && defined(_MSC_VER) && defined(_M_X64) && !defined(_M_ARM64EC)
+#	include <intrin.h>
+#endif
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && (defined(__x86_64__) || defined(__amd64__)) && !defined(_MSC_VER) && !defined(_M_ARM64EC)
+#	include <x86intrin.h>
+#endif
 
-typedef uint32_t fe521[17U];
+/*! \def ECDSAP521_RESTRICT
+ * \brief Compiler spelling of the private nonaliasing pointer contract.
+ */
+#if defined(_MSC_VER) || defined(__cplusplus)
+#	define ECDSAP521_RESTRICT __restrict
+#else
+#	define ECDSAP521_RESTRICT restrict
+#endif
 
+/*! \def ECDSAP521_LIMBS
+ * \brief Number of 64-bit words in a P-521 field element.
+ */
+#define ECDSAP521_LIMBS 9U
+
+/*! \def ECDSAP521_WIDE_LIMBS
+ * \brief Number of 64-bit words in a wide P-521 product.
+ */
+#define ECDSAP521_WIDE_LIMBS 18U
+
+/*! \brief Nine-limb native field representation of a P-521 residue.
+ * \details Each caller owns its instance; the ninth limb contains at most nine
+ * significant bits for canonical field values. No heap ownership.
+ */
 typedef struct
 {
-    fe521 X;
-    fe521 Y;
-    fe521 Z;
-} p521_jac_t;
+	uint64_t limbs[ECDSAP521_LIMBS]; /*!< Little-endian native 64-bit limbs. */
+} ecdsap521_field;
 
+static inline ecdsap521_field ecdsap521_one(void)
+{
+	ecdsap521_field result = {{UINT64_C(1)}};
+
+	return result;
+}
+
+static inline uint64_t ecdsap521_word_add(uint64_t x, uint64_t y, uint64_t* carry)
+{
+	uint64_t cb;
+	uint64_t z;
+	uint64_t c1;
+
+	cb = *carry & 1U;
+	z = x + y;
+	c1 = (uint64_t)(z < x);
+	z += cb;
+	*carry = c1 | (uint64_t)(z < cb);
+
+	return z;
+}
+
+static inline uint64_t ecdsap521_word_sub(uint64_t x, uint64_t y, uint64_t* borrow)
+{
+	uint64_t cb;
+	uint64_t t0;
+	uint64_t c1;
+	uint64_t z;
+
+	cb = *borrow & 1U;
+	t0 = x - y;
+	c1 = (uint64_t)(t0 > x);
+	z = t0 - cb;
+	*borrow = c1 | (uint64_t)(z > t0);
+
+	return z;
+}
+
+static inline void ecdsap521_redc(uint64_t* ECDSAP521_RESTRICT output, const uint64_t* ECDSAP521_RESTRICT z)
+{
+	uint64_t* t;
+	uint64_t carry;
+	uint64_t borrow;
+	uint64_t ovp5;
+	uint64_t eqp5;
+	uint64_t nsub;
+	uint64_t sum;
+	size_t i;
+
+	t = output;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		t[i] = z[(ECDSAP521_LIMBS - 1U) + i] >> 9U;
+	}
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		t[i] |= z[(ECDSAP521_LIMBS - 1U) + i + 1U] << 55U;
+	}
+
+	carry = 0U;
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		t[i] = ecdsap521_word_add(t[i], z[i], &carry);
+	}
+
+	t[ECDSAP521_LIMBS - 1U] += (z[ECDSAP521_LIMBS - 1U] & UINT64_C(0x1FF)) + carry;
+
+	ovp5 = 0U - (uint64_t)(t[ECDSAP521_LIMBS - 1U] > UINT64_C(0x1FF));
+	sum = UINT64_MAX;
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		sum &= t[i];
+	}
+
+	sum &= (UINT64_C(0xFFFFFFFFFFFFFE00) | t[ECDSAP521_LIMBS - 1U]);
+	eqp5 = 0U - (uint64_t)(sum == UINT64_MAX);
+	nsub = ovp5 | eqp5;
+	borrow = 0U;
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		t[i] = ecdsap521_word_sub(t[i], nsub, &borrow);
+	}
+
+	t[ECDSAP521_LIMBS - 1U] = ecdsap521_word_sub(t[ECDSAP521_LIMBS - 1U], nsub & UINT64_C(0x1FF), &borrow);
+}
+
+/*! \brief Canonical P-521 field modulus, in little-endian native words.
+ * \details The top limb has nine significant bits.
+ */
+static const uint64_t ECDSAP521_P[ECDSAP521_LIMBS] = {
+	UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_C(0x1FF)};
+
+static inline void ecdsap521_maybe_sub(uint64_t* ECDSAP521_RESTRICT output, uint64_t x0, const uint64_t* ECDSAP521_RESTRICT x)
+{
+	uint64_t borrow;
+	uint64_t mask;
+	size_t i;
+
+	borrow = 0U;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		output[i] = ecdsap521_word_sub(x[i], ECDSAP521_P[i], &borrow);
+	}
+
+	borrow = (uint64_t)((x0 - borrow) > x0);
+	mask = UINT64_C(0) - borrow;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		output[i] = (output[i] & ~mask) | (x[i] & mask);
+	}
+}
+
+static inline ecdsap521_field ecdsap521_add(const ecdsap521_field* a, const ecdsap521_field* b)
+{
+	ecdsap521_field result;
+	uint64_t t[ECDSAP521_LIMBS];
+	uint64_t carry;
+	size_t i;
+
+	carry = 0U;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		t[i] = ecdsap521_word_add(a->limbs[i], b->limbs[i], &carry);
+	}
+
+	ecdsap521_maybe_sub(result.limbs, carry, t);
+
+	return result;
+}
+
+static inline ecdsap521_field ecdsap521_sub(const ecdsap521_field* a, const ecdsap521_field* b)
+{
+	ecdsap521_field result;
+	uint64_t borrow;
+	uint64_t carry;
+	uint64_t mask;
+	size_t i;
+
+	borrow = 0U;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		result.limbs[i] = ecdsap521_word_sub(a->limbs[i], b->limbs[i], &borrow);
+	}
+
+	mask = UINT64_C(0) - borrow;
+	carry = 0U;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		result.limbs[i] = ecdsap521_word_add(result.limbs[i], ECDSAP521_P[i] & mask, &carry);
+	}
+
+	return result;
+}
+
+static inline ecdsap521_field ecdsap521_mul2(const ecdsap521_field* x)
+{
+	ecdsap521_field result;
+	uint64_t t[ECDSAP521_LIMBS];
+	uint64_t carry;
+	size_t i;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		t[i] = x->limbs[i];
+	}
+
+	carry = t[ECDSAP521_LIMBS - 1U] >> 63U;
+
+	for (i = ECDSAP521_LIMBS - 1U; i != 0U; --i)
+	{
+		t[i] = (t[i] << 1U) | (t[i - 1U] >> 63U);
+	}
+
+	t[0U] <<= 1U;
+	ecdsap521_maybe_sub(result.limbs, carry, t);
+
+	return result;
+}
+
+/*! \brief Three-word Comba product accumulator matching word3<uint64_t>.
+ * \details The low, middle and high words carry 192 bits. All storage is owned
+ *          by the caller; no allocation or shared state.
+ */
 typedef struct
 {
-    fe521 X;
-    fe521 Y;
-} p521_aff_t;
+	uint64_t w0; /*!< Least-significant accumulator word. */
+	uint64_t w1; /*!< Middle accumulator word. */
+	uint64_t w2; /*!< Most-significant accumulator word. */
+} ecdsap521_accumulator;
 
-/* field prime p = 2^521 - 1 */
-static const uint32_t P521_P[17U] =
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && defined(__SIZEOF_INT128__) && !(defined(_MSC_VER) && defined(_M_X64) && !defined(_M_ARM64EC))
+/*! \brief Native unsigned 128-bit intermediate used by supported compilers. */
+__extension__ typedef unsigned __int128 ecdsap521_uint128;
+#endif
+
+static inline void ecdsap521_mul_wide(uint64_t* low, uint64_t* high, uint64_t x, uint64_t y)
 {
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0x000001FFU
-};
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && defined(_MSC_VER) && defined(_M_X64) && !defined(_M_ARM64EC)
+	*low = _umul128(x, y, high);
+#elif !defined(QSC_ECDSAP521_FORCE_PORTABLE) && defined(__SIZEOF_INT128__)
+	ecdsap521_uint128 product;
 
-/* subgroup order n */
-static const uint32_t P521_N[17U] =
-{
-    0x91386409U, 0xBB6FB71EU, 0x899C47AEU, 0x3BB5C9B8U,
-    0xF709A5D0U, 0x7FCC0148U, 0xBF2F966BU, 0x51868783U,
-    0xFFFFFFFAU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
-    0x000001FFU
-};
+	product = (ecdsap521_uint128)x * y;
+	*low = (uint64_t)product;
+	*high = (uint64_t)(product >> 64U);
+#else
+	uint64_t a0;
+	uint64_t a1;
+	uint64_t b0;
+	uint64_t b1;
+	uint64_t p0;
+	uint64_t p1;
+	uint64_t p2;
+	uint64_t p3;
+	uint64_t carry;
 
-/* curve coefficient b */
-static const uint32_t P521_B[17U] =
-{
-    0x6B503F00U, 0xEF451FD4U, 0x3D2C34F1U, 0x3573DF88U,
-    0x3BB1BF07U, 0x1652C0BDU, 0xEC7E937BU, 0x56193951U,
-    0x8EF109E1U, 0xB8B48991U, 0x99B315F3U, 0xA2DA725BU,
-    0xB68540EEU, 0x929A21A0U, 0x8E1C9A1FU, 0x953EB961U,
-    0x00000051U
-};
-
-/* base point Gx */
-static const uint32_t P521_GX[17U] =
-{
-    0xC2E5BD66U, 0xF97E7E31U, 0x856A429BU, 0x3348B3C1U,
-    0xA2FFA8DEU, 0xFE1DC127U, 0xEFE75928U, 0xA14B5E77U,
-    0x6B4D3DBAU, 0xF828AF60U, 0x053FB521U, 0x9C648139U,
-    0x2395B442U, 0x9E3ECB66U, 0x0404E9CDU, 0x858E06B7U,
-    0x000000C6U
-};
-
-/* base point Gy */
-static const uint32_t P521_GY[17U] =
-{
-    0x9FD16650U, 0x88BE9476U, 0xA272C240U, 0x353C7086U,
-    0x3FAD0761U, 0xC550B901U, 0x5EF42640U, 0x97EE7299U,
-    0x273E662CU, 0x17AFBD17U, 0x579B4468U, 0x98F54449U,
-    0x2C7D1BD9U, 0x5C8A5FB4U, 0x9A3BC004U, 0x39296A78U,
-    0x00000118U
-};
-
-static void fe521_copy(fe521 r, const fe521 a)
-{
-    size_t i;
-
-    for (i = 0U; i < 17U; ++i)
-    {
-        r[i] = a[i];
-    }
+	a0 = x & UINT64_C(0xFFFFFFFF);
+	a1 = x >> 32U;
+	b0 = y & UINT64_C(0xFFFFFFFF);
+	b1 = y >> 32U;
+	p0 = a0 * b0;
+	p1 = a0 * b1;
+	p2 = a1 * b0;
+	p3 = a1 * b1;
+	carry = (p0 >> 32U) + (p1 & UINT64_C(0xFFFFFFFF)) + (p2 & UINT64_C(0xFFFFFFFF));
+	*low = (p0 & UINT64_C(0xFFFFFFFF)) | (carry << 32U);
+	*high = p3 + (p1 >> 32U) + (p2 >> 32U) + (carry >> 32U);
+#endif
 }
 
-static void fe521_zero(fe521 r)
+static inline void ecdsap521_accum_mul(ecdsap521_accumulator* accum, uint64_t x, uint64_t y)
 {
-    size_t i;
+	uint64_t low;
+	uint64_t high;
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && !defined(_M_ARM64EC) && !defined(_MSC_VER) && (defined(__GNUC__) || defined(__clang__)) &&                       \
+	(defined(__x86_64__) || defined(__amd64__))
+	__asm__("mulq %[y]" : "=a"(low), "=d"(high) : "a"(x), [y] "rm"(y) : "cc");
+	__asm__("addq %[low],%[w0]\n\t"
+			"adcq %[high],%[w1]\n\t"
+			"adcq $0,%[w2]"
+			: [w0] "+&r"(accum->w0), [w1] "+&r"(accum->w1), [w2] "+&r"(accum->w2)
+			: [low] "r"(low), [high] "r"(high)
+			: "cc");
+#elif !defined(QSC_ECDSAP521_FORCE_PORTABLE) && !defined(_M_ARM64EC) && (defined(__x86_64__) || defined(__amd64__) || (defined(_MSC_VER) && defined(_M_X64)))
+	unsigned long long tmp;
+	unsigned char carry;
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        r[i] = 0U;
-    }
+	ecdsap521_mul_wide(&low, &high, x, y);
+	carry = _addcarry_u64(0U, (unsigned long long)accum->w0, (unsigned long long)low, &tmp);
+	accum->w0 = (uint64_t)tmp;
+	carry = _addcarry_u64(carry, (unsigned long long)accum->w1, (unsigned long long)high, &tmp);
+	accum->w1 = (uint64_t)tmp;
+	accum->w2 += (uint64_t)carry;
+#else
+	uint64_t carry;
+
+	ecdsap521_mul_wide(&low, &high, x, y);
+	carry = 0U;
+	accum->w0 = ecdsap521_word_add(accum->w0, low, &carry);
+	accum->w1 = ecdsap521_word_add(accum->w1, high, &carry);
+	accum->w2 += carry;
+#endif
 }
 
-static void fe521_one(fe521 r)
+static inline uint64_t ecdsap521_accum_extract(ecdsap521_accumulator* accum)
 {
-    size_t i;
+	uint64_t result;
 
-    r[0U] = 1U;
+	result = accum->w0;
+	accum->w0 = accum->w1;
+	accum->w1 = accum->w2;
+	accum->w2 = 0U;
 
-    for (i = 1U; i < 17U; ++i)
-    {
-        r[i] = 0U;
-    }
+	return result;
 }
 
-static uint32_t fe521_is_zero(const fe521 a)
+static inline void ecdsap521_comba_mul9(uint64_t* z, const uint64_t* x, const uint64_t* y)
 {
-    uint32_t t;
-    size_t i;
+	ecdsap521_accumulator accum = {0U, 0U, 0U};
 
-    t = 0U;
-
-    for (i = 0U; i < 17U; ++i)
-    {
-        t |= a[i];
-    }
-
-    t = (t | (0U - t)) >> 31U;
-
-    return (uint32_t)(1U - t);
+	ecdsap521_accum_mul(&accum, x[0U], y[0U]);
+	z[0U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[0U]);
+	z[1U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[0U]);
+	z[2U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[0U]);
+	z[3U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[0U]);
+	z[4U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[0U]);
+	z[5U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[0U]);
+	z[6U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[0U]);
+	z[7U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[0U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[1U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[1U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[0U]);
+	z[8U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[1U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[2U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[2U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[1U]);
+	z[9U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[2U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[3U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[3U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[2U]);
+	z[10U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[3U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[4U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[4U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[3U]);
+	z[11U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[4U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[5U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[5U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[4U]);
+	z[12U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[5U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[6U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[6U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[5U]);
+	z[13U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[6U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[7U], y[7U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[6U]);
+	z[14U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[7U], y[8U]);
+	ecdsap521_accum_mul(&accum, x[8U], y[7U]);
+	z[15U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[8U], y[8U]);
+	z[16U] = ecdsap521_accum_extract(&accum);
+	z[17U] = ecdsap521_accum_extract(&accum);
 }
 
-static uint32_t fe521_is_one(const fe521 a)
+static inline void ecdsap521_accum_mul_x2(ecdsap521_accumulator* accum, uint64_t x, uint64_t y)
 {
-    uint32_t t;
-    size_t i;
+	uint64_t low;
+	uint64_t high;
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && !defined(_M_ARM64EC) && !defined(_MSC_VER) && (defined(__GNUC__) || defined(__clang__)) &&                       \
+	(defined(__x86_64__) || defined(__amd64__))
+	__asm__("mulq %[y]" : "=a"(low), "=d"(high) : "a"(x), [y] "rm"(y) : "cc");
+	__asm__("addq %[low],%[w0]\n\t"
+			"adcq %[high],%[w1]\n\t"
+			"adcq $0,%[w2]\n\t"
+			"addq %[low],%[w0]\n\t"
+			"adcq %[high],%[w1]\n\t"
+			"adcq $0,%[w2]"
+			: [w0] "+&r"(accum->w0), [w1] "+&r"(accum->w1), [w2] "+&r"(accum->w2)
+			: [low] "r"(low), [high] "r"(high)
+			: "cc");
+#elif !defined(QSC_ECDSAP521_FORCE_PORTABLE) && !defined(_M_ARM64EC) && (defined(__x86_64__) || defined(__amd64__) || (defined(_MSC_VER) && defined(_M_X64)))
+	unsigned long long tmp;
+	unsigned char carry;
 
-    t = a[0U] ^ 1U;
+	ecdsap521_mul_wide(&low, &high, x, y);
+	carry = _addcarry_u64(0U, (unsigned long long)accum->w0, (unsigned long long)low, &tmp);
+	accum->w0 = (uint64_t)tmp;
+	carry = _addcarry_u64(carry, (unsigned long long)accum->w1, (unsigned long long)high, &tmp);
+	accum->w1 = (uint64_t)tmp;
+	accum->w2 += (uint64_t)carry;
+	carry = _addcarry_u64(0U, (unsigned long long)accum->w0, (unsigned long long)low, &tmp);
+	accum->w0 = (uint64_t)tmp;
+	carry = _addcarry_u64(carry, (unsigned long long)accum->w1, (unsigned long long)high, &tmp);
+	accum->w1 = (uint64_t)tmp;
+	accum->w2 += (uint64_t)carry;
+#else
+	uint64_t carry;
 
-    for (i = 1U; i < 17U; ++i)
-    {
-        t |= a[i];
-    }
-
-    t = (t | (0U - t)) >> 31U;
-
-    return (uint32_t)(1U - t);
+	ecdsap521_mul_wide(&low, &high, x, y);
+	carry = 0U;
+	accum->w0 = ecdsap521_word_add(accum->w0, low, &carry);
+	accum->w1 = ecdsap521_word_add(accum->w1, high, &carry);
+	accum->w2 += carry;
+	carry = 0U;
+	accum->w0 = ecdsap521_word_add(accum->w0, low, &carry);
+	accum->w1 = ecdsap521_word_add(accum->w1, high, &carry);
+	accum->w2 += carry;
+#endif
 }
 
-static uint32_t fe521_is_even(const fe521 a)
+static inline void ecdsap521_comba_sqr9(uint64_t* z, const uint64_t* x)
 {
-    return (uint32_t)((a[0U] & 1U) ^ 1U);
+	ecdsap521_accumulator accum = {0U, 0U, 0U};
+
+	ecdsap521_accum_mul(&accum, x[0U], x[0U]);
+	z[0U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[1U]);
+	z[1U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[2U]);
+	ecdsap521_accum_mul(&accum, x[1U], x[1U]);
+	z[2U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[3U]);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[2U]);
+	z[3U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[4U]);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[3U]);
+	ecdsap521_accum_mul(&accum, x[2U], x[2U]);
+	z[4U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[5U]);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[4U]);
+	ecdsap521_accum_mul_x2(&accum, x[2U], x[3U]);
+	z[5U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[6U]);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[5U]);
+	ecdsap521_accum_mul_x2(&accum, x[2U], x[4U]);
+	ecdsap521_accum_mul(&accum, x[3U], x[3U]);
+	z[6U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[7U]);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[6U]);
+	ecdsap521_accum_mul_x2(&accum, x[2U], x[5U]);
+	ecdsap521_accum_mul_x2(&accum, x[3U], x[4U]);
+	z[7U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[0U], x[8U]);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[7U]);
+	ecdsap521_accum_mul_x2(&accum, x[2U], x[6U]);
+	ecdsap521_accum_mul_x2(&accum, x[3U], x[5U]);
+	ecdsap521_accum_mul(&accum, x[4U], x[4U]);
+	z[8U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[1U], x[8U]);
+	ecdsap521_accum_mul_x2(&accum, x[2U], x[7U]);
+	ecdsap521_accum_mul_x2(&accum, x[3U], x[6U]);
+	ecdsap521_accum_mul_x2(&accum, x[4U], x[5U]);
+	z[9U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[2U], x[8U]);
+	ecdsap521_accum_mul_x2(&accum, x[3U], x[7U]);
+	ecdsap521_accum_mul_x2(&accum, x[4U], x[6U]);
+	ecdsap521_accum_mul(&accum, x[5U], x[5U]);
+	z[10U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[3U], x[8U]);
+	ecdsap521_accum_mul_x2(&accum, x[4U], x[7U]);
+	ecdsap521_accum_mul_x2(&accum, x[5U], x[6U]);
+	z[11U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[4U], x[8U]);
+	ecdsap521_accum_mul_x2(&accum, x[5U], x[7U]);
+	ecdsap521_accum_mul(&accum, x[6U], x[6U]);
+	z[12U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[5U], x[8U]);
+	ecdsap521_accum_mul_x2(&accum, x[6U], x[7U]);
+	z[13U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[6U], x[8U]);
+	ecdsap521_accum_mul(&accum, x[7U], x[7U]);
+	z[14U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul_x2(&accum, x[7U], x[8U]);
+	z[15U] = ecdsap521_accum_extract(&accum);
+	ecdsap521_accum_mul(&accum, x[8U], x[8U]);
+	z[16U] = ecdsap521_accum_extract(&accum);
+	z[17U] = ecdsap521_accum_extract(&accum);
 }
 
-static int32_t fe521_cmp(const uint32_t* a, const uint32_t* b)
+static inline ecdsap521_field ecdsap521_mul(const ecdsap521_field* a, const ecdsap521_field* b)
 {
-    uint64_t ai;
-    uint32_t aigtbi;
-    uint32_t ailtbi;
-    uint64_t bi;
-    uint32_t gt;
-    int32_t i;
-    uint32_t lt;
-    uint32_t undecided;
+	ecdsap521_field result;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
 
-    gt = 0U;
-    lt = 0U;
+	ecdsap521_comba_mul9(z, a->limbs, b->limbs);
+	ecdsap521_redc(result.limbs, z);
 
-    for (i = 16; i >= 0; --i)
-    {
-        ai = (uint64_t)a[i];
-        bi = (uint64_t)b[i];
-
-        aigtbi = (uint32_t)((bi - ai) >> 63U);
-        ailtbi = (uint32_t)((ai - bi) >> 63U);
-        undecided = (uint32_t)(1U ^ (gt | lt));
-
-        gt |= aigtbi & undecided;
-        lt |= ailtbi & undecided;
-    }
-
-    return (gt != 0U) ? 1 : ((lt != 0U) ? -1 : 0);
+	return result;
 }
 
-static void fe521_from_bytes(fe521 r, const uint8_t* b)
+static inline ecdsap521_field* ecdsap521_mul_assign(ecdsap521_field* a, const ecdsap521_field* b)
 {
-    int32_t i;
-    int32_t j;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
 
-    for (i = 0, j = 62; i < 16; ++i, j -= 4)
-    {
-        r[i] = ((uint32_t)b[j] << 24U) |
-               ((uint32_t)b[j + 1] << 16U) |
-               ((uint32_t)b[j + 2] << 8U) |
-               ((uint32_t)b[j + 3]);
-    }
+	ecdsap521_comba_mul9(z, a->limbs, b->limbs);
+	ecdsap521_redc(a->limbs, z);
 
-    r[16] = ((uint32_t)b[0] << 8U) | (uint32_t)b[1];
+	return a;
 }
 
-static void fe521_to_bytes(uint8_t* b, const fe521 r)
+static inline ecdsap521_field ecdsap521_square(const ecdsap521_field* x)
 {
-    int32_t i;
-    int32_t j;
+	ecdsap521_field result;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
 
-    b[0] = (uint8_t)(r[16] >> 8U);
-    b[1] = (uint8_t)(r[16]);
+	ecdsap521_comba_sqr9(z, x->limbs);
+	ecdsap521_redc(result.limbs, z);
 
-    for (i = 0, j = 62; i < 16; ++i, j -= 4)
-    {
-        b[j] = (uint8_t)(r[i] >> 24U);
-        b[j + 1] = (uint8_t)(r[i] >> 16U);
-        b[j + 2] = (uint8_t)(r[i] >> 8U);
-        b[j + 3] = (uint8_t)(r[i]);
-    }
+	return result;
 }
 
-static void bn_rshift1(fe521 r)
+static inline void ecdsap521_square_n(ecdsap521_field* x, size_t n)
 {
-    size_t i;
-    uint32_t carry;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+	size_t i;
 
-    carry = 0U;
-
-    for (i = 17U; i-- > 0U;)
-    {
-        uint32_t next;
-
-        next = r[i] << 31U;
-        r[i] = (r[i] >> 1U) | carry;
-        carry = next;
-    }
-
+	for (i = 0U; i != n; ++i)
+	{
+		ecdsap521_comba_sqr9(z, x->limbs);
+		ecdsap521_redc(x->limbs, z);
+	}
 }
 
-static void bn_add_raw(fe521 r, const fe521 a, const fe521 b)
+static inline uint64_t ecdsap521_mask_barrier(uint64_t mask)
 {
-    uint64_t t;
-    uint64_t carry;
-    size_t i;
+	volatile uint64_t ptms;
 
-    carry = 0U;
+	ptms = mask;
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        t = (uint64_t)a[i] + (uint64_t)b[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
+	return ptms;
 }
 
-static uint32_t bn_sub_raw(fe521 r, const fe521 a, const fe521 b)
+static inline uint64_t ecdsap521_is_zero(const ecdsap521_field* x)
 {
-    uint64_t t;
-    uint32_t borrow;
-    size_t i;
+	uint64_t sum;
+	size_t i;
 
-    borrow = 0U;
+	sum = 0U;
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        t = (uint64_t)a[i] - (uint64_t)b[i] - (uint64_t)borrow;
-        r[i] = (uint32_t)t;
-        borrow = (uint32_t)((t >> 63U) & 1U);
-    }
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		sum |= x->limbs[i];
+	}
 
-    return borrow;
+	return (uint64_t)(1U ^ ((sum | (UINT64_C(0) - sum)) >> 63U));
 }
 
-static void bn_add_inplace(fe521 r, const fe521 a)
+static inline ecdsap521_field ecdsap521_negate(const ecdsap521_field* x)
 {
-    uint64_t t;
-    uint64_t carry;
-    size_t i;
+	ecdsap521_field result;
+	uint64_t xzer;
+	uint64_t borrow;
+	size_t i;
 
-    carry = 0U;
+	xzer = ecdsap521_mask_barrier(UINT64_C(0) - (ecdsap521_is_zero(x) ^ UINT64_C(1)));
+	borrow = 0U;
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        t = (uint64_t)r[i] + (uint64_t)a[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		result.limbs[i] = ecdsap521_word_sub(ECDSAP521_P[i] & xzer, x->limbs[i], &borrow);
+	}
+
+	return result;
 }
 
-static void bn_sub_mod(fe521 r, const fe521 a, const fe521 b, const fe521 mod)
+static inline void ecdsap521_conditional_assign(ecdsap521_field* x, uint64_t choice, const ecdsap521_field* nx)
 {
-    fe521 t;
+	uint64_t mask;
+	size_t i;
 
-    if (bn_sub_raw(t, a, b) != 0U)
-    {
-        bn_add_inplace(t, mod);
-    }
+	mask = ecdsap521_mask_barrier(UINT64_C(0) - (choice & UINT64_C(1)));
 
-    fe521_copy(r, t);
-    qsc_memutils_secure_erase(t, sizeof(t));
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		x->limbs[i] = (mask & nx->limbs[i]) | (~mask & x->limbs[i]);
+	}
 }
 
-static void bn_half_mod(fe521 r, const fe521 mod)
+static inline void ecdsap521_conditional_swap(uint64_t choice, ecdsap521_field* x, ecdsap521_field* y)
 {
-    if ((r[0U] & 1U) != 0U)
-    {
-        bn_add_inplace(r, mod);
-    }
+	uint64_t mask;
+	uint64_t nx;
+	uint64_t ny;
+	size_t i;
 
-    bn_rshift1(r);
+	mask = ecdsap521_mask_barrier(UINT64_C(0) - (choice & UINT64_C(1)));
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		nx = (mask & y->limbs[i]) | (~mask & x->limbs[i]);
+		ny = (mask & x->limbs[i]) | (~mask & y->limbs[i]);
+		x->limbs[i] = nx;
+		y->limbs[i] = ny;
+	}
 }
 
-static void mod_p_cond_sub(fe521 r)
+static inline ecdsap521_field ecdsap521_fe_invert2(const ecdsap521_field* x)
 {
-    fe521 t;
+	ecdsap521_field r;
+	ecdsap521_field rl;
+	ecdsap521_field a7;
 
-    if (fe521_cmp(r, P521_P) >= 0)
-    {
-        (void)bn_sub_raw(t, r, P521_P);
-        fe521_copy(r, t);
-    }
+	r = ecdsap521_square(x);
+	ecdsap521_mul_assign(&r, x);
+	r = ecdsap521_square(&r);
+	ecdsap521_mul_assign(&r, x);
+	rl = r;
+	ecdsap521_square_n(&r, 3U);
+	ecdsap521_mul_assign(&r, &rl);
+	ecdsap521_square_n(&r, 1U);
+	ecdsap521_mul_assign(&r, x);
+	a7 = r;
+	ecdsap521_square_n(&r, 1U);
+	ecdsap521_mul_assign(&r, x);
+	rl = r;
+	ecdsap521_square_n(&r, 8U);
+	ecdsap521_mul_assign(&r, &rl);
+	rl = r;
+	ecdsap521_square_n(&r, 16U);
+	ecdsap521_mul_assign(&r, &rl);
+	rl = r;
+	ecdsap521_square_n(&r, 32U);
+	ecdsap521_mul_assign(&r, &rl);
+	rl = r;
+	ecdsap521_square_n(&r, 64U);
+	ecdsap521_mul_assign(&r, &rl);
+	rl = r;
+	ecdsap521_square_n(&r, 128U);
+	ecdsap521_mul_assign(&r, &rl);
+	rl = r;
+	ecdsap521_square_n(&r, 256U);
+	ecdsap521_mul_assign(&r, &rl);
+	ecdsap521_square_n(&r, 7U);
+	ecdsap521_mul_assign(&r, &a7);
+	ecdsap521_square_n(&r, 2U);
 
-    r[16] &= 0x000001FFU;
-    qsc_memutils_secure_erase(t, sizeof(t));
+	return r;
 }
 
-static void mod_p_add_small(fe521 r, uint32_t x)
+static inline ecdsap521_field ecdsap521_zero(void)
 {
-    uint64_t t;
-    uint64_t carry;
-    size_t i;
+	ecdsap521_field result = {{UINT64_C(0)}};
 
-    t = (uint64_t)r[0U] + (uint64_t)x;
-    r[0U] = (uint32_t)t;
-    carry = t >> 32U;
-
-    for (i = 1U; i < 17U && carry != 0U; ++i)
-    {
-        t = (uint64_t)r[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
-
-    if ((r[16] >> 9U) != 0U)
-    {
-        x = r[16] >> 9U;
-        r[16] &= 0x000001FFU;
-
-        t = (uint64_t)r[0U] + (uint64_t)x;
-        r[0U] = (uint32_t)t;
-        carry = t >> 32U;
-
-        for (i = 1U; i < 17U && carry != 0U; ++i)
-        {
-            t = (uint64_t)r[i] + carry;
-            r[i] = (uint32_t)t;
-            carry = t >> 32U;
-        }
-    }
-
-    mod_p_cond_sub(r);
+	return result;
 }
 
-static void fe_add(fe521 r, const fe521 a, const fe521 b)
+/*! \brief An affine P-521 point in native coordinate representation.
+ * \details The identity is encoded as x=0 and y=0. Each field element is
+ * caller-owned. The structure has no dynamically allocated members.
+ */
+typedef struct
 {
-    uint64_t t;
-    uint64_t carry;
-    uint32_t extra;
-    size_t i;
+	ecdsap521_field x; /*!< Canonical affine x coordinate. */
+	ecdsap521_field y; /*!< Canonical affine y coordinate. */
+} ecdsap521_affine_point;
 
-    carry = 0U;
+/*! \brief A Jacobian P-521 point in native coordinate representation.
+ * \details The canonical identity encoding is (0,1,0). Coordinates are
+ * caller-owned and the type contains no shared mutable state.
+ */
+typedef struct
+{
+	ecdsap521_field x; /*!< Jacobian x coordinate. */
+	ecdsap521_field y; /*!< Jacobian y coordinate. */
+	ecdsap521_field z; /*!< Jacobian z coordinate. */
+} ecdsap521_projective_point;
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        t = (uint64_t)a[i] + (uint64_t)b[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
-
-    extra = (uint32_t)(r[16] >> 9U);
-    r[16] &= 0x000001FFU;
-    extra += (uint32_t)(carry << 23U);
-
-    if (extra != 0U)
-    {
-        mod_p_add_small(r, extra);
-    }
-    else
-    {
-        mod_p_cond_sub(r);
-    }
+static inline uint64_t ecdsap521_affine_is_identity(const ecdsap521_affine_point* pt)
+{
+	return ecdsap521_is_zero(&pt->x) & ecdsap521_is_zero(&pt->y);
 }
 
-static void fe_sub(fe521 r, const fe521 a, const fe521 b)
+static inline ecdsap521_projective_point ecdsap521_projective_identity(void)
 {
-    fe521 t;
+	ecdsap521_projective_point result;
 
-    if (bn_sub_raw(t, a, b) != 0U)
-    {
-        bn_add_inplace(t, P521_P);
-    }
+	result.x = ecdsap521_zero();
+	result.y = ecdsap521_one();
+	result.z = ecdsap521_zero();
 
-    fe521_copy(r, t);
-    mod_p_cond_sub(r);
-    qsc_memutils_secure_erase(t, sizeof(t));
+	return result;
 }
 
-static void fe_mul_raw(uint32_t c[34U], const fe521 a, const fe521 b)
+static inline ecdsap521_projective_point ecdsap521_projective_from_affine(const ecdsap521_affine_point* pt)
 {
-    uint64_t t;
-    uint64_t carry;
-    size_t i;
-    size_t j;
-    size_t k;
+	ecdsap521_projective_point result;
 
-    for (i = 0U; i < 34U; ++i)
-    {
-        c[i] = 0U;
-    }
+	result.x = pt->x;
+	result.y = pt->y;
+	result.z = ecdsap521_one();
+	ecdsap521_conditional_swap(ecdsap521_affine_is_identity(pt), &result.y, &result.z);
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        carry = 0U;
-
-        for (j = 0U; j < 17U; ++j)
-        {
-            t = (uint64_t)a[i] * (uint64_t)b[j] + (uint64_t)c[i + j] + carry;
-            c[i + j] = (uint32_t)t;
-            carry = t >> 32U;
-        }
-
-        k = i + 17U;
-
-        while (carry != 0U && k < 34U)
-        {
-            t = (uint64_t)c[k] + carry;
-            c[k] = (uint32_t)t;
-            carry = t >> 32U;
-            ++k;
-        }
-    }
+	return result;
 }
 
-static void fe_reduce_p(fe521 r, const uint32_t c[34U])
+static inline uint64_t ecdsap521_projective_is_identity(const ecdsap521_projective_point* pt)
 {
-    fe521 low;
-    fe521 high;
-    uint64_t t;
-    uint64_t carry;
-    uint32_t extra;
-    size_t i;
-
-    for (i = 0U; i < 16U; ++i)
-    {
-        low[i] = c[i];
-    }
-
-    low[16] = c[16U] & 0x000001FFU;
-
-    for (i = 0U; i < 17U; ++i)
-    {
-        uint64_t v;
-        size_t s;
-
-        s = i + 16U;
-        v = 0U;
-
-        if (s < 34U)
-        {
-            v = (uint64_t)(c[s] >> 9U);
-        }
-
-        if ((s + 1U) < 34U)
-        {
-            v |= ((uint64_t)c[s + 1U] << 23U);
-        }
-
-        high[i] = (uint32_t)v;
-    }
-
-    carry = 0U;
-
-    for (i = 0U; i < 17U; ++i)
-    {
-        t = (uint64_t)low[i] + (uint64_t)high[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
-
-    extra = (uint32_t)(r[16] >> 9U);
-    r[16] &= 0x000001FFU;
-    extra += (uint32_t)(carry << 23U);
-
-    if (extra != 0U)
-    {
-        mod_p_add_small(r, extra);
-    }
-    else
-    {
-        mod_p_cond_sub(r);
-    }
-
-    qsc_memutils_secure_erase(low, sizeof(low));
-    qsc_memutils_secure_erase(high, sizeof(high));
+	return ecdsap521_is_zero(&pt->z);
 }
 
-static void fe_mul(fe521 r, const fe521 a, const fe521 b)
+static inline ecdsap521_field ecdsap521_mul3(const ecdsap521_field* x)
 {
-    uint32_t c[34U];
+	ecdsap521_field result;
 
-    fe_mul_raw(c, a, b);
-    fe_reduce_p(r, c);
+	result = ecdsap521_mul2(x);
+	result = ecdsap521_add(&result, x);
 
-    qsc_memutils_secure_erase(c, sizeof(c));
+	return result;
 }
 
-static void fe_sqr(fe521 r, const fe521 a)
+static inline ecdsap521_field ecdsap521_mul4(const ecdsap521_field* x)
 {
-    fe_mul(r, a, a);
+	ecdsap521_field result;
+
+	result = ecdsap521_mul2(x);
+	result = ecdsap521_mul2(&result);
+
+	return result;
 }
 
-static void fe_mul_small(fe521 r, const fe521 a, uint32_t k)
+static inline ecdsap521_field ecdsap521_mul8(const ecdsap521_field* x)
 {
-    fe521 t;
-    uint32_t i;
+	ecdsap521_field result;
 
-    fe521_zero(t);
+	result = ecdsap521_mul2(x);
+	result = ecdsap521_mul2(&result);
+	result = ecdsap521_mul2(&result);
 
-    for (i = 0U; i < k; ++i)
-    {
-        fe_add(t, t, a);
-    }
-
-    fe521_copy(r, t);
-    qsc_memutils_secure_erase(t, sizeof(t));
+	return result;
 }
 
-static void mod_n_cond_sub(fe521 r)
+static inline ecdsap521_projective_point ecdsap521_dbl_a_minus_3(const ecdsap521_projective_point* pt)
 {
-    fe521 t;
+	ecdsap521_projective_point result;
+	ecdsap521_field z2;
+	ecdsap521_field m;
+	ecdsap521_field y2;
+	ecdsap521_field s;
+	ecdsap521_field nx;
+	ecdsap521_field ny;
+	ecdsap521_field nz;
+	ecdsap521_field t0;
+	ecdsap521_field t1;
 
-    if (fe521_cmp(r, P521_N) >= 0)
-    {
-        (void)bn_sub_raw(t, r, P521_N);
-        fe521_copy(r, t);
-    }
+	z2 = ecdsap521_square(&pt->z);
+	t0 = ecdsap521_sub(&pt->x, &z2);
+	t0 = ecdsap521_mul3(&t0);
+	t1 = ecdsap521_add(&pt->x, &z2);
+	m = ecdsap521_mul(&t0, &t1);
 
-    qsc_memutils_secure_erase(t, sizeof(t));
+	y2 = ecdsap521_square(&pt->y);
+	t0 = ecdsap521_mul4(&pt->x);
+	s = ecdsap521_mul(&t0, &y2);
+	t0 = ecdsap521_square(&m);
+	t1 = ecdsap521_mul2(&s);
+	nx = ecdsap521_sub(&t0, &t1);
+	t0 = ecdsap521_sub(&s, &nx);
+	t1 = ecdsap521_mul(&m, &t0);
+	t0 = ecdsap521_square(&y2);
+	t0 = ecdsap521_mul8(&t0);
+	ny = ecdsap521_sub(&t1, &t0);
+	t0 = ecdsap521_mul2(&pt->y);
+	nz = ecdsap521_mul(&t0, &pt->z);
+
+	result.x = nx;
+	result.y = ny;
+	result.z = nz;
+
+	return result;
 }
 
-static void sc_add(fe521 r, const fe521 a, const fe521 b);
-
-static void sc_add_one(fe521 r);
-
-static void sc_from_bytes(fe521 r, const uint8_t s[66U])
+static inline void ecdsap521_projective_conditional_assign(ecdsap521_projective_point* result, uint64_t choice, const ecdsap521_projective_point* replacement)
 {
-    fe521_from_bytes(r, s);
+	uint64_t pcho;
+
+	pcho = ecdsap521_mask_barrier(choice & UINT64_C(1));
+	ecdsap521_conditional_assign(&result->x, pcho, &replacement->x);
+	ecdsap521_conditional_assign(&result->y, pcho, &replacement->y);
+	ecdsap521_conditional_assign(&result->z, pcho, &replacement->z);
 }
 
-static void sc_add_one(fe521 r)
+/*! \brief Jacobian mixed-addition result and original H intermediate.
+ * \details The caller owns both fields. The point is in Jacobian coordinates,
+ * and H equals affine.x * projective.z^2 - projective.x.
+ */
+typedef struct
 {
-    uint64_t t;
-    uint64_t carry;
-    size_t i;
+	ecdsap521_projective_point point; /*!< Jacobian sum, or the point at infinity. */
+	ecdsap521_field h;				  /*!< Difference of normalized affine and projective x coordinates. */
+} ecdsap521_mixed_result;
 
-    t = (uint64_t)r[0U] + 1U;
-    r[0U] = (uint32_t)t;
-    carry = t >> 32U;
+static inline ecdsap521_projective_point ecdsap521_point_add_or_sub_mixed(const ecdsap521_projective_point* a, const ecdsap521_affine_point* b, uint64_t sub, bool check_exception)
+{
+	ecdsap521_projective_point result;
+	ecdsap521_projective_point doubled;
+	ecdsap521_field by;
+	ecdsap521_field ngby;
+	ecdsap521_field z1z1;
+	ecdsap521_field u2;
+	ecdsap521_field s2;
+	ecdsap521_field h;
+	ecdsap521_field r;
+	ecdsap521_field hh;
+	ecdsap521_field hhh;
+	ecdsap521_field v;
+	ecdsap521_field t0;
+	ecdsap521_field t2;
+	ecdsap521_field t3;
+	ecdsap521_field t4;
+	ecdsap521_field t5;
+	ecdsap521_field t6;
+	ecdsap521_field t7;
+	ecdsap521_field x3;
+	ecdsap521_field y3;
+	ecdsap521_field z3;
+	ecdsap521_field one;
+	uint64_t aidn;
+	uint64_t bidn;
+	uint64_t doubling;
 
-    for (i = 1U; i < 17U && carry != 0U; ++i)
-    {
-        t = (uint64_t)r[i] + carry;
-        r[i] = (uint32_t)t;
-        carry = t >> 32U;
-    }
+	aidn = ecdsap521_projective_is_identity(a);
+	bidn = ecdsap521_affine_is_identity(b);
 
-    mod_n_cond_sub(r);
+	by = b->y;
+	ngby = ecdsap521_negate(&by);
+	ecdsap521_conditional_assign(&by, ecdsap521_mask_barrier(sub & UINT64_C(1)), &ngby);
+
+	z1z1 = ecdsap521_square(&a->z);
+	u2 = ecdsap521_mul(&b->x, &z1z1);
+	t0 = ecdsap521_mul(&by, &a->z);
+	s2 = ecdsap521_mul(&t0, &z1z1);
+	h = ecdsap521_sub(&u2, &a->x);
+	r = ecdsap521_sub(&s2, &a->y);
+
+	hh = ecdsap521_square(&h);
+	hhh = ecdsap521_mul(&h, &hh);
+	v = ecdsap521_mul(&a->x, &hh);
+	t2 = ecdsap521_square(&r);
+	t3 = ecdsap521_add(&v, &v);
+	t4 = ecdsap521_sub(&t2, &hhh);
+	x3 = ecdsap521_sub(&t4, &t3);
+	t5 = ecdsap521_sub(&v, &x3);
+	t6 = ecdsap521_mul(&a->y, &hhh);
+	t7 = ecdsap521_mul(&r, &t5);
+	y3 = ecdsap521_sub(&t7, &t6);
+	z3 = ecdsap521_mul(&a->z, &h);
+
+	one = ecdsap521_one();
+	ecdsap521_conditional_assign(&x3, aidn, &b->x);
+	ecdsap521_conditional_assign(&y3, aidn, &by);
+	ecdsap521_conditional_assign(&z3, aidn, &one);
+	ecdsap521_conditional_assign(&x3, bidn, &a->x);
+	ecdsap521_conditional_assign(&y3, bidn, &a->y);
+	ecdsap521_conditional_assign(&z3, bidn, &a->z);
+
+	result.x = x3;
+	result.y = y3;
+	result.z = z3;
+
+	if (check_exception)
+	{
+		doubled = ecdsap521_dbl_a_minus_3(a);
+		doubling = ecdsap521_is_zero(&r) & ecdsap521_is_zero(&h) & (aidn ^ UINT64_C(1)) & (bidn ^ UINT64_C(1));
+		ecdsap521_projective_conditional_assign(&result, doubling, &doubled);
+	}
+
+	return result;
 }
 
-static void sc_from_bytes_reduce(fe521 r, const uint8_t* b, size_t blen)
+static inline ecdsap521_projective_point ecdsap521_point_add(const ecdsap521_projective_point* a, const ecdsap521_projective_point* b)
 {
-    size_t i;
-    int32_t j;
+	ecdsap521_projective_point result;
+	ecdsap521_projective_point doubled;
+	ecdsap521_field z1z1;
+	ecdsap521_field z2z2;
+	ecdsap521_field u1;
+	ecdsap521_field u2;
+	ecdsap521_field s1;
+	ecdsap521_field s2;
+	ecdsap521_field h;
+	ecdsap521_field r;
+	ecdsap521_field hh;
+	ecdsap521_field hhh;
+	ecdsap521_field v;
+	ecdsap521_field t0;
+	ecdsap521_field t2;
+	ecdsap521_field t3;
+	ecdsap521_field t4;
+	ecdsap521_field t5;
+	ecdsap521_field t6;
+	ecdsap521_field t7;
+	ecdsap521_field t8;
+	ecdsap521_field x3;
+	ecdsap521_field y3;
+	ecdsap521_field z3;
+	uint64_t aidn;
+	uint64_t bidn;
+	uint64_t doubling;
 
-    fe521_zero(r);
+	aidn = ecdsap521_projective_is_identity(a);
+	bidn = ecdsap521_projective_is_identity(b);
 
-    for (i = 0U; i < blen; ++i)
-    {
-        for (j = 7; j >= 0; --j)
-        {
-            sc_add(r, r, r);
+	z1z1 = ecdsap521_square(&a->z);
+	z2z2 = ecdsap521_square(&b->z);
+	u1 = ecdsap521_mul(&a->x, &z2z2);
+	u2 = ecdsap521_mul(&b->x, &z1z1);
+	t0 = ecdsap521_mul(&a->y, &b->z);
+	s1 = ecdsap521_mul(&t0, &z2z2);
+	t0 = ecdsap521_mul(&b->y, &a->z);
+	s2 = ecdsap521_mul(&t0, &z1z1);
+	h = ecdsap521_sub(&u2, &u1);
+	r = ecdsap521_sub(&s2, &s1);
 
-            if (((b[i] >> (uint32_t)j) & 1U) != 0U)
-            {
-                sc_add_one(r);
-            }
-        }
-    }
+	hh = ecdsap521_square(&h);
+	hhh = ecdsap521_mul(&h, &hh);
+	v = ecdsap521_mul(&u1, &hh);
+	t2 = ecdsap521_square(&r);
+	t3 = ecdsap521_add(&v, &v);
+	t4 = ecdsap521_sub(&t2, &hhh);
+	x3 = ecdsap521_sub(&t4, &t3);
+	t5 = ecdsap521_sub(&v, &x3);
+	t6 = ecdsap521_mul(&s1, &hhh);
+	t7 = ecdsap521_mul(&r, &t5);
+	y3 = ecdsap521_sub(&t7, &t6);
+	t8 = ecdsap521_mul(&b->z, &h);
+	z3 = ecdsap521_mul(&a->z, &t8);
+
+	ecdsap521_conditional_assign(&x3, aidn, &b->x);
+	ecdsap521_conditional_assign(&y3, aidn, &b->y);
+	ecdsap521_conditional_assign(&z3, aidn, &b->z);
+	ecdsap521_conditional_assign(&x3, bidn, &a->x);
+	ecdsap521_conditional_assign(&y3, bidn, &a->y);
+	ecdsap521_conditional_assign(&z3, bidn, &a->z);
+
+	result.x = x3;
+	result.y = y3;
+	result.z = z3;
+	doubled = ecdsap521_dbl_a_minus_3(a);
+	doubling = ecdsap521_is_zero(&r) & ecdsap521_is_zero(&h) & ((aidn & bidn) ^ UINT64_C(1));
+	ecdsap521_projective_conditional_assign(&result, doubling, &doubled);
+
+	return result;
 }
 
-static void sc_mul(fe521 r, const fe521 a, const fe521 b)
+/*! \def ECDSAP521_BASE_WINDOW_BITS
+ * \brief fixed-base Booth scalar-multiplication window width.
+ */
+#define ECDSAP521_BASE_WINDOW_BITS 6U
+
+/*! \def ECDSAP521_BASE_WINDOW_ELEMENTS
+ * \brief Number of nonidentity affine points per fixed-base Booth window.
+ */
+#define ECDSAP521_BASE_WINDOW_ELEMENTS 32U
+
+static inline ecdsap521_field ecdsap521_invert_field_element(const ecdsap521_field* x)
 {
-    uint32_t c[34U];
-    fe521 rem;
-    int32_t bit;
+	ecdsap521_field result;
 
-    fe_mul_raw(c, a, b);
-    fe521_zero(rem);
+	result = ecdsap521_fe_invert2(x);
+	result = ecdsap521_mul(&result, x);
 
-    for (bit = 1087; bit >= 0; --bit)
-    {
-        uint32_t word;
-        uint32_t bpos;
-
-        sc_add(rem, rem, rem);
-
-        word = c[(uint32_t)bit >> 5U];
-        bpos = (uint32_t)bit & 31U;
-
-        if (((word >> bpos) & 1U) != 0U)
-        {
-            sc_add_one(rem);
-        }
-    }
-
-    fe521_copy(r, rem);
-
-    qsc_memutils_secure_erase(c, sizeof(c));
-    qsc_memutils_secure_erase(rem, sizeof(rem));
+	return result;
 }
 
-static void sc_add(fe521 r, const fe521 a, const fe521 b)
+static inline ecdsap521_affine_point ecdsap521_to_affine(const ecdsap521_projective_point* pt)
 {
-    bn_add_raw(r, a, b);
+	ecdsap521_affine_point result;
+	ecdsap521_field z2iv;
+	ecdsap521_field z3iv;
 
-    if ((r[16] > 0x000001FFU) || (fe521_cmp(r, P521_N) >= 0))
-    {
-        (void)bn_sub_raw(r, r, P521_N);
-    }
+	z2iv = ecdsap521_fe_invert2(&pt->z);
+	z3iv = ecdsap521_square(&z2iv);
+	z3iv = ecdsap521_mul(&z3iv, &pt->z);
+	result.x = ecdsap521_mul(&pt->x, &z2iv);
+	result.y = ecdsap521_mul(&pt->y, &z3iv);
+
+	return result;
 }
 
-static void sc_sub(fe521 r, const fe521 a, const fe521 b)
+static inline bool ecdsap521_to_affine_batch(ecdsap521_affine_point* output, const ecdsap521_projective_point* input, size_t count, ecdsap521_field* scratch, size_t scratch_count)
 {
-    bn_sub_mod(r, a, b, P521_N);
-    mod_n_cond_sub(r);
+	ecdsap521_field s_inv;
+	ecdsap521_field z_inv;
+	ecdsap521_field z2iv;
+	ecdsap521_field z3iv;
+	uint64_t ayin;
+	bool success;
+	size_t i;
+
+	success = true;
+	ayin = UINT64_C(0);
+
+	if (count != 0U)
+	{
+		if (output == NULL || input == NULL)
+		{
+			success = false;
+		}
+		else
+		{
+			for (i = 0U; i != count; ++i)
+			{
+				ayin |= ecdsap521_projective_is_identity(&input[i]);
+			}
+
+			if (count <= 2U || ayin != UINT64_C(0))
+			{
+				for (i = 0U; i != count; ++i)
+				{
+					output[i] = ecdsap521_to_affine(&input[i]);
+				}
+			}
+			else if (scratch == NULL || scratch_count < count)
+			{
+				success = false;
+			}
+			else
+			{
+				scratch[0U] = input[0U].z;
+
+				for (i = 1U; i != count; ++i)
+				{
+					scratch[i] = ecdsap521_mul(&scratch[i - 1U], &input[i].z);
+				}
+
+				s_inv = ecdsap521_invert_field_element(&scratch[count - 1U]);
+
+				for (i = count - 1U; i > 0U; --i)
+				{
+					z_inv = ecdsap521_mul(&s_inv, &scratch[i - 1U]);
+					z2iv = ecdsap521_square(&z_inv);
+					z3iv = ecdsap521_mul(&z_inv, &z2iv);
+					s_inv = ecdsap521_mul(&s_inv, &input[i].z);
+					output[i].x = ecdsap521_mul(&input[i].x, &z2iv);
+					output[i].y = ecdsap521_mul(&input[i].y, &z3iv);
+				}
+
+				z2iv = ecdsap521_square(&s_inv);
+				z3iv = ecdsap521_mul(&s_inv, &z2iv);
+				output[0U].x = ecdsap521_mul(&input[0U].x, &z2iv);
+				output[0U].y = ecdsap521_mul(&input[0U].y, &z3iv);
+			}
+		}
+	}
+
+	return success;
 }
 
-static void sc_inv(fe521 r, const fe521 a)
+static inline size_t ecdsap521_basemul_booth_table_size(size_t max_scalar_bits)
 {
-    fe521 u;
-    fe521 v;
-    fe521 x1;
-    fe521 x2;
+	size_t windows;
+	size_t result;
 
-    fe521_copy(u, a);
-    fe521_copy(v, P521_N);
-    fe521_one(x1);
-    fe521_zero(x2);
+	result = 0U;
 
-    while ((fe521_is_one(u) == 0U) && (fe521_is_one(v) == 0U))
-    {
-        while (fe521_is_even(u) != 0U)
-        {
-            bn_rshift1(u);
-            bn_half_mod(x1, P521_N);
-        }
+	if (max_scalar_bits <= SIZE_MAX - (ECDSAP521_BASE_WINDOW_BITS - 1U))
+	{
+		windows = (max_scalar_bits + (ECDSAP521_BASE_WINDOW_BITS - 1U)) / ECDSAP521_BASE_WINDOW_BITS;
 
-        while (fe521_is_even(v) != 0U)
-        {
-            bn_rshift1(v);
-            bn_half_mod(x2, P521_N);
-        }
+		if (windows <= SIZE_MAX / ECDSAP521_BASE_WINDOW_ELEMENTS)
+		{
+			result = windows * ECDSAP521_BASE_WINDOW_ELEMENTS;
+		}
+	}
 
-        if (fe521_cmp(u, v) >= 0)
-        {
-            (void)bn_sub_raw(u, u, v);
-            bn_sub_mod(x1, x1, x2, P521_N);
-        }
-        else
-        {
-            (void)bn_sub_raw(v, v, u);
-            bn_sub_mod(x2, x2, x1, P521_N);
-        }
-    }
-
-    if (fe521_is_one(u) != 0U)
-    {
-        fe521_copy(r, x1);
-    }
-    else
-    {
-        fe521_copy(r, x2);
-    }
-
-    mod_n_cond_sub(r);
-
-    qsc_memutils_secure_erase(u, sizeof(u));
-    qsc_memutils_secure_erase(v, sizeof(v));
-    qsc_memutils_secure_erase(x1, sizeof(x1));
-    qsc_memutils_secure_erase(x2, sizeof(x2));
+	return result;
 }
 
-static void fe_inv(fe521 r, const fe521 a)
+static inline bool ecdsap521_basemul_booth_setup(ecdsap521_affine_point* output, size_t output_capacity, ecdsap521_projective_point* projective, size_t projective_capacity, ecdsap521_field* scratch, size_t scratch_capacity, const ecdsap521_affine_point* base, size_t max_scalar_bits)
 {
-    fe521 u;
-    fe521 v;
-    fe521 x1;
-    fe521 x2;
+	ecdsap521_projective_point accum;
+	ecdsap521_projective_point point;
+	size_t required;
+	size_t i;
+	size_t j;
+	bool success;
 
-    fe521_copy(u, a);
-    fe521_copy(v, P521_P);
-    fe521_one(x1);
-    fe521_zero(x2);
+	required = ecdsap521_basemul_booth_table_size(max_scalar_bits);
+	success = false;
 
-    while ((fe521_is_one(u) == 0U) && (fe521_is_one(v) == 0U))
-    {
-        while (fe521_is_even(u) != 0U)
-        {
-            bn_rshift1(u);
-            bn_half_mod(x1, P521_P);
-        }
+	if ((max_scalar_bits == 0U && required == 0U) || (required != 0U && base != NULL && output != NULL && projective != NULL && scratch != NULL &&
+		output_capacity >= required && projective_capacity >= required && scratch_capacity >= required))
+	{
+		success = true;
 
-        while (fe521_is_even(v) != 0U)
-        {
-            bn_rshift1(v);
-            bn_half_mod(x2, P521_P);
-        }
+		if (required != 0U)
+		{
+			accum = ecdsap521_projective_from_affine(base);
 
-        if (fe521_cmp(u, v) >= 0)
-        {
-            (void)bn_sub_raw(u, u, v);
-            bn_sub_mod(x1, x1, x2, P521_P);
-        }
-        else
-        {
-            (void)bn_sub_raw(v, v, u);
-            bn_sub_mod(x2, x2, x1, P521_P);
-        }
-    }
+			for (i = 0U; i != required; i += ECDSAP521_BASE_WINDOW_ELEMENTS)
+			{
+				projective[i] = accum;
 
-    if (fe521_is_one(u) != 0U)
-    {
-        fe521_copy(r, x1);
-    }
-    else
-    {
-        fe521_copy(r, x2);
-    }
+				for (j = 1U; j != ECDSAP521_BASE_WINDOW_ELEMENTS; ++j)
+				{
+					if ((j & 1U) != 0U)
+					{
+						projective[i + j] = ecdsap521_dbl_a_minus_3(&projective[i + j / 2U]);
+					}
+					else
+					{
+						projective[i + j] = ecdsap521_point_add(&projective[i + j - 1U], &projective[i]);
+					}
+				}
 
-    mod_p_cond_sub(r);
+				point = projective[i + ECDSAP521_BASE_WINDOW_ELEMENTS - 1U];
+				accum = ecdsap521_dbl_a_minus_3(&point);
+			}
 
-    qsc_memutils_secure_erase(u, sizeof(u));
-    qsc_memutils_secure_erase(v, sizeof(v));
-    qsc_memutils_secure_erase(x1, sizeof(x1));
-    qsc_memutils_secure_erase(x2, sizeof(x2));
+			success = ecdsap521_to_affine_batch(output, projective, required, scratch, scratch_capacity);
+		}
+	}
+
+	return success;
 }
 
-static uint32_t ct_sel32(uint32_t sel, uint32_t a, uint32_t b)
+/*! \def ECDSAP521_BOOTH_WINDOW_MASK
+ * \brief Seven-bit input mask for the six-bit signed Booth representation.
+ */
+#define ECDSAP521_BOOTH_WINDOW_MASK UINT64_C(0x7F)
+
+/*! \brief A signed Booth table index, with the sign represented separately.
+ * \details Digit zero denotes the point at infinity. The negation flag has
+ * value zero or one. Instances have automatic storage and no owner.
+ */
+typedef struct
 {
-    uint32_t mask;
+	uint64_t digit;	   /*!< Affine table index in [0,32], zero denotes identity. */
+	uint64_t negative; /*!< One means subtract selected table point. */
+} ecdsap521_booth_digit;
 
-    mask = (uint32_t)(0U - sel);
+static inline ecdsap521_booth_digit ecdsap521_booth_recode6(uint64_t raw)
+{
+	ecdsap521_booth_digit result;
+	uint64_t sign;
+	uint64_t mask;
+	uint64_t negx;
+	uint64_t digit;
 
-    return (a & mask) | (b & ~mask);
+	raw &= ECDSAP521_BOOTH_WINDOW_MASK;
+	sign = raw >> ECDSAP521_BASE_WINDOW_BITS;
+	mask = ecdsap521_mask_barrier(UINT64_C(0) - sign);
+	negx = (UINT64_C(1) << (ECDSAP521_BASE_WINDOW_BITS + 1U)) - raw - UINT64_C(1);
+	digit = (negx & mask) | (raw & ~mask);
+	result.digit = (digit >> 1U) + (digit & UINT64_C(1));
+	result.negative = sign;
+
+	return result;
 }
 
-static void fe521_ct_select(fe521 r, uint32_t sel, const fe521 a, const fe521 b)
+static inline uint64_t ecdsap521_scalar_window7(const uint8_t* scalar, size_t scalar_length, size_t offset)
 {
-    size_t i;
+	uint64_t result;
+	uint64_t bit;
+	size_t ypos;
+	size_t bpos;
+	size_t i;
 
-    for (i = 0U; i < 17U; ++i)
-    {
-        r[i] = ct_sel32(sel, a[i], b[i]);
-    }
+	result = UINT64_C(0);
+
+	for (i = 0U; i != 7U; ++i)
+	{
+		bpos = offset + i;
+		ypos = bpos / 8U;
+		bit = UINT64_C(0);
+
+		if (ypos < scalar_length)
+		{
+			bit = ((uint64_t)scalar[scalar_length - 1U - ypos] >> (bpos & 7U)) & UINT64_C(1);
+		}
+
+		result |= bit << i;
+	}
+
+	return result;
 }
 
-static void p521_jac_ct_select(p521_jac_t* r, uint32_t sel, const p521_jac_t* a, const p521_jac_t* b)
+static inline ecdsap521_affine_point ecdsap521_affine_ct_select32(const ecdsap521_affine_point* table, uint64_t digit)
 {
-    fe521_ct_select(r->X, sel, a->X, b->X);
-    fe521_ct_select(r->Y, sel, a->Y, b->Y);
-    fe521_ct_select(r->Z, sel, a->Z, b->Z);
+	ecdsap521_affine_point result;
+	uint64_t diff;
+	uint64_t equal;
+	size_t i;
+
+	result.x = ecdsap521_zero();
+	result.y = ecdsap521_zero();
+
+	for (i = 0U; i != ECDSAP521_BASE_WINDOW_ELEMENTS; ++i)
+	{
+		diff = digit ^ ((uint64_t)i + UINT64_C(1));
+		equal = UINT64_C(1) ^ ((diff | (UINT64_C(0) - diff)) >> 63U);
+		ecdsap521_conditional_assign(&result.x, equal, &table[i].x);
+		ecdsap521_conditional_assign(&result.y, equal, &table[i].y);
+	}
+
+	return result;
 }
 
-static void p521_aff_to_jac(p521_jac_t* R, const p521_aff_t* P)
+/*! \def ECDSAP521_BLIND_BITS
+ * \brief scalar-blinding bit count for the P-521 subgroup order.
+ */
+#define ECDSAP521_BLIND_BITS 55U
+
+/*! \def ECDSAP521_BLIND_BYTES
+ * \brief Fixed 576-bit blinded scalar serialization length in bytes.
+ */
+#define ECDSAP521_BLIND_BYTES 72U
+
+/*! \def ECDSAP521_RANDOM_FIELD_BYTES
+ * \brief Oversampled field element length, 66 field bytes plus eight bytes.
+ */
+#define ECDSAP521_RANDOM_FIELD_BYTES 74U
+
+/*! \def ECDSAP521_RERANDOMIZATIONS
+ * \brief four projective representation rerandomizations.
+ */
+#define ECDSAP521_RERANDOMIZATIONS 4U
+
+/*! \def ECDSAP521_BLIND_MATERIAL_BYTES
+ * \brief One 64-bit mask and four oversampled field rerandomizers.
+ */
+#define ECDSAP521_BLIND_MATERIAL_BYTES (8U + ECDSAP521_RERANDOMIZATIONS * ECDSAP521_RANDOM_FIELD_BYTES)
+
+/*! \brief Little-endian native representation of the P-521 subgroup order.
+ * \details Constant, immutable nine-word representation; no ownership.
+ */
+static const uint64_t ECDSAP521_N[ECDSAP521_LIMBS] = {UINT64_C(0xBB6FB71E91386409), UINT64_C(0x3BB5C9B8899C47AE), UINT64_C(0x7FCC0148F709A5D0),
+	UINT64_C(0x51868783BF2F966B), UINT64_C(0xFFFFFFFFFFFFFFFA), UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_C(0x1FF)};
+
+static inline ecdsap521_field ecdsap521_field_from_wide_bytes(const uint8_t* wide)
 {
-    fe521_copy(R->X, P->X);
-    fe521_copy(R->Y, P->Y);
-    fe521_one(R->Z);
+	ecdsap521_field result;
+	uint64_t product[ECDSAP521_WIDE_LIMBS] = { 0U };
+	size_t i;
+
+	for (i = 0U; i != ECDSAP521_RANDOM_FIELD_BYTES; ++i)
+	{
+		product[i / 8U] |= (uint64_t)wide[ECDSAP521_RANDOM_FIELD_BYTES - 1U - i] << ((i & 7U) * 8U);
+	}
+
+	ecdsap521_redc(result.limbs, product);
+	qsc_memutils_secure_erase(product, sizeof(product));
+
+	return result;
 }
 
-static void p521_set_infinity(p521_jac_t* R)
+static inline void ecdsap521_blind_scalar55(uint8_t* output, const uint8_t* scalar, const uint8_t* mask)
 {
-    fe521_zero(R->X);
-    fe521_one(R->Y);
-    fe521_zero(R->Z);
+	uint64_t product[ECDSAP521_LIMBS];
+	uint64_t words[ECDSAP521_LIMBS] = { 0U };
+	uint64_t k;
+	uint64_t low;
+	uint64_t high;
+	uint64_t carry;
+	uint64_t addcarry;
+	size_t i;
+
+	k = UINT64_C(0);
+
+	for (i = 0U; i != 8U; ++i)
+	{
+		k |= (uint64_t)mask[i] << (i * 8U);
+	}
+
+	k &= (UINT64_C(1) << ECDSAP521_BLIND_BITS) - UINT64_C(1);
+	k |= (UINT64_C(1) << (ECDSAP521_BLIND_BITS - 1U)) | UINT64_C(1);
+
+	for (i = 0U; i != 66U; ++i)
+	{
+		words[i / 8U] |= (uint64_t)scalar[65U - i] << ((i & 7U) * 8U);
+	}
+
+	carry = UINT64_C(0);
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		ecdsap521_mul_wide(&low, &high, k, ECDSAP521_N[i]);
+		addcarry = UINT64_C(0);
+		product[i] = ecdsap521_word_add(low, carry, &addcarry);
+		carry = high + addcarry;
+	}
+
+	addcarry = UINT64_C(0);
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		product[i] = ecdsap521_word_add(product[i], words[i], &addcarry);
+	}
+
+	for (i = 0U; i != ECDSAP521_BLIND_BYTES; ++i)
+	{
+		output[ECDSAP521_BLIND_BYTES - 1U - i] = (uint8_t)(product[i / 8U] >> ((i & 7U) * 8U));
+	}
+
+	qsc_memutils_secure_erase(product, sizeof(product));
+	qsc_memutils_secure_erase(words, sizeof(words));
+	qsc_memutils_secure_erase(&k, sizeof(k));
 }
 
-static uint32_t p521_is_infinity(const p521_jac_t* P)
+static inline void ecdsap521_projective_randomize_rep(ecdsap521_projective_point* point, const ecdsap521_field* r)
 {
-    return fe521_is_zero(P->Z);
+	ecdsap521_field r2;
+	ecdsap521_field r3;
+
+	r2 = ecdsap521_square(r);
+	r3 = ecdsap521_mul(&r2, r);
+	point->x = ecdsap521_mul(&point->x, &r2);
+	point->y = ecdsap521_mul(&point->y, &r3);
+	point->z = ecdsap521_mul(&point->z, r);
 }
 
-static void p521_dbl(p521_jac_t* R, const p521_jac_t* P)
+static inline bool ecdsap521_basemul_booth_exec_blinded(ecdsap521_projective_point* result, const ecdsap521_affine_point* table, size_t table_count, const uint8_t* scalar, const uint8_t* randomness)
 {
-    fe521 delta;
-    fe521 gamma;
-    fe521 beta;
-    fe521 alpha;
-    fe521 tmp;
-    fe521 x3;
-    fe521 y3;
-    fe521 z3;
+	ecdsap521_projective_point accum;
+	ecdsap521_projective_point negated;
+	ecdsap521_affine_point selected;
+	ecdsap521_field rerand[ECDSAP521_RERANDOMIZATIONS];
+	ecdsap521_booth_digit digit;
+	uint8_t blinded[ECDSAP521_BLIND_BYTES] = { 0U };
+	uint64_t raw;
+	size_t i;
+	size_t offset;
+	bool success;
 
-    fe_sqr(delta, P->Z);
-    fe_sqr(gamma, P->Y);
-    fe_mul(beta, P->X, gamma);
+	success = false;
 
-    fe_sub(alpha, P->X, delta);
-    fe_add(tmp, P->X, delta);
-    fe_mul(alpha, alpha, tmp);
-    fe_mul_small(alpha, alpha, 3U);
+	if (result != NULL && table != NULL && scalar != NULL && randomness != NULL && table_count >= (97U * ECDSAP521_BASE_WINDOW_ELEMENTS))
+	{
+		ecdsap521_blind_scalar55(blinded, scalar, randomness);
+		success = true;
 
-    fe_sqr(x3, alpha);
-    fe_mul_small(tmp, beta, 8U);
-    fe_sub(x3, x3, tmp);
+		for (i = 0U; i != ECDSAP521_RERANDOMIZATIONS; ++i)
+		{
+			rerand[i] = ecdsap521_field_from_wide_bytes(randomness + 8U + i * ECDSAP521_RANDOM_FIELD_BYTES);
 
-    fe_add(z3, P->Y, P->Z);
-    fe_sqr(z3, z3);
-    fe_sub(z3, z3, gamma);
-    fe_sub(z3, z3, delta);
+			if (ecdsap521_is_zero(&rerand[i]) != UINT64_C(0))
+			{
+				success = false;
+			}
+		}
 
-    fe_mul_small(tmp, beta, 4U);
-    fe_sub(tmp, tmp, x3);
-    fe_mul(y3, alpha, tmp);
-    fe_sqr(tmp, gamma);
-    fe_mul_small(tmp, tmp, 8U);
-    fe_sub(y3, y3, tmp);
+		if (success == true)
+		{
+			raw = (ecdsap521_scalar_window7(blinded, sizeof(blinded), 0U) & UINT64_C(0x3F)) << 1U;
+			digit = ecdsap521_booth_recode6(raw);
+			selected = ecdsap521_affine_ct_select32(table, digit.digit);
+			accum = ecdsap521_projective_from_affine(&selected);
+			negated = accum;
+			negated.y = ecdsap521_negate(&accum.y);
+			ecdsap521_projective_conditional_assign(&accum, digit.negative, &negated);
+			ecdsap521_projective_randomize_rep(&accum, &rerand[0U]);
 
-    fe521_copy(R->X, x3);
-    fe521_copy(R->Y, y3);
-    fe521_copy(R->Z, z3);
+			for (i = 1U; i != 97U; ++i)
+			{
+				offset = ECDSAP521_BASE_WINDOW_BITS * i - 1U;
+				raw = ecdsap521_scalar_window7(blinded, sizeof(blinded), offset);
+				digit = ecdsap521_booth_recode6(raw);
+				selected = ecdsap521_affine_ct_select32(&table[ECDSAP521_BASE_WINDOW_ELEMENTS * i], digit.digit);
+				accum = ecdsap521_point_add_or_sub_mixed(&accum, &selected, digit.negative, i >= 86U);
+
+				if (i < ECDSAP521_RERANDOMIZATIONS)
+				{
+					ecdsap521_projective_randomize_rep(&accum, &rerand[i]);
+				}
+			}
+
+			*result = accum;
+			qsc_memutils_secure_erase(&accum, sizeof(accum));
+			qsc_memutils_secure_erase(&negated, sizeof(negated));
+			qsc_memutils_secure_erase(&selected, sizeof(selected));
+		}
+	}
+
+	qsc_memutils_secure_erase(blinded, sizeof(blinded));
+	qsc_memutils_secure_erase(rerand, sizeof(rerand));
+	qsc_memutils_secure_erase(&digit, sizeof(digit));
+
+	return success;
 }
 
-static void p521_add(p521_jac_t* R, const p521_jac_t* P, const p521_jac_t* Q)
+static inline bool ecdsap521_basemul_booth_exec_csp(ecdsap521_projective_point* result, const ecdsap521_affine_point* table, size_t table_count, const uint8_t* scalar)
 {
-    fe521 z1z1;
-    fe521 z2z2;
-    fe521 u1;
-    fe521 u2;
-    fe521 s1;
-    fe521 s2;
-    fe521 h;
-    fe521 r2;
-    fe521 i;
-    fe521 j;
-    fe521 v;
-    fe521 x3;
-    fe521 y3;
-    fe521 z3;
-    fe521 tmp;
-    p521_jac_t Radd;
-    p521_jac_t Rdbl;
-    p521_jac_t Rinf;
-    p521_jac_t T;
-    uint32_t general_case;
-    uint32_t h_zero;
-    uint32_t opposite_point;
-    uint32_t pinf;
-    uint32_t qinf;
-    uint32_t r_zero;
-    uint32_t same_point;
+	uint8_t randomness[ECDSAP521_BLIND_MATERIAL_BYTES] = { 0U };
+	bool success;
 
-    fe_sqr(z1z1, P->Z);
-    fe_sqr(z2z2, Q->Z);
+	success = false;
 
-    fe_mul(u1, P->X, z2z2);
-    fe_mul(u2, Q->X, z1z1);
+	if (result != NULL && table != NULL && scalar != NULL && table_count >= 97U * ECDSAP521_BASE_WINDOW_ELEMENTS)
+	{
+		if (qsc_csp_generate(randomness, sizeof(randomness)) == true)
+		{
+			success = ecdsap521_basemul_booth_exec_blinded(result, table, table_count, scalar, randomness);
+		}
+	}
 
-    fe_mul(s1, P->Y, Q->Z);
-    fe_mul(s1, s1, z2z2);
+	qsc_memutils_secure_erase(randomness, sizeof(randomness));
 
-    fe_mul(s2, Q->Y, P->Z);
-    fe_mul(s2, s2, z1z1);
-
-    fe_sub(h, u2, u1);
-    fe_sub(r2, s2, s1);
-    fe_mul_small(r2, r2, 2U);
-
-    fe_mul_small(i, h, 2U);
-    fe_sqr(i, i);
-    fe_mul(j, h, i);
-    fe_mul(v, u1, i);
-
-    fe_sqr(x3, r2);
-    fe_sub(x3, x3, j);
-    fe_sub(x3, x3, v);
-    fe_sub(x3, x3, v);
-
-    fe_sub(tmp, v, x3);
-    fe_mul(y3, r2, tmp);
-
-    fe_mul(tmp, s1, j);
-    fe_mul_small(tmp, tmp, 2U);
-    fe_sub(y3, y3, tmp);
-
-    fe_add(z3, P->Z, Q->Z);
-    fe_sqr(z3, z3);
-    fe_sub(z3, z3, z1z1);
-    fe_sub(z3, z3, z2z2);
-    fe_mul(z3, z3, h);
-
-    fe521_copy(Radd.X, x3);
-    fe521_copy(Radd.Y, y3);
-    fe521_copy(Radd.Z, z3);
-
-    p521_dbl(&Rdbl, P);
-    p521_set_infinity(&Rinf);
-
-    pinf = p521_is_infinity(P);
-    qinf = p521_is_infinity(Q);
-    h_zero = fe521_is_zero(h);
-    r_zero = fe521_is_zero(r2);
-
-    same_point = h_zero & r_zero;
-    opposite_point = h_zero & (uint32_t)(r_zero ^ 1U);
-    general_case = (uint32_t)((pinf | qinf | same_point | opposite_point) ^ 1U);
-
-    p521_set_infinity(&T);
-    p521_jac_ct_select(&T, general_case, &Radd, &T);
-    p521_jac_ct_select(&T, same_point, &Rdbl, &T);
-    p521_jac_ct_select(&T, opposite_point, &Rinf, &T);
-    p521_jac_ct_select(&T, qinf, P, &T);
-    p521_jac_ct_select(&T, pinf, Q, &T);
-
-    *R = T;
-
-    qsc_memutils_secure_erase(&Radd, sizeof(Radd));
-    qsc_memutils_secure_erase(&Rdbl, sizeof(Rdbl));
-    qsc_memutils_secure_erase(&Rinf, sizeof(Rinf));
-    qsc_memutils_secure_erase(&T, sizeof(T));
+	return success;
 }
 
-static void p521_scalar_mult(p521_jac_t* R, const p521_aff_t* P, const fe521 k)
+static inline bool ecdsap521_scalar_valid(const uint8_t* scalar)
 {
-    p521_jac_t R0;
-    p521_jac_t R1;
-    p521_jac_t A;
-    p521_jac_t D0;
-    p521_jac_t D1;
-    int32_t i;
+	uint64_t words[ECDSAP521_LIMBS] = { 0U };
+	uint64_t carry;
+	uint64_t nonzero;
+	size_t i;
+	bool valid;
 
-    p521_set_infinity(&R0);
-    p521_aff_to_jac(&R1, P);
+	for (i = 0U; i != 66U; ++i)
+	{
+		words[i / 8U] |= (uint64_t)scalar[65U - i] << ((i & 7U) * 8U);
+	}
 
-    for (i = 520; i >= 0; --i)
-    {
-        uint32_t bit;
+	carry = UINT64_C(0);
+	nonzero = UINT64_C(0);
 
-        p521_add(&A, &R0, &R1);
-        p521_dbl(&D0, &R0);
-        p521_dbl(&D1, &R1);
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		uint64_t ignored;
 
-        bit = (k[(uint32_t)i >> 5U] >> ((uint32_t)i & 31U)) & 1U;
+		ignored = ecdsap521_word_sub(words[i], ECDSAP521_N[i], &carry);
+		(void)ignored;
+		nonzero |= words[i];
+	}
 
-        p521_jac_ct_select(&R0, bit, &A, &D0);
-        p521_jac_ct_select(&R1, bit, &D1, &A);
-    }
+	valid = (carry != UINT64_C(0)) && (nonzero != UINT64_C(0));
+	qsc_memutils_secure_erase(words, sizeof(words));
 
-    *R = R0;
-
-    qsc_memutils_secure_erase(&R0, sizeof(R0));
-    qsc_memutils_secure_erase(&R1, sizeof(R1));
-    qsc_memutils_secure_erase(&A, sizeof(A));
-    qsc_memutils_secure_erase(&D0, sizeof(D0));
-    qsc_memutils_secure_erase(&D1, sizeof(D1));
+	return valid;
 }
 
-static bool p521_jac_to_aff(p521_aff_t* R, const p521_jac_t* P)
+static inline bool ecdsap521_publickey_derive(uint8_t* publickey, const uint8_t* scalar, const ecdsap521_affine_point* table, size_t table_count, bool x_only)
 {
-    fe521 zinv;
-    fe521 zinv2;
-    fe521 zinv3;
+	ecdsap521_projective_point point;
+	ecdsap521_affine_point affine;
+	ecdsap521_field inv2;
+	uint8_t encoded[132U] = { 0U };
+	size_t i;
+	bool success;
 
-    if (p521_is_infinity(P) != 0U)
-    {
-        return false;
-    }
+	success = false;
 
-    fe_inv(zinv, P->Z);
-    fe_sqr(zinv2, zinv);
-    fe_mul(zinv3, zinv2, zinv);
+	if (publickey != NULL && scalar != NULL && table != NULL && table_count >= (97U * ECDSAP521_BASE_WINDOW_ELEMENTS))
+	{
+		if (ecdsap521_scalar_valid(scalar) == true)
+		{
+			if (ecdsap521_basemul_booth_exec_csp(&point, table, table_count, scalar) == true)
+			{
+				if (x_only)
+				{
+					inv2 = ecdsap521_fe_invert2(&point.z);
+					affine.x = ecdsap521_mul(&point.x, &inv2);
+				}
+				else
+				{
+					affine = ecdsap521_to_affine(&point);
+				}
 
-    fe_mul(R->X, P->X, zinv2);
-    fe_mul(R->Y, P->Y, zinv3);
+				for (i = 0U; i != 66U; ++i)
+				{
+					encoded[65U - i] = (uint8_t)(affine.x.limbs[i / 8U] >> ((i & 7U) * 8U));
+				}
 
-    qsc_memutils_secure_erase(zinv, sizeof(fe521));
-    qsc_memutils_secure_erase(zinv2, sizeof(fe521));
-    qsc_memutils_secure_erase(zinv3, sizeof(fe521));
+				if (!x_only)
+				{
+					for (i = 0U; i < 66U; ++i)
+					{
+						encoded[131U - i] = (uint8_t)(affine.y.limbs[i / 8U] >> ((i & 7U) * 8U));
+					}
+				}
 
-    return true;
+				qsc_memutils_copy(publickey, encoded, x_only ? 66U : sizeof(encoded));
+				success = true;
+			}
+		}
+	}
+
+	qsc_memutils_secure_erase(encoded, sizeof(encoded));
+	qsc_memutils_secure_erase(&point, sizeof(point));
+	qsc_memutils_secure_erase(&affine, sizeof(affine));
+	qsc_memutils_secure_erase(&inv2, sizeof(inv2));
+
+	return success;
 }
 
-static bool p521_point_is_on_curve(const p521_aff_t* Q)
+static inline bool ecdsap521_keypair_derive(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed, const ecdsap521_affine_point* table, size_t table_count)
 {
-    fe521 y2;
-    fe521 x3;
-    fe521 ax;
-    fe521 rhs;
+	uint8_t digest[64U] = { 0U };
+	uint8_t scalar[66U] = { 0U };
+	uint8_t derived[132U] = { 0U };
+	uint64_t nonzero;
+	size_t i;
+	bool success;
 
-    fe_sqr(y2, Q->Y);
-    fe_sqr(x3, Q->X);
-    fe_mul(x3, x3, Q->X);
+	success = false;
 
-    fe_mul_small(ax, Q->X, 3U);
-    fe_sub(rhs, x3, ax);
-    fe_add(rhs, rhs, P521_B);
+	if (publickey != NULL && privatekey != NULL && seed != NULL && table != NULL && table_count >= (97U * ECDSAP521_BASE_WINDOW_ELEMENTS))
+	{
+		qsc_sha512_compute(digest, seed, 66U);
+		qsc_memutils_copy(scalar + 2U, digest, sizeof(digest));
+		nonzero = UINT64_C(0);
 
-    return (fe521_cmp(y2, rhs) == 0);
+		for (i = 0U; i != sizeof(digest); ++i)
+		{
+			nonzero |= digest[i];
+		}
+
+		if (nonzero == UINT64_C(0))
+		{
+			scalar[65U] = 1U;
+		}
+
+		if (ecdsap521_publickey_derive(derived, scalar, table, table_count, false) == true)
+		{
+			qsc_memutils_copy(publickey, derived, sizeof(derived));
+			qsc_memutils_copy(privatekey, seed, 66U);
+			qsc_memutils_copy(privatekey + 66U, derived, sizeof(derived));
+			success = true;
+		}
+	}
+
+	qsc_memutils_secure_erase(digest, sizeof(digest));
+	qsc_memutils_secure_erase(scalar, sizeof(scalar));
+	qsc_memutils_secure_erase(derived, sizeof(derived));
+
+	return success;
 }
 
-static void rfc6979_bits2octets_p521(uint8_t out[66U], const uint8_t hash_be[64U])
+/*! \def ECDSAP521_SCALAR_MONT_P_DASH
+ * \brief Negative inverse of the P-521 subgroup order's low word modulo 2^64.
+ */
+#define ECDSAP521_SCALAR_MONT_P_DASH UINT64_C(0x1D2F5CCD79A995C7)
+
+/*! \brief P-521 subgroup-order scalar represented by nine Montgomery limbs.
+ * \details Values are reduced modulo n and multiplied by 2^576 modulo n.
+ */
+typedef struct
 {
-    fe521 z;
+	uint64_t limbs[ECDSAP521_LIMBS]; /*!< Little-endian Montgomery residue. */
+} ecdsap521_scalar;
 
-    sc_from_bytes_reduce(z, hash_be, 64U);
-    fe521_to_bytes(out, z);
+/*! \brief Montgomery constant R^2 modulo the P-521 subgroup order.
+ * \details Immutable constant used in the conversion to Montgomery form.
+ */
+static const uint64_t ECDSAP521_SCALAR_R2[ECDSAP521_LIMBS] = {UINT64_C(0x137CD04DCF15DD04), UINT64_C(0xF707BADCE5547EA3), UINT64_C(0x12A78D38794573FF),
+	UINT64_C(0xD3721EF557F75E06), UINT64_C(0xDD6E23D82E49C7DB), UINT64_C(0xCFF3D142B7756E3E), UINT64_C(0x5BCC6D61A8E567BC), UINT64_C(0x2D8E03D1492D0D45),
+	UINT64_C(0x000000000000003D)};
 
-    qsc_memutils_secure_erase(z, sizeof(z));
+/*! \brief Montgomery constant R^3 modulo the P-521 subgroup order.
+ * \details Immutable constant used for conversion of 18-limb scalars.
+ */
+static const uint64_t ECDSAP521_SCALAR_R3[ECDSAP521_LIMBS] = {UINT64_C(0xD35F2816760F23E2), UINT64_C(0x2767143C8C3184C1), UINT64_C(0xB268AD5BAC58D935),
+	UINT64_C(0x3F3DEB9609930765), UINT64_C(0x6D4AF6CB8E6B92EA), UINT64_C(0xDF0F66F966E917A0), UINT64_C(0xC99C43FC5F7321CE), UINT64_C(0xDB25B1117A1814FD),
+	UINT64_C(0x0000000000000097)};
+
+static inline void ecdsap521_scalar_accum_add(ecdsap521_accumulator* accum, uint64_t word)
+{
+#if !defined(QSC_ECDSAP521_FORCE_PORTABLE) && !defined(_M_ARM64EC) && !defined(_MSC_VER) && (defined(__GNUC__) || defined(__clang__)) &&                       \
+	(defined(__x86_64__) || defined(__amd64__))
+	__asm__("addq %[word],%[w0]\n\t"
+			"adcq $0,%[w1]\n\t"
+			"adcq $0,%[w2]"
+			: [w0] "+&r"(accum->w0), [w1] "+&r"(accum->w1), [w2] "+&r"(accum->w2)
+			: [word] "r"(word)
+			: "cc");
+#else
+	uint64_t carry;
+
+	carry = 0U;
+	accum->w0 = ecdsap521_word_add(accum->w0, word, &carry);
+	accum->w1 = ecdsap521_word_add(accum->w1, UINT64_C(0), &carry);
+	accum->w2 += carry;
+#endif
 }
 
-static void rfc6979_generate_k(fe521 k_out, const uint8_t priv_be[66U], const uint8_t h1_be[64U])
+static inline uint64_t ecdsap521_scalar_monty_step(ecdsap521_accumulator* accum)
 {
-    uint8_t V[64U];
-    uint8_t K[64U];
-    uint8_t bh[66U];
-    uint8_t blob[133U];
-    uint8_t T[66U];
-    uint8_t msg[197U];
-    uint8_t mac[64U];
-    uint32_t i;
+	uint64_t result;
 
-    rfc6979_bits2octets_p521(bh, h1_be);
+	result = accum->w0 * ECDSAP521_SCALAR_MONT_P_DASH;
+	ecdsap521_accum_mul(accum, result, ECDSAP521_N[0U]);
+	(void)ecdsap521_accum_extract(accum);
 
-    for (i = 0U; i < 64U; ++i)
-    {
-        V[i] = 0x01U;
-        K[i] = 0x00U;
-    }
+	return result;
+}
 
-    blob[0U] = 0x00U;
-    qsc_memutils_copy(blob + 1U, priv_be, 66U);
-    qsc_memutils_copy(blob + 67U, bh, 66U);
+static inline void ecdsap521_scalar_maybe_sub(uint64_t* output, uint64_t high, const uint64_t* x)
+{
+	uint64_t borrow;
+	uint64_t mask;
+	size_t i;
 
-    qsc_memutils_copy(msg, V, 64U);
-    qsc_memutils_copy(msg + 64U, blob, 133U);
-    qsc_hmac512_compute(mac, msg, sizeof(msg), K, sizeof(K));
-    qsc_memutils_copy(K, mac, 64U);
+	borrow = 0U;
 
-    qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
-    qsc_memutils_copy(V, mac, 64U);
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		output[i] = ecdsap521_word_sub(x[i], ECDSAP521_N[i], &borrow);
+	}
 
-    blob[0U] = 0x01U;
-    qsc_memutils_copy(msg, V, 64U);
-    qsc_memutils_copy(msg + 64U, blob, 133U);
-    qsc_hmac512_compute(mac, msg, sizeof(msg), K, sizeof(K));
-    qsc_memutils_copy(K, mac, 64U);
+	borrow = (uint64_t)((high - borrow) > high);
+	mask = ecdsap521_mask_barrier(UINT64_C(0) - borrow);
 
-    qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
-    qsc_memutils_copy(V, mac, 64U);
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		output[i] = (output[i] & ~mask) | (x[i] & mask);
+	}
+}
 
-    for (;;)
-    {
-        qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
-        qsc_memutils_copy(V, mac, 64U);
-        qsc_memutils_copy(T, V, 64U);
+static inline void ecdsap521_scalar_monty_redc(uint64_t* output, const uint64_t* z)
+{
+	ecdsap521_accumulator accum = {0U, 0U, 0U};
+	uint64_t workspace[ECDSAP521_LIMBS];
+	uint64_t high;
+	size_t i;
+	size_t j;
 
-        qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
-        qsc_memutils_copy(V, mac, 64U);
-        T[64U] = V[0U];
-        T[65U] = V[1U];
+	ecdsap521_scalar_accum_add(&accum, z[0U]);
+	workspace[0U] = ecdsap521_scalar_monty_step(&accum);
 
-        /*
+	for (i = 1U; i != ECDSAP521_LIMBS; ++i)
+	{
+		for (j = 0U; j != i; ++j)
+		{
+			ecdsap521_accum_mul(&accum, workspace[j], ECDSAP521_N[i - j]);
+		}
+
+		ecdsap521_scalar_accum_add(&accum, z[i]);
+		workspace[i] = ecdsap521_scalar_monty_step(&accum);
+	}
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		for (j = i + 1U; j != ECDSAP521_LIMBS; ++j)
+		{
+			ecdsap521_accum_mul(&accum, workspace[j], ECDSAP521_N[ECDSAP521_LIMBS + i - j]);
+		}
+
+		ecdsap521_scalar_accum_add(&accum, z[ECDSAP521_LIMBS + i]);
+		workspace[i] = ecdsap521_accum_extract(&accum);
+	}
+
+	ecdsap521_scalar_accum_add(&accum, z[ECDSAP521_WIDE_LIMBS - 1U]);
+	workspace[ECDSAP521_LIMBS - 1U] = ecdsap521_accum_extract(&accum);
+	high = ecdsap521_accum_extract(&accum);
+	ecdsap521_scalar_maybe_sub(output, high, workspace);
+}
+
+static inline ecdsap521_scalar ecdsap521_scalar_to_rep(const uint64_t* x)
+{
+	ecdsap521_scalar result;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+
+	ecdsap521_comba_mul9(z, x, ECDSAP521_SCALAR_R2);
+	ecdsap521_scalar_monty_redc(result.limbs, z);
+
+	return result;
+}
+
+static inline ecdsap521_scalar ecdsap521_scalar_wide_to_rep(const uint64_t* x)
+{
+	ecdsap521_scalar result;
+	uint64_t reduced[ECDSAP521_LIMBS];
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+
+	ecdsap521_scalar_monty_redc(reduced, x);
+	ecdsap521_comba_mul9(z, reduced, ECDSAP521_SCALAR_R3);
+	ecdsap521_scalar_monty_redc(result.limbs, z);
+
+	return result;
+}
+
+static inline void ecdsap521_scalar_from_rep(uint64_t* output, const ecdsap521_scalar* x)
+{
+	uint64_t z[ECDSAP521_WIDE_LIMBS] = { 0U };
+	size_t i;
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		z[i] = x->limbs[i];
+	}
+
+	ecdsap521_scalar_monty_redc(output, z);
+}
+
+static inline ecdsap521_scalar ecdsap521_scalar_add(const ecdsap521_scalar* a, const ecdsap521_scalar* b)
+{
+	ecdsap521_scalar result;
+	uint64_t t[ECDSAP521_LIMBS];
+	uint64_t carry;
+	size_t i;
+
+	carry = UINT64_C(0);
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		t[i] = ecdsap521_word_add(a->limbs[i], b->limbs[i], &carry);
+	}
+
+	ecdsap521_scalar_maybe_sub(result.limbs, carry, t);
+
+	return result;
+}
+
+static inline ecdsap521_scalar ecdsap521_scalar_mul(const ecdsap521_scalar* a, const ecdsap521_scalar* b)
+{
+	ecdsap521_scalar result;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+
+	ecdsap521_comba_mul9(z, a->limbs, b->limbs);
+	ecdsap521_scalar_monty_redc(result.limbs, z);
+
+	return result;
+}
+
+static inline ecdsap521_scalar* ecdsap521_scalar_mul_assign(ecdsap521_scalar* a, const ecdsap521_scalar* b)
+{
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+
+	ecdsap521_comba_mul9(z, a->limbs, b->limbs);
+	ecdsap521_scalar_monty_redc(a->limbs, z);
+
+	return a;
+}
+
+static inline ecdsap521_scalar ecdsap521_scalar_square(const ecdsap521_scalar* x)
+{
+	ecdsap521_scalar result;
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+
+	ecdsap521_comba_sqr9(z, x->limbs);
+	ecdsap521_scalar_monty_redc(result.limbs, z);
+
+	return result;
+}
+
+static inline void ecdsap521_scalar_square_n(ecdsap521_scalar* x, size_t n)
+{
+	uint64_t z[ECDSAP521_WIDE_LIMBS];
+	size_t i;
+
+	for (i = 0U; i != n; ++i)
+	{
+		ecdsap521_comba_sqr9(z, x->limbs);
+		ecdsap521_scalar_monty_redc(x->limbs, z);
+	}
+}
+
+static inline ecdsap521_scalar ecdsap521_scalar_invert(const ecdsap521_scalar* x)
+{
+	ecdsap521_scalar z;
+	ecdsap521_scalar t0;
+	ecdsap521_scalar t1;
+	ecdsap521_scalar t2;
+	ecdsap521_scalar t3;
+	ecdsap521_scalar t4;
+	ecdsap521_scalar t5;
+	ecdsap521_scalar t6;
+	ecdsap521_scalar t7;
+	ecdsap521_scalar t8;
+	ecdsap521_scalar t9;
+	ecdsap521_scalar t10;
+	ecdsap521_scalar t11;
+	ecdsap521_scalar t12;
+	ecdsap521_scalar t13;
+	ecdsap521_scalar t14;
+	ecdsap521_scalar t15;
+	ecdsap521_scalar t16;
+	ecdsap521_scalar t17;
+	ecdsap521_scalar t18;
+	ecdsap521_scalar t19;
+	ecdsap521_scalar t20;
+
+	t2 = ecdsap521_scalar_square(x);
+	t13 = ecdsap521_scalar_mul(&t2, x);
+	t4 = ecdsap521_scalar_mul(&t13, x);
+	z = ecdsap521_scalar_mul(&t13, &t4);
+	t5 = ecdsap521_scalar_mul(x, &z);
+	t16 = ecdsap521_scalar_mul(&t13, &t5);
+	t10 = ecdsap521_scalar_mul(&t16, &t2);
+	t18 = ecdsap521_scalar_mul(&t10, &t2);
+	t1 = ecdsap521_scalar_mul(&t18, &t2);
+	t12 = ecdsap521_scalar_mul(&t1, &t2);
+	t15 = ecdsap521_scalar_mul(&t12, &t4);
+	t0 = ecdsap521_scalar_mul(&t15, &t2);
+	t3 = ecdsap521_scalar_mul(&t0, &t2);
+	t6 = ecdsap521_scalar_mul(&t2, &t3);
+	t11 = ecdsap521_scalar_mul(&t5, &t6);
+	t14 = ecdsap521_scalar_mul(&t11, &t4);
+	t9 = ecdsap521_scalar_mul(&t14, &t4);
+	t17 = ecdsap521_scalar_mul(&t2, &t9);
+	t7 = ecdsap521_scalar_mul(&t17, &t4);
+	(void)ecdsap521_scalar_mul_assign(&t4, &t7);
+	t8 = ecdsap521_scalar_mul(&t2, &t4);
+	t5 = ecdsap521_scalar_mul(&t2, &t8);
+	(void)ecdsap521_scalar_mul_assign(&t2, &t5);
+	t19 = t2;
+	ecdsap521_scalar_square_n(&t19, 3U);
+	(void)ecdsap521_scalar_mul_assign(&t15, &t19);
+	t19 = ecdsap521_scalar_square(&t15);
+	t20 = t19;
+	ecdsap521_scalar_square_n(&t20, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t20, &t15);
+	ecdsap521_scalar_square_n(&t20, 10U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t20);
+	t20 = t19;
+	ecdsap521_scalar_square_n(&t20, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t20, &t15);
+	ecdsap521_scalar_square_n(&t20, 28U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t20);
+	t20 = t19;
+	ecdsap521_scalar_square_n(&t20, 63U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t20);
+	t20 = t19;
+	ecdsap521_scalar_square_n(&t20, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t20, &t15);
+	ecdsap521_scalar_square_n(&t20, 127U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t20);
+	(void)ecdsap521_scalar_mul_assign(&t19, x);
+	ecdsap521_scalar_square_n(&t19, 7U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t11);
+	ecdsap521_scalar_square_n(&t19, 5U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t13);
+	ecdsap521_scalar_square_n(&t19, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t10);
+	ecdsap521_scalar_square_n(&t19, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t18);
+	ecdsap521_scalar_square_n(&t19, 11U);
+	(void)ecdsap521_scalar_mul_assign(&t19, &t5);
+	ecdsap521_scalar_square_n(&t19, 4U);
+	(void)ecdsap521_scalar_mul_assign(&t18, &t19);
+	ecdsap521_scalar_square_n(&t18, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t17, &t18);
+	ecdsap521_scalar_square_n(&t17, 6U);
+	(void)ecdsap521_scalar_mul_assign(&t17, &t11);
+	ecdsap521_scalar_square_n(&t17, 5U);
+	(void)ecdsap521_scalar_mul_assign(&t17, &t12);
+	ecdsap521_scalar_square_n(&t17, 5U);
+	(void)ecdsap521_scalar_mul_assign(&t16, &t17);
+	ecdsap521_scalar_square_n(&t16, 10U);
+	(void)ecdsap521_scalar_mul_assign(&t15, &t16);
+	ecdsap521_scalar_square_n(&t15, 4U);
+	(void)ecdsap521_scalar_mul_assign(&t15, &t13);
+	ecdsap521_scalar_square_n(&t15, 15U);
+	(void)ecdsap521_scalar_mul_assign(&t14, &t15);
+	ecdsap521_scalar_square_n(&t14, 9U);
+	(void)ecdsap521_scalar_mul_assign(&t14, &t2);
+	ecdsap521_scalar_square_n(&t14, 2U);
+	(void)ecdsap521_scalar_mul_assign(&t13, &t14);
+	ecdsap521_scalar_square_n(&t13, 9U);
+	(void)ecdsap521_scalar_mul_assign(&t12, &t13);
+	ecdsap521_scalar_square_n(&t12, 7U);
+	(void)ecdsap521_scalar_mul_assign(&t11, &t12);
+	ecdsap521_scalar_square_n(&t11, 4U);
+	(void)ecdsap521_scalar_mul_assign(&t10, &t11);
+	ecdsap521_scalar_square_n(&t10, 12U);
+	(void)ecdsap521_scalar_mul_assign(&t10, &t5);
+	ecdsap521_scalar_square_n(&t10, 6U);
+	(void)ecdsap521_scalar_mul_assign(&t9, &t10);
+	ecdsap521_scalar_square_n(&t9, 7U);
+	(void)ecdsap521_scalar_mul_assign(&t8, &t9);
+	ecdsap521_scalar_square_n(&t8, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t8, &t4);
+	ecdsap521_scalar_square_n(&t8, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t8, &t1);
+	ecdsap521_scalar_square_n(&t8, 8U);
+	(void)ecdsap521_scalar_mul_assign(&t7, &t8);
+	ecdsap521_scalar_square_n(&t7, 5U);
+	(void)ecdsap521_scalar_mul_assign(&t7, &t1);
+	ecdsap521_scalar_square_n(&t7, 9U);
+	(void)ecdsap521_scalar_mul_assign(&t7, &t2);
+	ecdsap521_scalar_square_n(&t7, 6U);
+	(void)ecdsap521_scalar_mul_assign(&t6, &t7);
+	ecdsap521_scalar_square_n(&t6, 7U);
+	(void)ecdsap521_scalar_mul_assign(&t5, &t6);
+	ecdsap521_scalar_square_n(&t5, 7U);
+	(void)ecdsap521_scalar_mul_assign(&t4, &t5);
+	ecdsap521_scalar_square_n(&t4, 5U);
+	(void)ecdsap521_scalar_mul_assign(&t3, &t4);
+	ecdsap521_scalar_square_n(&t3, 4U);
+	(void)ecdsap521_scalar_mul_assign(&t3, &z);
+	ecdsap521_scalar_square_n(&t3, 9U);
+	(void)ecdsap521_scalar_mul_assign(&t2, &t3);
+	ecdsap521_scalar_square_n(&t2, 7U);
+	(void)ecdsap521_scalar_mul_assign(&t1, &t2);
+	ecdsap521_scalar_square_n(&t1, 5U);
+	(void)ecdsap521_scalar_mul_assign(&t1, &z);
+	ecdsap521_scalar_square_n(&t1, 9U);
+	(void)ecdsap521_scalar_mul_assign(&t0, &t1);
+	ecdsap521_scalar_square_n(&t0, 10U);
+	(void)ecdsap521_scalar_mul_assign(&z, &t0);
+
+	return z;
+}
+
+static inline bool ecdsap521_scalar_deserialize(ecdsap521_scalar* output, const uint8_t* input, size_t length)
+{
+	uint64_t words[ECDSAP521_LIMBS];
+	uint64_t borrow;
+	size_t i;
+	bool success;
+
+	success = false;
+
+	if ((output != NULL) && (input != NULL) && (length == 66U))
+	{
+		for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+		{
+			words[i] = qsc_intutils_be8to64(input + 58U - (i * 8U));
+		}
+
+		words[ECDSAP521_LIMBS - 1U] = ((uint64_t)input[0U] << 8U) | (uint64_t)input[1U];
+		borrow = UINT64_C(0);
+
+		for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+		{
+			(void)ecdsap521_word_sub(words[i], ECDSAP521_N[i], &borrow);
+		}
+
+		if (borrow != UINT64_C(0))
+		{
+			*output = ecdsap521_scalar_to_rep(words);
+			success = true;
+		}
+
+		qsc_memutils_secure_erase(words, sizeof(words));
+	}
+
+	return success;
+}
+
+static inline void ecdsap521_scalar_serialize(uint8_t* output, const ecdsap521_scalar* scalar)
+{
+	uint64_t words[ECDSAP521_LIMBS];
+	size_t i;
+
+	ecdsap521_scalar_from_rep(words, scalar);
+	output[0U] = (uint8_t)(words[ECDSAP521_LIMBS - 1U] >> 8U);
+	output[1U] = (uint8_t)words[ECDSAP521_LIMBS - 1U];
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		qsc_intutils_be64to8(output + 2U + (i * 8U), words[ECDSAP521_LIMBS - 2U - i]);
+	}
+
+	qsc_memutils_secure_erase(words, sizeof(words));
+}
+
+static inline bool ecdsap521_scalar_from_wide_bytes(ecdsap521_scalar* output, const uint8_t* input, size_t length)
+{
+	uint64_t wide[ECDSAP521_WIDE_LIMBS] = {UINT64_C(0)};
+	size_t i;
+	bool success;
+
+	success = false;
+
+	if ((output != NULL) && (length <= 132U) && ((input != NULL) || (length == 0U)))
+	{
+		for (i = 0U; i != length; ++i)
+		{
+			wide[i / 8U] |= (uint64_t)input[length - 1U - i] << ((i & 7U) * 8U);
+		}
+
+		*output = ecdsap521_scalar_wide_to_rep(wide);
+		success = true;
+		qsc_memutils_secure_erase(wide, sizeof(wide));
+	}
+
+	return success;
+}
+
+static inline uint64_t ecdsap521_scalar_is_zero(const ecdsap521_scalar* scalar)
+{
+	uint64_t accumulator;
+	size_t i;
+
+	accumulator = UINT64_C(0);
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		accumulator |= scalar->limbs[i];
+	}
+
+	return UINT64_C(1) ^ ((accumulator | (UINT64_C(0) - accumulator)) >> 63U);
+}
+
+static inline bool ecdsap521_ecdsa_sign_core(uint8_t* signature, const uint8_t* private_scalar, const uint8_t* nonce_scalar, const uint8_t* nonce_x, const uint8_t* digest, const uint8_t* blinder)
+{
+	ecdsap521_scalar d;
+	ecdsap521_scalar k;
+	ecdsap521_scalar b;
+	ecdsap521_scalar r;
+	ecdsap521_scalar s;
+	ecdsap521_scalar m;
+	ecdsap521_scalar k_inv;
+	ecdsap521_scalar xr_m;
+	ecdsap521_scalar t0;
+	ecdsap521_scalar t1;
+	uint8_t temporary[132U];
+	bool success;
+
+	success = false;
+
+	if ((signature != NULL) && (private_scalar != NULL) && (nonce_scalar != NULL) && (nonce_x != NULL) && (digest != NULL) && (blinder != NULL))
+	{
+		if (ecdsap521_scalar_deserialize(&d, private_scalar, 66U) && ecdsap521_scalar_deserialize(&k, nonce_scalar, 66U) &&
+			ecdsap521_scalar_deserialize(&b, blinder, 66U))
+		{
+			if ((ecdsap521_scalar_is_zero(&d) == UINT64_C(0)) && (ecdsap521_scalar_is_zero(&k) == UINT64_C(0)) && (ecdsap521_scalar_is_zero(&b) == UINT64_C(0)))
+			{
+				if (ecdsap521_scalar_from_wide_bytes(&r, nonce_x, 66U) && ecdsap521_scalar_from_wide_bytes(&m, digest, 64U))
+				{
+					if (ecdsap521_scalar_is_zero(&r) == UINT64_C(0))
+					{
+						t0 = ecdsap521_scalar_mul(&b, &k);
+						k_inv = ecdsap521_scalar_invert(&t0);
+						t0 = ecdsap521_scalar_mul(&d, &b);
+						t0 = ecdsap521_scalar_mul(&t0, &r);
+						t1 = ecdsap521_scalar_mul(&m, &b);
+						xr_m = ecdsap521_scalar_add(&t0, &t1);
+						s = ecdsap521_scalar_mul(&k_inv, &xr_m);
+
+						if (ecdsap521_scalar_is_zero(&s) == UINT64_C(0))
+						{
+							ecdsap521_scalar_serialize(temporary, &r);
+							ecdsap521_scalar_serialize(temporary + 66U, &s);
+							qsc_memutils_copy(signature, temporary, sizeof(temporary));
+							success = true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	qsc_memutils_secure_erase(&d, sizeof(d));
+	qsc_memutils_secure_erase(&k, sizeof(k));
+	qsc_memutils_secure_erase(&b, sizeof(b));
+	qsc_memutils_secure_erase(&r, sizeof(r));
+	qsc_memutils_secure_erase(&s, sizeof(s));
+	qsc_memutils_secure_erase(&m, sizeof(m));
+	qsc_memutils_secure_erase(&k_inv, sizeof(k_inv));
+	qsc_memutils_secure_erase(&xr_m, sizeof(xr_m));
+	qsc_memutils_secure_erase(&t0, sizeof(t0));
+	qsc_memutils_secure_erase(&t1, sizeof(t1));
+	qsc_memutils_secure_erase(temporary, sizeof(temporary));
+
+	return success;
+}
+
+/* The generator is defined with the public SEC 2 P-521 coordinates.
+ * No separate 32-bit scalar or field arithmetic backend is required. */
+
+/*! \brief Public SEC 2 P-521 generator x-coordinate in seventeen 32-bit limbs.
+ * \details Little-endian limbs; constant and shared read-only.
+ */
+static const uint32_t ECDSAP521_GX[17U] = {0xC2E5BD66U, 0xF97E7E31U, 0x856A429BU, 0x3348B3C1U, 0xA2FFA8DEU, 0xFE1DC127U, 0xEFE75928U, 0xA14B5E77U, 0x6B4D3DBAU,
+	0xF828AF60U, 0x053FB521U, 0x9C648139U, 0x2395B442U, 0x9E3ECB66U, 0x0404E9CDU, 0x858E06B7U, 0x000000C6U};
+
+/*! \brief Public SEC 2 P-521 generator y-coordinate in seventeen 32-bit limbs.
+ * \details Little-endian limbs; constant and shared read-only.
+ */
+static const uint32_t ECDSAP521_GY[17U] = {0x9FD16650U, 0x88BE9476U, 0xA272C240U, 0x353C7086U, 0x3FAD0761U, 0xC550B901U, 0x5EF42640U, 0x97EE7299U, 0x273E662CU,
+	0x17AFBD17U, 0x579B4468U, 0x98F54449U, 0x2C7D1BD9U, 0x5C8A5FB4U, 0x9A3BC004U, 0x39296A78U, 0x00000118U};
+
+static void ecdsap521_nonce_digest_encode(uint8_t out[66U], const uint8_t hash_be[64U])
+{
+	out[0U] = 0U;
+	out[1U] = 0U;
+	qsc_memutils_copy(out + 2U, hash_be, 64U);
+}
+
+static void ecdsap521_nonce_generate(uint8_t k_out[66U], const uint8_t priv_be[66U], const uint8_t h1_be[64U])
+{
+	uint8_t V[64U];
+	uint8_t K[64U];
+	uint8_t bh[66U];
+	uint8_t blob[133U];
+	uint8_t T[66U];
+	uint8_t msg[197U];
+	uint8_t mac[64U];
+	uint32_t i;
+
+	ecdsap521_nonce_digest_encode(bh, h1_be);
+
+	for (i = 0U; i < 64U; ++i)
+	{
+		V[i] = 0x01U;
+		K[i] = 0x00U;
+	}
+
+	blob[0U] = 0x00U;
+	qsc_memutils_copy(blob + 1U, priv_be, 66U);
+	qsc_memutils_copy(blob + 67U, bh, 66U);
+
+	qsc_memutils_copy(msg, V, 64U);
+	qsc_memutils_copy(msg + 64U, blob, 133U);
+	qsc_hmac512_compute(mac, msg, sizeof(msg), K, sizeof(K));
+	qsc_memutils_copy(K, mac, 64U);
+
+	qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
+	qsc_memutils_copy(V, mac, 64U);
+
+	blob[0U] = 0x01U;
+	qsc_memutils_copy(msg, V, 64U);
+	qsc_memutils_copy(msg + 64U, blob, 133U);
+	qsc_hmac512_compute(mac, msg, sizeof(msg), K, sizeof(K));
+	qsc_memutils_copy(K, mac, 64U);
+
+	qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
+	qsc_memutils_copy(V, mac, 64U);
+
+	for (;;)
+	{
+		qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
+		qsc_memutils_copy(V, mac, 64U);
+		qsc_memutils_copy(T, V, 64U);
+
+		qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
+		qsc_memutils_copy(V, mac, 64U);
+		T[64U] = V[0U];
+		T[65U] = V[1U];
+
+		/*
          * RFC 6979 bits2int(T) for qlen = 521 and tlen = 528
          * is the leftmost 521 bits of T, which is equivalent to
          * shifting the 528-bit candidate right by 7 bits.
          */
-        {
-            uint8_t t521[66U];
-            uint32_t carry;
+		{
+			uint8_t t521[66U];
+			uint32_t carry;
 
-            carry = 0U;
+			carry = 0U;
 
-            for (i = 0U; i < 66U; ++i)
-            {
-                uint32_t cur;
+			for (i = 0U; i < 66U; ++i)
+			{
+				uint32_t cur;
 
-                cur = T[i];
-                t521[i] = (uint8_t)((cur >> 7U) | carry);
-                carry = (cur & 0x7FU) << 1U;
-            }
+				cur = T[i];
+				t521[i] = (uint8_t)((cur >> 7U) | carry);
+				carry = (cur & 0x7FU) << 1U;
+			}
 
-            sc_from_bytes(k_out, t521);
-            qsc_memutils_secure_erase(t521, sizeof(t521));
-        }
+			qsc_memutils_copy(k_out, t521, sizeof(t521));
+			qsc_memutils_secure_erase(t521, sizeof(t521));
+		}
 
-        if ((fe521_is_zero(k_out) == 0U) && (fe521_cmp(k_out, P521_N) < 0))
-        {
-            break;
-        }
+		if (ecdsap521_scalar_valid(k_out) == true)
+		{
+			break;
+		}
 
-        msg[0U] = 0x00U;
-        qsc_memutils_copy(msg + 1U, V, 64U);
-        qsc_hmac512_compute(mac, msg, 65U, K, sizeof(K));
-        qsc_memutils_copy(K, mac, 64U);
+		qsc_memutils_copy(msg, V, 64U);
+		msg[64U] = 0x00U;
+		qsc_hmac512_compute(mac, msg, 65U, K, sizeof(K));
+		qsc_memutils_copy(K, mac, 64U);
 
-        qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
-        qsc_memutils_copy(V, mac, 64U);
-    }
+		qsc_hmac512_compute(mac, V, sizeof(V), K, sizeof(K));
+		qsc_memutils_copy(V, mac, 64U);
+	}
 
-    qsc_memutils_secure_erase(V, sizeof(V));
-    qsc_memutils_secure_erase(K, sizeof(K));
-    qsc_memutils_secure_erase(bh, sizeof(bh));
-    qsc_memutils_secure_erase(blob, sizeof(blob));
-    qsc_memutils_secure_erase(T, sizeof(T));
-    qsc_memutils_secure_erase(msg, sizeof(msg));
-    qsc_memutils_secure_erase(mac, sizeof(mac));
+	qsc_memutils_secure_erase(V, sizeof(V));
+	qsc_memutils_secure_erase(K, sizeof(K));
+	qsc_memutils_secure_erase(bh, sizeof(bh));
+	qsc_memutils_secure_erase(blob, sizeof(blob));
+	qsc_memutils_secure_erase(T, sizeof(T));
+	qsc_memutils_secure_erase(msg, sizeof(msg));
+	qsc_memutils_secure_erase(mac, sizeof(mac));
 }
 
-int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey)
-{
-    fe521 d;
-    p521_aff_t G;
-    p521_aff_t Q;
-    p521_jac_t Qj;
-    int32_t res;
-
-    QSC_ASSERT(publickey != NULL);
-    QSC_ASSERT(privatekey != NULL);
-
-    res = -1;
-
-    if (publickey != NULL && privatekey != NULL)
-    {
-        sc_from_bytes(d, privatekey);
-
-        if ((fe521_is_zero(d) == 0U) && (fe521_cmp(d, P521_N) < 0))
-        {
-            fe521_copy(G.X, P521_GX);
-            fe521_copy(G.Y, P521_GY);
-
-            p521_scalar_mult(&Qj, &G, d);
-
-            if (p521_jac_to_aff(&Q, &Qj) == true)
-            {
-                fe521_to_bytes(publickey, Q.X);
-                fe521_to_bytes(publickey + 66U, Q.Y);
-                res = 0;
-            }
-
-            qsc_memutils_secure_erase(&Q, sizeof(Q));
-            qsc_memutils_secure_erase(&Qj, sizeof(Qj));
-        }
-
-        qsc_memutils_secure_erase(d, sizeof(d));
-        qsc_memutils_secure_erase(&G, sizeof(G));
-    }
-
-    return res;
-}
-
-int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
-{
-    uint8_t dhash[64U];
-    uint8_t d_be[66U];
-    fe521 d;
-    int32_t res;
-
-    QSC_ASSERT(publickey != NULL);
-    QSC_ASSERT(privatekey != NULL);
-    QSC_ASSERT(seed != NULL);
-
-    res = -1;
-
-    if (publickey != NULL && privatekey != NULL && seed != NULL)
-    {
-        qsc_sha512_compute(dhash, seed, EC_NISTP521_SEED_SIZE);
-        sc_from_bytes_reduce(d, dhash, sizeof(dhash));
-
-        if (fe521_is_zero(d) != 0U)
-        {
-            fe521_one(d);
-        }
-
-        fe521_to_bytes(d_be, d);
-        res = qsc_p521_publickey_from_privatekey(publickey, d_be);
-
-        if (res == 0)
-        {
-            qsc_memutils_copy(privatekey, seed, EC_NISTP521_SEED_SIZE);
-            qsc_memutils_copy(privatekey + EC_NISTP521_SEED_SIZE, publickey, EC_NISTP521_PUBLICKEY_SIZE);
-        }
-
-        qsc_memutils_secure_erase(dhash, sizeof(dhash));
-        qsc_memutils_secure_erase(d_be, sizeof(d_be));
-        qsc_memutils_secure_erase(d, sizeof(d));
-    }
-
-    return res;
-}
-
-int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
-{
-    uint8_t hash[64U];
-    uint8_t dhash[64U];
-    uint8_t d_be[66U];
-    fe521 d;
-    fe521 e;
-    fe521 k;
-    fe521 r;
-    fe521 s;
-    fe521 tmp;
-    p521_aff_t G;
-    p521_aff_t kG;
-    p521_jac_t kG_jac;
-    int32_t res;
-
-    QSC_ASSERT(signedmsg != NULL);
-    QSC_ASSERT(smsglen != NULL);
-    QSC_ASSERT(message != NULL);
-    QSC_ASSERT(privatekey != NULL);
-
-    res = -1;
-
-    qsc_sha512_compute(hash, message, msglen);
-    qsc_sha512_compute(dhash, privatekey, EC_NISTP521_SEED_SIZE);
-    sc_from_bytes_reduce(d, dhash, sizeof(dhash));
-
-    if (fe521_is_zero(d) != 0U)
-    {
-        res = -2;
-    }
-    else if (fe521_cmp(d, P521_N) < 0)
-    {
-        sc_from_bytes_reduce(e, hash, sizeof(hash));
-        fe521_to_bytes(d_be, d);
-        rfc6979_generate_k(k, d_be, hash);
-
-        fe521_copy(G.X, P521_GX);
-        fe521_copy(G.Y, P521_GY);
-
-        p521_scalar_mult(&kG_jac, &G, k);
-        p521_jac_to_aff(&kG, &kG_jac);
-
-        fe521_copy(r, kG.X);
-        mod_n_cond_sub(r);
-
-        if (fe521_is_zero(r) == 0U)
-        {
-            sc_mul(tmp, r, d);
-            sc_add(tmp, tmp, e);
-            sc_inv(s, k);
-            sc_mul(s, s, tmp);
-
-            if (fe521_is_zero(s) == 0U)
-            {
-                fe521_to_bytes(signedmsg, r);
-                fe521_to_bytes(signedmsg + 66U, s);
-                qsc_memutils_copy(signedmsg + EC_NISTP521_SIGNATURE_SIZE, message, msglen);
-                *smsglen = EC_NISTP521_SIGNATURE_SIZE + msglen;
-                res = 0;
-            }
-        }
-    }
-
-    qsc_memutils_secure_erase(hash, sizeof(hash));
-    qsc_memutils_secure_erase(dhash, sizeof(dhash));
-    qsc_memutils_secure_erase(d_be, sizeof(d_be));
-    qsc_memutils_secure_erase(d, sizeof(d));
-    qsc_memutils_secure_erase(e, sizeof(e));
-    qsc_memutils_secure_erase(k, sizeof(k));
-    qsc_memutils_secure_erase(r, sizeof(r));
-    qsc_memutils_secure_erase(s, sizeof(s));
-    qsc_memutils_secure_erase(tmp, sizeof(tmp));
-    qsc_memutils_secure_erase(&G, sizeof(G));
-    qsc_memutils_secure_erase(&kG, sizeof(kG));
-    qsc_memutils_secure_erase(&kG_jac, sizeof(kG_jac));
-
-    if (res != 0 && smsglen != NULL)
-    {
-        *smsglen = 0U;
-    }
-
-    return res;
-}
-
-int32_t qsc_p521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
-{
-    uint8_t hash[64U];
-    uint8_t d_be[66U];
-    fe521 d;
-    fe521 e;
-    fe521 k;
-    fe521 r;
-    fe521 s;
-    fe521 tmp;
-    p521_aff_t G;
-    p521_aff_t kG;
-    p521_jac_t kG_jac;
-    int32_t res;
-
-    QSC_ASSERT(signedmsg != NULL);
-    QSC_ASSERT(smsglen != NULL);
-    QSC_ASSERT(message != NULL);
-    QSC_ASSERT(privatekey != NULL);
-
-    res = -1;
-
-    qsc_sha512_compute(hash, message, msglen);
-    sc_from_bytes(d, privatekey);
-
-    if (fe521_is_zero(d) != 0U)
-    {
-        res = -2;
-    }
-    else if (fe521_cmp(d, P521_N) < 0)
-    {
-        sc_from_bytes_reduce(e, hash, sizeof(hash));
-        fe521_to_bytes(d_be, d);
-        rfc6979_generate_k(k, d_be, hash);
-
-        fe521_copy(G.X, P521_GX);
-        fe521_copy(G.Y, P521_GY);
-
-        p521_scalar_mult(&kG_jac, &G, k);
-        p521_jac_to_aff(&kG, &kG_jac);
-
-        fe521_copy(r, kG.X);
-        mod_n_cond_sub(r);
-
-        if (fe521_is_zero(r) == 0U)
-        {
-            sc_mul(tmp, r, d);
-            sc_add(tmp, tmp, e);
-            sc_inv(s, k);
-            sc_mul(s, s, tmp);
-
-            if (fe521_is_zero(s) == 0U)
-            {
-                fe521_to_bytes(signedmsg, r);
-                fe521_to_bytes(signedmsg + 66U, s);
-                qsc_memutils_copy(signedmsg + EC_NISTP521_SIGNATURE_SIZE, message, msglen);
-                *smsglen = EC_NISTP521_SIGNATURE_SIZE + msglen;
-                res = 0;
-            }
-        }
-    }
-
-    qsc_memutils_secure_erase(hash, sizeof(hash));
-    qsc_memutils_secure_erase(d_be, sizeof(d_be));
-    qsc_memutils_secure_erase(d, sizeof(d));
-    qsc_memutils_secure_erase(e, sizeof(e));
-    qsc_memutils_secure_erase(k, sizeof(k));
-    qsc_memutils_secure_erase(r, sizeof(r));
-    qsc_memutils_secure_erase(s, sizeof(s));
-    qsc_memutils_secure_erase(tmp, sizeof(tmp));
-    qsc_memutils_secure_erase(&G, sizeof(G));
-    qsc_memutils_secure_erase(&kG, sizeof(kG));
-    qsc_memutils_secure_erase(&kG_jac, sizeof(kG_jac));
-
-    if (res != 0 && smsglen != NULL)
-    {
-        *smsglen = 0U;
-    }
-
-    return res;
-}
-
-/**
- * \brief Verify an ECDSA signature using the already normalized message digest.
- * \param msgout Output buffer containing the recovered signed message on success.
- * \param msglen Output recovered-message length.
- * \param signedmsg Signature-prefixed message input.
- * \param smsglen Length of signature-prefixed message.
- * \param publickey Raw affine public key in curve-specific format.
- * \param digest Curve-width, leftmost-bits ECDSA digest integer (big-endian).
- * \return True on valid signature; otherwise false.
- * \note Caller owns all buffers; this internal function does not allocate or synchronize.
+/*! \def ECDSAP521_GENERATOR_TABLE_CAPACITY
+ * \brief Number of affine entries in the immutable-after-initialization P-521 Booth table.
  */
-static bool p521_verify_digest_core(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest)
+#define ECDSAP521_GENERATOR_TABLE_CAPACITY 3104U
+
+/*! \brief Public fixed-generator table, populated only during guarded first use.
+ * \details State 2 publishes immutable entries via a sequentially consistent atomic store.
+ */
+static ecdsap521_affine_point ecdsap521_generator_table[ECDSAP521_GENERATOR_TABLE_CAPACITY];
+
+/*! \brief Atomic initialization state for the public generator table.
+ * \details 0=uninitialized; 1=building; 2=ready; 3=failed. Access only via QSC atomic functions.
+ */
+static volatile int32_t ecdsap521_generator_table_state = 0;
+
+static bool ecdsap521_generator_table_initialize(void)
 {
-    uint8_t hash[64U];
-    fe521 r;
-    fe521 s;
-    fe521 e;
-    fe521 w;
-    fe521 u1;
-    fe521 u2;
-    fe521 xr;
-    p521_aff_t Q;
-    p521_aff_t G_init;
-    p521_aff_t Rsum;
-    p521_jac_t J1;
-    p521_jac_t J2;
-    p521_jac_t Jsum;
-    bool res;
-    size_t mlen;
+	ecdsap521_projective_point* projective;
+	ecdsap521_field* scratch;
+	ecdsap521_affine_point generator;
+	int32_t state;
+	size_t i;
+	bool ready;
 
-    QSC_ASSERT(msgout != NULL);
-    QSC_ASSERT(msglen != NULL);
-    QSC_ASSERT(signedmsg != NULL);
-    QSC_ASSERT(publickey != NULL);
+	state = qsc_async_atomic_int32_load(&ecdsap521_generator_table_state);
+	ready = (state == 2);
 
-    res = false;
+	if (state == 0)
+	{
+		if (qsc_async_atomic_int32_compare_exchange(&ecdsap521_generator_table_state, 0, 1) == true)
+		{
+			projective = (ecdsap521_projective_point*)qsc_memutils_calloc(ECDSAP521_GENERATOR_TABLE_CAPACITY, sizeof(ecdsap521_projective_point));
+			scratch = (ecdsap521_field*)qsc_memutils_calloc(ECDSAP521_GENERATOR_TABLE_CAPACITY, sizeof(ecdsap521_field));
+			ready = false;
 
-    if ((digest != NULL) && (smsglen >= EC_NISTP521_SIGNATURE_SIZE))
-    {
-        mlen = smsglen - EC_NISTP521_SIGNATURE_SIZE;
+			if (projective != NULL && scratch != NULL)
+			{
+				for (i = 0U; i != 8U; ++i)
+				{
+					generator.x.limbs[i] = ((uint64_t)ECDSAP521_GX[2U * i + 1U] << 32U) | ECDSAP521_GX[2U * i];
+					generator.y.limbs[i] = ((uint64_t)ECDSAP521_GY[2U * i + 1U] << 32U) | ECDSAP521_GY[2U * i];
+				}
 
-        fe521_from_bytes(Q.X, publickey);
-        fe521_from_bytes(Q.Y, publickey + 66U);
+				generator.x.limbs[8U] = ECDSAP521_GX[16U];
+				generator.y.limbs[8U] = ECDSAP521_GY[16U];
+				ready = ecdsap521_basemul_booth_setup(ecdsap521_generator_table, ECDSAP521_GENERATOR_TABLE_CAPACITY, projective,
+					ECDSAP521_GENERATOR_TABLE_CAPACITY, scratch, ECDSAP521_GENERATOR_TABLE_CAPACITY, &generator, 577U);
+			}
 
-        if (fe521_cmp(Q.X, P521_P) < 0 && fe521_cmp(Q.Y, P521_P) < 0 && p521_point_is_on_curve(&Q) == true)
-        {
-            fe521_from_bytes(r, signedmsg);
-            fe521_from_bytes(s, signedmsg + 66U);
+			if (projective != NULL)
+			{
+				qsc_memutils_alloc_free(projective);
+			}
 
-            if (fe521_is_zero(r) == 0U && fe521_cmp(r, P521_N) < 0 && 
-                fe521_is_zero(s) == 0U && fe521_cmp(s, P521_N) < 0)
-            {
-                qsc_memutils_copy(hash, digest, 64U);
-                sc_from_bytes_reduce(e, hash, sizeof(hash));
-                sc_inv(w, s);
-                sc_mul(u1, e, w);
-                sc_mul(u2, r, w);
+			if (scratch != NULL)
+			{
+				qsc_memutils_alloc_free(scratch);
+			}
 
-                fe521_copy(G_init.X, P521_GX);
-                fe521_copy(G_init.Y, P521_GY);
+			qsc_async_atomic_int32_store(&ecdsap521_generator_table_state, ready == true ? 2 : 3);
+		}
+		else
+		{
+			state = 1;
+		}
+	}
 
-                p521_scalar_mult(&J1, &G_init, u1);
-                p521_scalar_mult(&J2, &Q, u2);
-                p521_add(&Jsum, &J1, &J2);
+	if (state == 1)
+	{
+		do
+		{
+			qsc_async_thread_sleep(1U);
+			state = qsc_async_atomic_int32_load(&ecdsap521_generator_table_state);
+		} while (state == 1);
 
-                if (p521_jac_to_aff(&Rsum, &Jsum) == true)
-                {
-                    fe521_copy(xr, Rsum.X);
+		ready = (state == 2);
+	}
 
-                    if (fe521_cmp(xr, P521_N) >= 0)
-                    {
-                        sc_sub(xr, xr, P521_N);
-                    }
-
-                    if (fe521_cmp(xr, r) == 0)
-                    {
-                        qsc_memutils_copy(msgout, signedmsg + EC_NISTP521_SIGNATURE_SIZE, mlen);
-                        *msglen = mlen;
-                        res = true;
-                    }
-                }
-            }
-        }
-
-        if (res == false)
-        {
-            *msglen = 0U;
-        }
-
-        qsc_memutils_secure_erase(hash, sizeof(hash));
-        qsc_memutils_secure_erase(r, sizeof(r));
-        qsc_memutils_secure_erase(s, sizeof(s));
-        qsc_memutils_secure_erase(e, sizeof(e));
-        qsc_memutils_secure_erase(w, sizeof(w));
-        qsc_memutils_secure_erase(u1, sizeof(u1));
-        qsc_memutils_secure_erase(u2, sizeof(u2));
-        qsc_memutils_secure_erase(xr, sizeof(xr));
-        qsc_memutils_secure_erase(&Q, sizeof(Q));
-        qsc_memutils_secure_erase(&G_init, sizeof(G_init));
-        qsc_memutils_secure_erase(&Rsum, sizeof(Rsum));
-        qsc_memutils_secure_erase(&J1, sizeof(J1));
-        qsc_memutils_secure_erase(&J2, sizeof(J2));
-        qsc_memutils_secure_erase(&Jsum, sizeof(Jsum));
-    }
-
-    return res;
+	return ready;
 }
 
-/**
- * \brief Verify an ECDSA signature with the curve's original fixed SHA-2 digest.
- * \param msgout Recovered message output with capacity for smsglen minus signature bytes.
- * \param msglen Receives recovered message length, or zero on failure.
- * \param signedmsg Signature-prefixed message input.
- * \param smsglen Length of signedmsg in bytes.
- * \param publickey Raw curve public key.
- * \return True on valid signature, false otherwise.
- * \note Caller owns all buffers. No state is retained between calls.
- */
-bool qsc_p521_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
+int32_t qsc_ecdsap521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey)
+{
+	int32_t result;
+
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(privatekey != NULL);
+
+	result = -1;
+
+	if (publickey != NULL && privatekey != NULL)
+	{
+		if (ecdsap521_scalar_valid(privatekey) == true)
+		{
+			if (ecdsap521_generator_table_initialize() == true)
+			{
+				if (ecdsap521_publickey_derive(publickey, privatekey, ecdsap521_generator_table, ECDSAP521_GENERATOR_TABLE_CAPACITY, false) == true)
+				{
+					result = 0;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+int32_t qsc_ecdsap521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
+{
+	int32_t result;
+
+	QSC_ASSERT(publickey != NULL);
+	QSC_ASSERT(privatekey != NULL);
+	QSC_ASSERT(seed != NULL);
+
+	result = -1;
+
+	if (publickey != NULL && privatekey != NULL && seed != NULL)
+	{
+		if (ecdsap521_generator_table_initialize() == true)
+		{
+			if (ecdsap521_keypair_derive(publickey, privatekey, seed, ecdsap521_generator_table, ECDSAP521_GENERATOR_TABLE_CAPACITY) == true)
+			{
+				result = 0;
+			}
+		}
+	}
+
+	return result;
+}
+
+static int32_t ecdsap521_sign_with_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* scalar)
 {
 	uint8_t digest[64U] = { 0U };
-	bool res;
+	uint8_t nbyt[66U] = { 0U };
+	uint8_t npt[66U] = { 0U };
+	uint8_t brnd[66U] = { 0U };
+	uint8_t bbyt[66U] = { 0U };
+	uint8_t signature[132U] = { 0U };
+	ecdsap521_scalar blinder = {{ 0U }};
+	int32_t result;
 
-	res = false;
+	result = -1;
 
-	if ((signedmsg != NULL) && (smsglen >= EC_NISTP521_SIGNATURE_SIZE))
+	if (smsglen != NULL)
 	{
-		qsc_sha512_compute(digest, signedmsg + EC_NISTP521_SIGNATURE_SIZE, smsglen - EC_NISTP521_SIGNATURE_SIZE);
-		res = p521_verify_digest_core(msgout, msglen, signedmsg, smsglen, publickey, digest);
+		*smsglen = 0U;
+	}
+
+	if ((signedmsg != NULL) && (smsglen != NULL) && (message != NULL) && (scalar != NULL) && (msglen <= SIZE_MAX - EC_NISTP521_SIGNATURE_SIZE))
+	{
+		if (ecdsap521_scalar_valid(scalar) == true)
+		{
+			if (ecdsap521_generator_table_initialize() == true)
+			{
+				qsc_sha512_compute(digest, message, msglen);
+				ecdsap521_nonce_generate(nbyt, scalar, digest);
+
+				if (ecdsap521_publickey_derive(npt, nbyt, ecdsap521_generator_table, ECDSAP521_GENERATOR_TABLE_CAPACITY, true) == true)
+				{
+					if (qsc_csp_generate(brnd, sizeof(brnd)) == true)
+					{
+						if (ecdsap521_scalar_from_wide_bytes(&blinder, brnd, sizeof(brnd)) == true)
+						{
+							if (ecdsap521_scalar_is_zero(&blinder) == UINT64_C(0))
+							{
+								ecdsap521_scalar_serialize(bbyt, &blinder);
+
+								if (ecdsap521_ecdsa_sign_core(signature, scalar, nbyt, npt, digest, bbyt) == true)
+								{
+									qsc_memutils_copy(signedmsg + EC_NISTP521_SIGNATURE_SIZE, message, msglen);
+									qsc_memutils_copy(signedmsg, signature, sizeof(signature));
+									*smsglen = msglen + EC_NISTP521_SIGNATURE_SIZE;
+									result = 0;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	qsc_memutils_secure_erase(digest, sizeof(digest));
-	return res;
+	qsc_memutils_secure_erase(nbyt, sizeof(nbyt));
+	qsc_memutils_secure_erase(npt, sizeof(npt));
+	qsc_memutils_secure_erase(brnd, sizeof(brnd));
+	qsc_memutils_secure_erase(bbyt, sizeof(bbyt));
+	qsc_memutils_secure_erase(signature, sizeof(signature));
+	qsc_memutils_secure_erase(&blinder, sizeof(blinder));
+
+	return result;
 }
 
-/**
- * \brief Verify ECDSA using a caller-computed SHA-256, SHA-384, or SHA-512 digest.
- * \param msgout Recovered message output with capacity for smsglen minus signature bytes.
- * \param msglen Receives recovered message length, or zero on failure.
- * \param signedmsg Signature-prefixed message input.
- * \param smsglen Length of signedmsg in bytes.
- * \param publickey Raw curve public key.
- * \param digest SHA-2 digest bytes in big-endian order.
- * \param digestlen Exactly 32, 48 or 64 bytes.
- * \return True only for a valid signature of the supplied prehashed digest.
- * \note The caller must authenticate the association between digest and message.
- * All buffers remain caller-owned. The function retains no shared mutable state.
- */
-bool qsc_p521_verify_prehashed(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest, size_t digestlen)
+int32_t qsc_ecdsap521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
 {
-	uint8_t scalarhash[64U] = { 0U };
-	bool res;
+	uint8_t digest[64U] = { 0U };
+	uint8_t scalar[66U] = { 0U };
+	uint64_t nonzero;
+	size_t i;
+	int32_t result;
 
-	res = false;
+	QSC_ASSERT(signedmsg != NULL);
+	QSC_ASSERT(smsglen != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(privatekey != NULL);
+
+	result = -1;
+
+	if (smsglen != NULL)
+	{
+		*smsglen = 0U;
+	}
+
+	if ((signedmsg != NULL) && (smsglen != NULL) && (message != NULL) && (privatekey != NULL) && (msglen <= SIZE_MAX - EC_NISTP521_SIGNATURE_SIZE))
+	{
+		qsc_sha512_compute(digest, privatekey, EC_NISTP521_SEED_SIZE);
+		qsc_memutils_copy(scalar + 2U, digest, sizeof(digest));
+		nonzero = UINT64_C(0);
+
+		for (i = 0U; i != sizeof(digest); ++i)
+		{
+			nonzero |= digest[i];
+		}
+
+		if (nonzero != UINT64_C(0))
+		{
+			result = ecdsap521_sign_with_scalar(signedmsg, smsglen, message, msglen, scalar);
+		}
+		else
+		{
+			result = -2;
+		}
+	}
+
+	qsc_memutils_secure_erase(digest, sizeof(digest));
+	qsc_memutils_secure_erase(scalar, sizeof(scalar));
+
+	return result;
+}
+
+int32_t qsc_ecdsap521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
+{
+	uint64_t nonzero;
+	size_t i;
+	int32_t result;
+
+	QSC_ASSERT(signedmsg != NULL);
+	QSC_ASSERT(smsglen != NULL);
+	QSC_ASSERT(message != NULL);
+	QSC_ASSERT(privatekey != NULL);
+
+	result = -1;
+
+	if (smsglen != NULL)
+	{
+		*smsglen = 0U;
+	}
+
+	if ((signedmsg != NULL) && (smsglen != NULL) && (message != NULL) && (privatekey != NULL))
+	{
+		nonzero = UINT64_C(0);
+
+		for (i = 0U; i != 66U; ++i)
+		{
+			nonzero |= privatekey[i];
+		}
+
+		if (nonzero != UINT64_C(0))
+		{
+			result = ecdsap521_sign_with_scalar(signedmsg, smsglen, message, msglen, privatekey);
+		}
+		else
+		{
+			result = -2;
+		}
+	}
+
+	return result;
+}
+
+/*! \def ECDSAP521_VERIFY_WNAF_WIDTH
+ * \brief Signed-window width for public-scalar verification multiplication.
+ */
+#define ECDSAP521_VERIFY_WNAF_WIDTH 5U
+
+/*! \def ECDSAP521_VERIFY_WNAF_DIGITS
+ * \brief Maximum wNAF digits, including the final recoding carry.
+ */
+#define ECDSAP521_VERIFY_WNAF_DIGITS 522U
+
+/*! \def ECDSAP521_VERIFY_ODD_MULTIPLES
+ * \brief Number of odd multiples required for width-five wNAF.
+ */
+#define ECDSAP521_VERIFY_ODD_MULTIPLES 8U
+
+/*! \struct ecdsap521_verify_wnaf_scalar
+ * \brief Width-five signed-digit representation of a public P-521 scalar.
+ * \details Digits and storage are caller-owned. Never use on secret inputs.
+ */
+typedef struct
+{
+	int8_t digits[ECDSAP521_VERIFY_WNAF_DIGITS]; /*!< Signed digits, low to high. */
+	size_t length;								 /*!< Last nonzero digit index plus one; zero for zero scalar. */
+} ecdsap521_verify_wnaf_scalar;
+
+static bool ecdsap521_verify_wnaf_recode(ecdsap521_verify_wnaf_scalar* result, const uint8_t* scalar)
+{
+	uint64_t words[ECDSAP521_LIMBS + 1U] = {UINT64_C(0)};
+	uint64_t carry;
+	uint64_t value;
+	size_t i;
+	size_t j;
+	size_t shift;
+	int32_t digit;
+	bool nonzero;
+	bool valid;
+
+	valid = false;
+
+	if (result != NULL && scalar != NULL && scalar[0U] <= 1U)
+	{
+		qsc_memutils_clear(result, sizeof(*result));
+
+		for (i = 0U; i != 66U; ++i)
+		{
+			words[i / 8U] |= (uint64_t)scalar[65U - i] << ((i & 7U) * 8U);
+		}
+
+		i = 0U;
+		valid = true;
+
+		for (;;)
+		{
+			nonzero = false;
+
+			for (j = 0U; j != ECDSAP521_LIMBS + 1U; ++j)
+			{
+				if (words[j] != UINT64_C(0))
+				{
+					nonzero = true;
+				}
+			}
+
+			if (nonzero == false)
+			{
+				break;
+			}
+
+			if (i >= ECDSAP521_VERIFY_WNAF_DIGITS)
+			{
+				valid = false;
+				break;
+			}
+
+			shift = 1U;
+
+			if ((words[0U] & UINT64_C(1)) != UINT64_C(0))
+			{
+				digit = (int32_t)(words[0U] & UINT64_C(31));
+
+				if (digit >= 16)
+				{
+					digit -= 32;
+					carry = (uint64_t)(-digit);
+
+					for (j = 0U; j != ECDSAP521_LIMBS + 1U && carry != UINT64_C(0); ++j)
+					{
+						value = words[j] + carry;
+						carry = (uint64_t)(value < words[j]);
+						words[j] = value;
+					}
+				}
+				else
+				{
+					carry = (uint64_t)digit;
+
+					for (j = 0U; j != ECDSAP521_LIMBS + 1U && carry != UINT64_C(0); ++j)
+					{
+						value = words[j] - carry;
+						carry = (uint64_t)(words[j] < carry);
+						words[j] = value;
+					}
+				}
+
+				result->digits[i] = (int8_t)digit;
+				result->length = i + 1U;
+				shift = ECDSAP521_VERIFY_WNAF_WIDTH;
+			}
+
+			for (j = 0U; j != ECDSAP521_LIMBS + 1U; ++j)
+			{
+				words[j] >>= shift;
+
+				if (j + 1U != ECDSAP521_LIMBS + 1U)
+				{
+					words[j] |= words[j + 1U] << (64U - shift);
+				}
+			}
+
+			i += shift;
+		}
+	}
+
+	qsc_memutils_secure_erase(words, sizeof(words));
+
+	return valid;
+}
+
+static bool ecdsap521_verify_odd_multiples_setup_vartime(ecdsap521_affine_point* table, const ecdsap521_affine_point* point)
+{
+	ecdsap521_projective_point multiples[ECDSAP521_VERIFY_ODD_MULTIPLES];
+	ecdsap521_projective_point doubled;
+	ecdsap521_field scratch[ECDSAP521_VERIFY_ODD_MULTIPLES];
+	size_t i;
+	bool ret;
+
+	ret = false;
+
+	if (table != NULL && point != NULL && ecdsap521_affine_is_identity(point) == UINT64_C(0))
+	{
+		multiples[0U] = ecdsap521_projective_from_affine(point);
+		doubled = ecdsap521_dbl_a_minus_3(&multiples[0U]);
+
+		for (i = 1U; i != ECDSAP521_VERIFY_ODD_MULTIPLES; ++i)
+		{
+			multiples[i] = ecdsap521_point_add(&multiples[i - 1U], &doubled);
+		}
+
+		ret = ecdsap521_to_affine_batch(table, multiples, ECDSAP521_VERIFY_ODD_MULTIPLES, scratch, ECDSAP521_VERIFY_ODD_MULTIPLES);
+	}
+
+	qsc_memutils_secure_erase(multiples, sizeof(multiples));
+	qsc_memutils_secure_erase(&doubled, sizeof(doubled));
+	qsc_memutils_secure_erase(scratch, sizeof(scratch));
+
+	return ret;
+}
+
+static inline ecdsap521_field ecdsap521_verify_div2(const ecdsap521_field* input)
+{
+	ecdsap521_field result;
+	uint64_t words[ECDSAP521_LIMBS];
+	uint64_t carry;
+	uint64_t mask;
+	size_t i;
+
+	mask = UINT64_C(0) - (input->limbs[0U] & UINT64_C(1));
+	carry = UINT64_C(0);
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		words[i] = ecdsap521_word_add(input->limbs[i], ECDSAP521_P[i] & mask, &carry);
+	}
+
+	for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+	{
+		result.limbs[i] = (words[i] >> 1U) | (words[i + 1U] << 63U);
+	}
+
+	result.limbs[ECDSAP521_LIMBS - 1U] = (words[ECDSAP521_LIMBS - 1U] >> 1U) | (carry << 63U);
+	qsc_memutils_secure_erase(words, sizeof(words));
+
+	return result;
+}
+
+static ecdsap521_projective_point ecdsap521_verify_dbl_n_a_minus_3(const ecdsap521_projective_point* point, size_t count)
+{
+	ecdsap521_projective_point result;
+	ecdsap521_field nx;
+	ecdsap521_field ny;
+	ecdsap521_field nz;
+	ecdsap521_field w;
+	ecdsap521_field ny2;
+	ecdsap521_field ny4;
+	ecdsap521_field t1;
+	ecdsap521_field t2;
+	ecdsap521_field tmp;
+
+	nx = point->x;
+	ny = ecdsap521_mul2(&point->y);
+	nz = point->z;
+	w = ecdsap521_square(&nz);
+	w = ecdsap521_square(&w);
+
+	while (count != 0U)
+	{
+		ny2 = ecdsap521_square(&ny);
+		ny4 = ecdsap521_square(&ny2);
+		t1 = ecdsap521_square(&nx);
+		t1 = ecdsap521_sub(&t1, &w);
+		t1 = ecdsap521_mul3(&t1);
+		t2 = ecdsap521_mul(&nx, &ny2);
+		nx = ecdsap521_square(&t1);
+		tmp = ecdsap521_mul2(&t2);
+		nx = ecdsap521_sub(&nx, &tmp);
+		nz = ecdsap521_mul(&nz, &ny);
+		tmp = ecdsap521_sub(&t2, &nx);
+		tmp = ecdsap521_mul2(&tmp);
+		ny = ecdsap521_mul(&t1, &tmp);
+		ny = ecdsap521_sub(&ny, &ny4);
+		--count;
+
+		if (count != 0U)
+		{
+			w = ecdsap521_mul(&w, &ny4);
+		}
+	}
+
+	result.x = nx;
+	result.y = ecdsap521_verify_div2(&ny);
+	result.z = nz;
+
+	return result;
+}
+
+static inline ecdsap521_projective_point ecdsap521_verify_public_point_add_or_sub_mixed(const ecdsap521_projective_point* a, const ecdsap521_affine_point* b, uint64_t sub)
+{
+	ecdsap521_projective_point result;
+	ecdsap521_affine_point selected;
+	ecdsap521_field by;
+	ecdsap521_field ngby;
+	ecdsap521_field z1z1;
+	ecdsap521_field u2;
+	ecdsap521_field s2;
+	ecdsap521_field h;
+	ecdsap521_field r;
+	ecdsap521_field hh;
+	ecdsap521_field hhh;
+	ecdsap521_field v;
+	ecdsap521_field t0;
+	ecdsap521_field t2;
+	ecdsap521_field t3;
+	ecdsap521_field t4;
+	ecdsap521_field t5;
+	ecdsap521_field t6;
+	ecdsap521_field t7;
+	ecdsap521_field x3;
+	ecdsap521_field y3;
+	ecdsap521_field z3;
+	uint64_t aidn;
+	uint64_t bidn;
+
+	aidn = ecdsap521_projective_is_identity(a);
+	bidn = ecdsap521_affine_is_identity(b);
+
+	if (bidn != UINT64_C(0))
+	{
+		result = *a;
+	}
+	else
+	{
+		by = b->y;
+		ngby = ecdsap521_negate(&by);
+
+		if ((sub & UINT64_C(1)) != UINT64_C(0))
+		{
+			by = ngby;
+		}
+
+		if (aidn != UINT64_C(0))
+		{
+			selected.x = b->x;
+			selected.y = by;
+			result = ecdsap521_projective_from_affine(&selected);
+		}
+		else
+		{
+			z1z1 = ecdsap521_square(&a->z);
+			u2 = ecdsap521_mul(&b->x, &z1z1);
+			t0 = ecdsap521_mul(&by, &a->z);
+			s2 = ecdsap521_mul(&t0, &z1z1);
+			h = ecdsap521_sub(&u2, &a->x);
+			r = ecdsap521_sub(&s2, &a->y);
+
+			if (ecdsap521_is_zero(&h) != UINT64_C(0))
+			{
+				if (ecdsap521_is_zero(&r) != UINT64_C(0))
+				{
+					result = ecdsap521_dbl_a_minus_3(a);
+				}
+				else
+				{
+					result = ecdsap521_projective_identity();
+				}
+			}
+			else
+			{
+				hh = ecdsap521_square(&h);
+				hhh = ecdsap521_mul(&h, &hh);
+				v = ecdsap521_mul(&a->x, &hh);
+				t2 = ecdsap521_square(&r);
+				t3 = ecdsap521_add(&v, &v);
+				t4 = ecdsap521_sub(&t2, &hhh);
+				x3 = ecdsap521_sub(&t4, &t3);
+				t5 = ecdsap521_sub(&v, &x3);
+				t6 = ecdsap521_mul(&a->y, &hhh);
+				t7 = ecdsap521_mul(&r, &t5);
+				y3 = ecdsap521_sub(&t7, &t6);
+				z3 = ecdsap521_mul(&a->z, &h);
+				result.x = x3;
+				result.y = y3;
+				result.z = z3;
+			}
+		}
+	}
+
+	return result;
+}
+
+static bool ecdsap521_verify_mul_vartime(ecdsap521_projective_point* result, const ecdsap521_affine_point* table, const uint8_t* scalar)
+{
+	ecdsap521_verify_wnaf_scalar naf;
+	ecdsap521_projective_point accum;
+	ecdsap521_field negy;
+	int32_t digit;
+	size_t i;
+	size_t magnitude;
+	size_t pending;
+	bool ret;
+
+	ret = false;
+
+	if (result != NULL && table != NULL && scalar != NULL)
+	{
+		ret = ecdsap521_verify_wnaf_recode(&naf, scalar);
+
+		if (ret == true)
+		{
+			accum = ecdsap521_projective_identity();
+			i = naf.length;
+
+			if (i != 0U)
+			{
+				--i;
+				digit = naf.digits[i];
+				magnitude = (size_t)((digit < 0) ? -digit : digit);
+				accum = ecdsap521_projective_from_affine(&table[(magnitude - 1U) / 2U]);
+
+				if (digit < 0)
+				{
+					negy = ecdsap521_negate(&accum.y);
+					accum.y = negy;
+				}
+
+				pending = 0U;
+
+				while (i != 0U)
+				{
+					--i;
+					++pending;
+					digit = naf.digits[i];
+
+					if (digit != 0)
+					{
+						accum = ecdsap521_verify_dbl_n_a_minus_3(&accum, pending);
+						pending = 0U;
+
+						magnitude = (size_t)((digit < 0) ? -digit : digit);
+						accum = ecdsap521_verify_public_point_add_or_sub_mixed(&accum, &table[(magnitude - 1U) / 2U], (uint64_t)(digit < 0));
+					}
+				}
+
+				if (pending != 0U)
+				{
+					accum = ecdsap521_verify_dbl_n_a_minus_3(&accum, pending);
+				}
+			}
+
+			*result = accum;
+		}
+	}
+
+	qsc_memutils_secure_erase(&naf, sizeof(naf));
+	qsc_memutils_secure_erase(&accum, sizeof(accum));
+	qsc_memutils_secure_erase(&negy, sizeof(negy));
+
+	return ret;
+}
+
+static bool ecdsap521_verify_basemul_booth_exec_vartime(ecdsap521_projective_point* result, const ecdsap521_affine_point* table, size_t table_count, const uint8_t* scalar)
+{
+	ecdsap521_booth_digit digit;
+	uint64_t raw;
+	size_t i;
+	size_t offset;
+	size_t windows;
+	bool ret;
+
+	ret = false;
+	windows = (521U + ECDSAP521_BASE_WINDOW_BITS) / ECDSAP521_BASE_WINDOW_BITS;
+
+	if (result != NULL && table != NULL && scalar != NULL && scalar[0U] <= 1U && table_count >= windows * ECDSAP521_BASE_WINDOW_ELEMENTS)
+	{
+		for (i = 0U; i != windows; ++i)
+		{
+			if (i == 0U)
+			{
+				raw = (ecdsap521_scalar_window7(scalar, 66U, 0U) & UINT64_C(63)) << 1U;
+			}
+			else
+			{
+				offset = ECDSAP521_BASE_WINDOW_BITS * i - 1U;
+				raw = ecdsap521_scalar_window7(scalar, 66U, offset);
+			}
+
+			digit = ecdsap521_booth_recode6(raw);
+
+			if (digit.digit != UINT64_C(0))
+			{
+				*result = ecdsap521_verify_public_point_add_or_sub_mixed(
+					result, &table[ECDSAP521_BASE_WINDOW_ELEMENTS * i + (size_t)digit.digit - 1U], digit.negative);
+			}
+		}
+
+		ret = true;
+	}
+
+	return ret;
+}
+
+static bool ecdsap521_verify_field_deserialize(ecdsap521_field* result, const uint8_t* bytes)
+{
+	size_t i;
+	bool valid;
+
+	valid = false;
+
+	if (result != NULL && bytes != NULL && bytes[0U] <= 1U)
+	{
+		for (i = 0U; i != ECDSAP521_LIMBS - 1U; ++i)
+		{
+			result->limbs[i] = qsc_intutils_be8to64(bytes + 58U - i * 8U);
+		}
+
+		result->limbs[8U] = ((uint64_t)bytes[0U] << 8U) | bytes[1U];
+		valid = true;
+
+		for (i = ECDSAP521_LIMBS; i != 0U; --i)
+		{
+			if (result->limbs[i - 1U] < ECDSAP521_P[i - 1U])
+			{
+				break;
+			}
+
+			if (result->limbs[i - 1U] > ECDSAP521_P[i - 1U])
+			{
+				valid = false;
+				break;
+			}
+
+			if (i == 1U)
+			{
+				valid = false;
+			}
+		}
+	}
+
+	return valid;
+}
+
+/*! \brief Canonical P-521 curve coefficient b in native field representation.
+ * \details Public immutable curve parameter from FIPS 186 secp521r1. Nine
+ * little-endian limbs, matching native P-521 field representation.
+ */
+static const ecdsap521_field ECDSAP521_VERIFY_CURVE_B = {
+	{UINT64_C(0xEF451FD46B503F00), UINT64_C(0x3573DF883D2C34F1), UINT64_C(0x1652C0BD3BB1BF07), UINT64_C(0x56193951EC7E937B), UINT64_C(0xB8B489918EF109E1),
+		UINT64_C(0xA2DA725B99B315F3), UINT64_C(0x929A21A0B68540EE), UINT64_C(0x953EB9618E1C9A1F), UINT64_C(0x0000000000000051)}};
+
+static bool ecdsap521_verify_point_on_curve(const ecdsap521_affine_point* public_point)
+{
+	ecdsap521_field y2;
+	ecdsap521_field x2;
+	ecdsap521_field x3;
+	ecdsap521_field thrx;
+	ecdsap521_field rhs;
+	ecdsap521_field difference;
+	bool valid;
+
+	valid = false;
+
+	if (public_point != NULL)
+	{
+		y2 = ecdsap521_square(&public_point->y);
+		x2 = ecdsap521_square(&public_point->x);
+		x3 = ecdsap521_mul(&x2, &public_point->x);
+		thrx = ecdsap521_mul3(&public_point->x);
+		rhs = ecdsap521_sub(&x3, &thrx);
+		rhs = ecdsap521_add(&rhs, &ECDSAP521_VERIFY_CURVE_B);
+		difference = ecdsap521_sub(&y2, &rhs);
+		valid = (ecdsap521_is_zero(&difference) != UINT64_C(0));
+	}
+
+	return valid;
+}
+
+static bool ecdsap521_verify_projective_x_mod_order_eq(const ecdsap521_projective_point* result, const uint8_t* rbytes)
+{
+	ecdsap521_field z2;
+	ecdsap521_field candidate;
+	ecdsap521_field product;
+	ecdsap521_field difference;
+	uint64_t carry;
+	uint64_t value;
+	size_t i;
+	bool ret;
+	bool less;
+
+	ret = false;
+
+	if (result != NULL && rbytes != NULL && ecdsap521_projective_is_identity(result) == UINT64_C(0))
+	{
+		if (ecdsap521_verify_field_deserialize(&candidate, rbytes) == true)
+		{
+			z2 = ecdsap521_square(&result->z);
+			product = ecdsap521_mul(&candidate, &z2);
+			difference = ecdsap521_sub(&product, &result->x);
+			ret = (ecdsap521_is_zero(&difference) != UINT64_C(0));
+
+			if (ret == false)
+			{
+				carry = UINT64_C(0);
+
+				for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+				{
+					value = ecdsap521_word_add(candidate.limbs[i], ECDSAP521_N[i], &carry);
+					candidate.limbs[i] = value;
+				}
+
+				less = (carry == UINT64_C(0));
+
+				if (less == true)
+				{
+					less = false;
+
+					for (i = ECDSAP521_LIMBS; i != 0U; --i)
+					{
+						if (candidate.limbs[i - 1U] < ECDSAP521_P[i - 1U])
+						{
+							less = true;
+							break;
+						}
+
+						if (candidate.limbs[i - 1U] > ECDSAP521_P[i - 1U])
+						{
+							break;
+						}
+					}
+				}
+
+				if (less == true)
+				{
+					product = ecdsap521_mul(&candidate, &z2);
+					difference = ecdsap521_sub(&product, &result->x);
+					ret = (ecdsap521_is_zero(&difference) != UINT64_C(0));
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
+static bool ecdsap521_verify_mul2_vartime_x_mod_order_eq(bool* result, const ecdsap521_affine_point* public_point, const uint8_t* u1, const uint8_t* u2, const uint8_t* rbytes, const ecdsap521_affine_point* fixed_table, size_t table_count)
+{
+	ecdsap521_affine_point odd_table[ECDSAP521_VERIFY_ODD_MULTIPLES];
+	ecdsap521_projective_point accum;
+	bool ret;
+
+	ret = false;
+
+	if (result != NULL)
+	{
+		*result = false;
+	}
+
+	if (result != NULL && public_point != NULL && u1 != NULL && u2 != NULL && rbytes != NULL && fixed_table != NULL)
+	{
+		if (ecdsap521_verify_odd_multiples_setup_vartime(odd_table, public_point) == true)
+		{
+			if (ecdsap521_verify_mul_vartime(&accum, odd_table, u2) == true)
+			{
+				if (ecdsap521_verify_basemul_booth_exec_vartime(&accum, fixed_table, table_count, u1) == true)
+				{
+					*result = ecdsap521_verify_projective_x_mod_order_eq(&accum, rbytes);
+					ret = true;
+				}
+			}
+		}
+	}
+
+	qsc_memutils_secure_erase(odd_table, sizeof(odd_table));
+	qsc_memutils_secure_erase(&accum, sizeof(accum));
+
+	return ret;
+}
+
+static int32_t ecdsap521_verify_public_cmp(const uint64_t a[ECDSAP521_LIMBS], const uint64_t b[ECDSAP521_LIMBS])
+{
+	int32_t result;
+	int32_t i;
+
+	result = 0;
+
+	for (i = (int32_t)ECDSAP521_LIMBS - 1; i >= 0; --i)
+	{
+		if (a[i] != b[i])
+		{
+			result = (a[i] > b[i]) ? 1 : -1;
+			break;
+		}
+	}
+
+	return result;
+}
+
+static void ecdsap521_verify_public_shift1(uint64_t value[ECDSAP521_LIMBS])
+{
+	uint64_t carry;
+	uint64_t next;
+	int32_t i;
+
+	carry = UINT64_C(0);
+
+	for (i = (int32_t)ECDSAP521_LIMBS - 1; i >= 0; --i)
+	{
+		next = value[i] << 63U;
+		value[i] = (value[i] >> 1U) | carry;
+		carry = next;
+	}
+}
+
+static void ecdsap521_verify_public_half(uint64_t value[ECDSAP521_LIMBS])
+{
+	uint64_t carry;
+	uint64_t sum;
+	size_t i;
+
+	if ((value[0U] & UINT64_C(1)) != UINT64_C(0))
+	{
+		carry = UINT64_C(0);
+
+		for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+		{
+			sum = value[i] + ECDSAP521_N[i];
+			value[i] = sum + carry;
+			carry = (uint64_t)(sum < ECDSAP521_N[i]) | (uint64_t)(value[i] < sum);
+		}
+	}
+
+	ecdsap521_verify_public_shift1(value);
+}
+
+static void ecdsap521_verify_public_submod(uint64_t value[ECDSAP521_LIMBS], const uint64_t other[ECDSAP521_LIMBS])
+{
+	uint64_t borrow;
+	uint64_t carry;
+	size_t i;
+
+	borrow = UINT64_C(0);
+
+	for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+	{
+		value[i] = ecdsap521_word_sub(value[i], other[i], &borrow);
+	}
+
+	if (borrow != UINT64_C(0))
+	{
+		carry = UINT64_C(0);
+
+		for (i = 0U; i != ECDSAP521_LIMBS; ++i)
+		{
+			value[i] = ecdsap521_word_add(value[i], ECDSAP521_N[i], &carry);
+		}
+	}
+}
+
+static bool ecdsap521_verify_scalar_invert_vartime(ecdsap521_scalar* output, const ecdsap521_scalar* input)
+{
+	uint64_t u[ECDSAP521_LIMBS];
+	uint64_t v[ECDSAP521_LIMBS];
+	uint64_t x1[ECDSAP521_LIMBS] = {UINT64_C(1)};
+	uint64_t x2[ECDSAP521_LIMBS] = {UINT64_C(0)};
+	const uint64_t one[ECDSAP521_LIMBS] = {UINT64_C(1)};
+	bool ret;
+
+	ret = false;
+
+	if (output != NULL && input != NULL)
+	{
+		ecdsap521_scalar_from_rep(u, input);
+		qsc_memutils_copy(v, ECDSAP521_N, sizeof(v));
+
+		if (ecdsap521_verify_public_cmp(u, x2) != 0)
+		{
+			while (ecdsap521_verify_public_cmp(u, one) != 0 && ecdsap521_verify_public_cmp(v, one) != 0)
+			{
+				while ((u[0U] & UINT64_C(1)) == UINT64_C(0))
+				{
+					ecdsap521_verify_public_shift1(u);
+					ecdsap521_verify_public_half(x1);
+				}
+
+				while ((v[0U] & UINT64_C(1)) == UINT64_C(0))
+				{
+					ecdsap521_verify_public_shift1(v);
+					ecdsap521_verify_public_half(x2);
+				}
+
+				if (ecdsap521_verify_public_cmp(u, v) >= 0)
+				{
+					ecdsap521_verify_public_submod(u, v);
+					ecdsap521_verify_public_submod(x1, x2);
+				}
+				else
+				{
+					ecdsap521_verify_public_submod(v, u);
+					ecdsap521_verify_public_submod(x2, x1);
+				}
+			}
+
+			if (ecdsap521_verify_public_cmp(u, one) == 0)
+			{
+				*output = ecdsap521_scalar_to_rep(x1);
+			}
+			else
+			{
+				*output = ecdsap521_scalar_to_rep(x2);
+			}
+
+			ret = true;
+		}
+	}
+
+	qsc_memutils_secure_erase(u, sizeof(u));
+	qsc_memutils_secure_erase(v, sizeof(v));
+	qsc_memutils_secure_erase(x1, sizeof(x1));
+	qsc_memutils_secure_erase(x2, sizeof(x2));
+
+	return ret;
+}
+
+bool qsc_ecdsap521_comb_verify_context_initialize(qsc_ecdsap521_comb_verify_context* context, const uint8_t* publickey)
+{
+	ecdsap521_affine_point q;
+	ecdsap521_projective_point points[63U];
+	ecdsap521_affine_point affine[63U];
+	ecdsap521_field scratch[63U];
+	size_t column;
+	size_t base;
+	size_t i;
+	bool ret;
+
+	ret = false;
+
+	if (context != NULL)
+	{
+		qsc_memutils_clear(context, sizeof(*context));
+
+		if (publickey != NULL && ecdsap521_verify_field_deserialize(&q.x, publickey) && ecdsap521_verify_field_deserialize(&q.y, publickey + 66U) &&
+			ecdsap521_verify_point_on_curve(&q))
+		{
+			points[0U] = ecdsap521_projective_from_affine(&q);
+
+			for (column = 1U; column < 6U; ++column)
+			{
+				base = (size_t)1U << column;
+				points[base - 1U] = ecdsap521_verify_dbl_n_a_minus_3(&points[(base / 2U) - 1U], 87U);
+
+				for (i = 1U; i < base; ++i)
+				{
+					points[base + i - 1U] = ecdsap521_point_add(&points[i - 1U], &points[base - 1U]);
+				}
+			}
+
+			ret = ecdsap521_to_affine_batch(affine, points, 63U, scratch, 63U);
+
+			if (ret)
+			{
+				for (i = 0U; i < 63U; ++i)
+				{
+					qsc_memutils_copy(context->comb[i][0U], affine[i].x.limbs, sizeof(affine[i].x.limbs));
+					qsc_memutils_copy(context->comb[i][1U], affine[i].y.limbs, sizeof(affine[i].y.limbs));
+				}
+
+				qsc_memutils_copy(context->publickey, publickey, EC_NISTP521_PUBLICKEY_SIZE);
+				context->initialized = true;
+			}
+		}
+	}
+
+	return ret;
+}
+
+static ecdsap521_projective_point ecdsap521_verify_comb_mul(const qsc_ecdsap521_comb_verify_context* context, const uint8_t scalar[66U])
+{
+	ecdsap521_projective_point accum = { 0 };
+	ecdsap521_affine_point selected;
+	size_t row;
+	size_t column;
+	size_t bit;
+	uint32_t index;
+
+	accum.y = ecdsap521_one();
+
+	for (row = 87U; row > 0U; --row)
+	{
+		accum = ecdsap521_dbl_a_minus_3(&accum);
+		index = 0U;
+
+		for (column = 0U; column < 6U; ++column)
+		{
+			bit = row - 1U + 87U * column;
+
+			if (bit < 521U)
+			{
+				index |= ((uint32_t)(scalar[65U - bit / 8U] >> (bit & 7U)) & 1U) << column;
+			}
+		}
+
+		if (index != 0U)
+		{
+			qsc_memutils_copy(selected.x.limbs, context->comb[index - 1U][0U], sizeof(selected.x.limbs));
+			qsc_memutils_copy(selected.y.limbs, context->comb[index - 1U][1U], sizeof(selected.y.limbs));
+			accum = ecdsap521_verify_public_point_add_or_sub_mixed(&accum, &selected, 0U);
+		}
+	}
+
+	return accum;
+}
+
+static bool ecdsap521_verify_digest(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest_bytes, size_t digest_length, const qsc_ecdsap521_comb_verify_context* context)
+{
+	ecdsap521_affine_point point = { 0 };
+	ecdsap521_projective_point accum;
+	ecdsap521_scalar r = {{ 0U }};
+	ecdsap521_scalar s = {{ 0U }};
+	ecdsap521_scalar digest = {{ 0U }};
+	ecdsap521_scalar inverse = {{ 0U }};
+	ecdsap521_scalar u1 = {{ 0U }};
+	ecdsap521_scalar u2 = {{ 0U }};
+	uint8_t u1by[66U] = { 0U };
+	uint8_t u2by[66U] = { 0U };
+	size_t mlen;
+	bool valid;
+	bool ret;
+
+	ret = false;
+	valid = false;
+	mlen = 0U;
 
 	if (msglen != NULL)
 	{
 		*msglen = 0U;
 	}
 
-	if ((msgout != NULL) && (msglen != NULL) && (signedmsg != NULL) && (publickey != NULL) &&
-		(smsglen >= EC_NISTP521_SIGNATURE_SIZE) && (digest != NULL) &&
-		((digestlen == 32U) || (digestlen == 48U) || (digestlen == 64U)))
+	if (msgout != NULL && msglen != NULL && signedmsg != NULL && (publickey != NULL || context != NULL) && digest_bytes != NULL &&
+		smsglen >= EC_NISTP521_SIGNATURE_SIZE && (digest_length == 32U || digest_length == 48U || digest_length == 64U))
 	{
-		qsc_memutils_copy(scalarhash + sizeof(scalarhash) - digestlen, digest, digestlen);
-		res = p521_verify_digest_core(msgout, msglen, signedmsg, smsglen, publickey, scalarhash);
+		mlen = smsglen - EC_NISTP521_SIGNATURE_SIZE;
+
+		if (context != NULL)
+		{
+			valid = context->initialized;
+		}
+		else
+		{
+			valid = ecdsap521_verify_field_deserialize(&point.x, publickey) && ecdsap521_verify_field_deserialize(&point.y, publickey + 66U) &&
+					ecdsap521_verify_point_on_curve(&point);
+		}
+
+		if (valid && ecdsap521_scalar_deserialize(&r, signedmsg, 66U) == true && ecdsap521_scalar_deserialize(&s, signedmsg + 66U, 66U) == true &&
+			ecdsap521_scalar_is_zero(&r) == UINT64_C(0) && ecdsap521_scalar_is_zero(&s) == UINT64_C(0) && ecdsap521_generator_table_initialize() == true)
+		{
+			if (ecdsap521_scalar_from_wide_bytes(&digest, digest_bytes, digest_length) == true && ecdsap521_verify_scalar_invert_vartime(&inverse, &s) == true)
+			{
+				u1 = ecdsap521_scalar_mul(&digest, &inverse);
+				u2 = ecdsap521_scalar_mul(&r, &inverse);
+				ecdsap521_scalar_serialize(u1by, &u1);
+				ecdsap521_scalar_serialize(u2by, &u2);
+
+				if (context != NULL)
+				{
+					accum = ecdsap521_verify_comb_mul(context, u2by);
+					valid = ecdsap521_verify_basemul_booth_exec_vartime(&accum, ecdsap521_generator_table, ECDSAP521_GENERATOR_TABLE_CAPACITY, u1by);
+					valid = valid && ecdsap521_verify_projective_x_mod_order_eq(&accum, signedmsg);
+				}
+ else if (!ecdsap521_verify_mul2_vartime_x_mod_order_eq(&valid, &point, u1by, u2by, signedmsg, ecdsap521_generator_table, ECDSAP521_GENERATOR_TABLE_CAPACITY))
+				{
+					valid = false;
+				}
+
+				if (valid)
+				{
+					qsc_memutils_copy(msgout, signedmsg + EC_NISTP521_SIGNATURE_SIZE, mlen);
+					*msglen = mlen;
+					ret = true;
+				}
+			}
+		}
 	}
 
-	qsc_memutils_secure_erase(scalarhash, sizeof(scalarhash));
-	return res;
+	qsc_memutils_secure_erase(&point, sizeof(point));
+	qsc_memutils_secure_erase(&r, sizeof(r));
+	qsc_memutils_secure_erase(&s, sizeof(s));
+	qsc_memutils_secure_erase(&digest, sizeof(digest));
+	qsc_memutils_secure_erase(&inverse, sizeof(inverse));
+	qsc_memutils_secure_erase(&u1, sizeof(u1));
+	qsc_memutils_secure_erase(&u2, sizeof(u2));
+	qsc_memutils_secure_erase(u1by, sizeof(u1by));
+	qsc_memutils_secure_erase(u2by, sizeof(u2by));
+
+	return ret;
 }
+
+bool qsc_ecdsap521_verify(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
+{
+	uint8_t dbyt[64U] = { 0U };
+	bool result;
+
+	result = false;
+
+	if (msglen != NULL)
+	{
+		*msglen = 0U;
+	}
+
+	if (msgout != NULL && msglen != NULL && signedmsg != NULL && publickey != NULL && smsglen >= EC_NISTP521_SIGNATURE_SIZE)
+	{
+		qsc_sha512_compute(dbyt, signedmsg + EC_NISTP521_SIGNATURE_SIZE, smsglen - EC_NISTP521_SIGNATURE_SIZE);
+		result = ecdsap521_verify_digest(msgout, msglen, signedmsg, smsglen, publickey, dbyt, sizeof(dbyt), NULL);
+	}
+
+	qsc_memutils_secure_erase(dbyt, sizeof(dbyt));
+
+	return result;
+}
+
+bool qsc_ecdsap521_verify_prehashed(uint8_t* msgout, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest, size_t digestlen)
+{
+	bool result;
+
+	result = ecdsap521_verify_digest(msgout, msglen, signedmsg, smsglen, publickey, digest, digestlen, NULL);
+
+	return result;
+}
+
+void qsc_ecdsap521_comb_verify_context_clear(qsc_ecdsap521_comb_verify_context* context)
+{
+	if (context != NULL)
+	{
+		qsc_memutils_clear(context, sizeof(*context));
+	}
+}
+
+bool qsc_ecdsap521_verify_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_ecdsap521_comb_verify_context* context)
+{
+	uint8_t digest[64U] = { 0U };
+	bool ret;
+
+	ret = false;
+
+	if (msglen != NULL)
+	{
+		*msglen = 0U;
+	}
+
+	if (message != NULL && msglen != NULL && signedmsg != NULL && context != NULL && smsglen >= EC_NISTP521_SIGNATURE_SIZE && context->initialized)
+	{
+		qsc_sha512_compute(digest, signedmsg + EC_NISTP521_SIGNATURE_SIZE, smsglen - EC_NISTP521_SIGNATURE_SIZE);
+		ret = qsc_ecdsap521_verify_prehashed_with_comb_context(message, msglen, signedmsg, smsglen, context, digest, sizeof(digest));
+	}
+
+	qsc_memutils_secure_erase(digest, sizeof(digest));
+
+	return ret;
+}
+
+bool qsc_ecdsap521_verify_prehashed_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_ecdsap521_comb_verify_context* context, const uint8_t* digest, size_t digestlen)
+{
+	bool ret;
+
+	ret = false;
+
+	if (msglen != NULL)
+	{
+		*msglen = 0U;
+	}
+
+	if (context != NULL && context->initialized)
+	{
+		ret = ecdsap521_verify_digest(message, msglen, signedmsg, smsglen, NULL, digest, digestlen, context);
+	}
+
+	return ret;
+}
+
+int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey)
+{
+	return qsc_ecdsap521_publickey_from_privatekey(publickey, privatekey);
+}
+
+int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed)
+{
+	return qsc_ecdsap521_keypair(publickey, privatekey, seed);
+}
+
+int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
+{
+	return qsc_ecdsap521_sign(signedmsg, smsglen, message, msglen, privatekey);
+}
+
+int32_t qsc_p521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey)
+{
+	return qsc_ecdsap521_sign_scalar(signedmsg, smsglen, message, msglen, privatekey);
+}
+
+bool qsc_p521_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey)
+{
+	return qsc_ecdsap521_verify(message, msglen, signedmsg, smsglen, publickey);
+}
+
+bool qsc_p521_verify_prehashed(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest, size_t digestlen)
+{
+	return qsc_ecdsap521_verify_prehashed(message, msglen, signedmsg, smsglen, publickey, digest, digestlen);
+}
+
+bool qsc_p521_comb_verify_context_initialize(qsc_p521_comb_verify_context* context, const uint8_t* publickey)
+{
+	return qsc_ecdsap521_comb_verify_context_initialize(context, publickey);
+}
+
+void qsc_p521_comb_verify_context_clear(qsc_p521_comb_verify_context* context)
+{
+	qsc_ecdsap521_comb_verify_context_clear(context);
+}
+
+bool qsc_p521_verify_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_p521_comb_verify_context* context)
+{
+	return qsc_ecdsap521_verify_with_comb_context(message, msglen, signedmsg, smsglen, context);
+}
+
+bool qsc_p521_verify_prehashed_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_p521_comb_verify_context* context, const uint8_t* digest, size_t digestlen)
+{
+	return qsc_ecdsap521_verify_prehashed_with_comb_context(message, msglen, signedmsg, smsglen, context, digest, digestlen);
+}
+
+/* \endcond NO_DOCUMENT */

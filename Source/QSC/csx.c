@@ -38,8 +38,19 @@ static const uint8_t csx_name[CSX_NAME_SIZE] =
 	0x43U, 0x53U, 0x58U, 0x35U, 0x31U, 0x32U, 0x2DU, 0x4BU, 0x4DU, 0x41U, 0x43U, 0x35U, 0x31U, 0x32U
 };
 
-
 #endif
+
+/**
+ * \brief Rotate one 64-bit CSX state word using fixed public shift amounts.
+ * \param value The 64-bit cipher word to rotate.
+ * \param shift The public nonzero rotation distance, strictly less than 64.
+ * \return The rotated state word.
+ * \note Fixed-work arithmetic without allocation or shared state.
+ */
+static inline uint64_t csx_rotl64(uint64_t value, size_t shift)
+{
+	return (value << shift) | (value >> (64U - shift));
+}
 
 static void csx_increment(qsc_csx_state* ctx)
 {
@@ -85,70 +96,70 @@ static void csx_permute_p1024c(const qsc_csx_state* ctx, uint8_t* output)
 	{
 		/* round n */
 		X0 += X4;
-		X12 = qsc_intutils_rotl64(X12 ^ X0, 38U);
+		X12 = csx_rotl64(X12 ^ X0, 38U);
 		X8 += X12;
-		X4 = qsc_intutils_rotl64(X4 ^ X8, 19U);
+		X4 = csx_rotl64(X4 ^ X8, 19U);
 		X0 += X4;
-		X12 = qsc_intutils_rotl64(X12 ^ X0, 10U);
+		X12 = csx_rotl64(X12 ^ X0, 10U);
 		X8 += X12;
-		X4 = qsc_intutils_rotl64(X4 ^ X8, 55U);
+		X4 = csx_rotl64(X4 ^ X8, 55U);
 		X1 += X5;
-		X13 = qsc_intutils_rotl64(X13 ^ X1, 33U);
+		X13 = csx_rotl64(X13 ^ X1, 33U);
 		X9 += X13;
-		X5 = qsc_intutils_rotl64(X5 ^ X9, 4U);
+		X5 = csx_rotl64(X5 ^ X9, 4U);
 		X1 += X5;
-		X13 = qsc_intutils_rotl64(X13 ^ X1, 51U);
+		X13 = csx_rotl64(X13 ^ X1, 51U);
 		X9 += X13;
-		X5 = qsc_intutils_rotl64(X5 ^ X9, 13U);
+		X5 = csx_rotl64(X5 ^ X9, 13U);
 		X2 += X6;
-		X14 = qsc_intutils_rotl64(X14 ^ X2, 16U);
+		X14 = csx_rotl64(X14 ^ X2, 16U);
 		X10 += X14;
-		X6 = qsc_intutils_rotl64(X6 ^ X10, 34U);
+		X6 = csx_rotl64(X6 ^ X10, 34U);
 		X2 += X6;
-		X14 = qsc_intutils_rotl64(X14 ^ X2, 56U);
+		X14 = csx_rotl64(X14 ^ X2, 56U);
 		X10 += X14;
-		X6 = qsc_intutils_rotl64(X6 ^ X10, 51U);
+		X6 = csx_rotl64(X6 ^ X10, 51U);
 		X3 += X7;
-		X15 = qsc_intutils_rotl64(X15 ^ X3, 4U);
+		X15 = csx_rotl64(X15 ^ X3, 4U);
 		X11 += X15;
-		X7 = qsc_intutils_rotl64(X7 ^ X11, 53U);
+		X7 = csx_rotl64(X7 ^ X11, 53U);
 		X3 += X7;
-		X15 = qsc_intutils_rotl64(X15 ^ X3, 42U);
+		X15 = csx_rotl64(X15 ^ X3, 42U);
 		X11 += X15;
-		X7 = qsc_intutils_rotl64(X7 ^ X11, 41U);
+		X7 = csx_rotl64(X7 ^ X11, 41U);
 		/* round n+1 */
 		X0 += X5;
-		X15 = qsc_intutils_rotl64(X15 ^ X0, 34U);
+		X15 = csx_rotl64(X15 ^ X0, 34U);
 		X10 += X15;
-		X5 = qsc_intutils_rotl64(X5 ^ X10, 41U);
+		X5 = csx_rotl64(X5 ^ X10, 41U);
 		X0 += X5;
-		X15 = qsc_intutils_rotl64(X15 ^ X0, 59U);
+		X15 = csx_rotl64(X15 ^ X0, 59U);
 		X10 += X15;
-		X5 = qsc_intutils_rotl64(X5 ^ X10, 17U);
+		X5 = csx_rotl64(X5 ^ X10, 17U);
 		X1 += X6;
-		X12 = qsc_intutils_rotl64(X12 ^ X1, 23U);
+		X12 = csx_rotl64(X12 ^ X1, 23U);
 		X11 += X12;
-		X6 = qsc_intutils_rotl64(X6 ^ X11, 31U);
+		X6 = csx_rotl64(X6 ^ X11, 31U);
 		X1 += X6;
-		X12 = qsc_intutils_rotl64(X12 ^ X1, 37U);
+		X12 = csx_rotl64(X12 ^ X1, 37U);
 		X11 += X12;
-		X6 = qsc_intutils_rotl64(X6 ^ X11, 20U);
+		X6 = csx_rotl64(X6 ^ X11, 20U);
 		X2 += X7;
-		X13 = qsc_intutils_rotl64(X13 ^ X2, 31U);
+		X13 = csx_rotl64(X13 ^ X2, 31U);
 		X8 += X13;
-		X7 = qsc_intutils_rotl64(X7 ^ X8, 44U);
+		X7 = csx_rotl64(X7 ^ X8, 44U);
 		X2 += X7;
-		X13 = qsc_intutils_rotl64(X13 ^ X2, 47U);
+		X13 = csx_rotl64(X13 ^ X2, 47U);
 		X8 += X13;
-		X7 = qsc_intutils_rotl64(X7 ^ X8, 46U);
+		X7 = csx_rotl64(X7 ^ X8, 46U);
 		X3 += X4;
-		X14 = qsc_intutils_rotl64(X14 ^ X3, 12U);
+		X14 = csx_rotl64(X14 ^ X3, 12U);
 		X9 += X14;
-		X4 = qsc_intutils_rotl64(X4 ^ X9, 47U);
+		X4 = csx_rotl64(X4 ^ X9, 47U);
 		X3 += X4;
-		X14 = qsc_intutils_rotl64(X14 ^ X3, 44U);
+		X14 = csx_rotl64(X14 ^ X3, 44U);
 		X9 += X14;
-		X4 = qsc_intutils_rotl64(X4 ^ X9, 30U);
+		X4 = csx_rotl64(X4 ^ X9, 30U);
 		ctr -= 2;
 	}
 
@@ -326,7 +337,6 @@ static void csx_permute_p2x1024_arm(const uint64x2_t* state, uint64x2_t* output)
 
 #endif
 
-
 #if defined(QSC_SYSTEM_HAS_AVX512)
 
 typedef struct
@@ -340,28 +350,18 @@ inline static __m512i csx_rotl512(const __m512i x, uint32_t shift)
 	return _mm512_or_si512(_mm512_slli_epi64(x, shift), _mm512_srli_epi64(x, 64U - shift));
 }
 
-/**
- * \brief Load eight unaligned little-endian message words.
- * \param v: The first word, with a 128-byte stride between words.
- * \return The words in CSX lane order.
- */
 static __m512i csx_load512(const uint8_t* v)
 {
+	/* load eight unaligned little-endian message words */
 	return _mm512_set_epi64((int64_t)qsc_intutils_le8to64(v), (int64_t)qsc_intutils_le8to64(v + 128U),
 		(int64_t)qsc_intutils_le8to64(v + 256U), (int64_t)qsc_intutils_le8to64(v + 384U),
 		(int64_t)qsc_intutils_le8to64(v + 512U), (int64_t)qsc_intutils_le8to64(v + 640U),
 		(int64_t)qsc_intutils_le8to64(v + 768U), (int64_t)qsc_intutils_le8to64(v + 896U));
 }
 
-/**
- * \brief Store eight lanes as little-endian words and erase the staging buffer.
- * \param output: The first output word, with a 128-byte stride.
- * \param x: The output lanes.
- */
-static void csx_store512(uint8_t* output, const __m512i x)
+static void csx_store512(uint8_t* output, const __m512i x, uint64_t tmp[8U])
 {
-	QSC_ALIGN(64) uint64_t tmp[8U];
-
+	/* store eight lanes as little-endian words in a reusable scratch buffer */
 	_mm512_storeu_si512((__m512i*)tmp, x);
 
 	qsc_intutils_le64to8(output, tmp[7U]);
@@ -372,7 +372,7 @@ static void csx_store512(uint8_t* output, const __m512i x)
 	qsc_intutils_le64to8((output + 640), tmp[2U]);
 	qsc_intutils_le64to8((output + 768), tmp[1U]);
 	qsc_intutils_le64to8((output + 896), tmp[0U]);
-	qsc_memutils_secure_erase(tmp, sizeof(tmp));
+	/* The borrowed scratch is erased by the caller after all SIMD blocks. */
 }
 
 static void csx_increment512(__m512i* low, __m512i* high, const __m512i increment)
@@ -524,7 +524,6 @@ static void csx_permute_p8x1024h(csx_avx512_state* ctx)
 	ctx->outw[15U] = _mm512_add_epi64(x15, ctx->state[15U]);
 }
 
-
 #elif defined(QSC_SYSTEM_HAS_AVX2)
 
 typedef struct
@@ -545,18 +544,16 @@ static __m256i csx_load256(const uint8_t* v)
 		(int64_t)qsc_intutils_le8to64(v + 256U), (int64_t)qsc_intutils_le8to64(v + 384U));
 }
 
-static void csx_store256(uint8_t* output, const __m256i x)
+static void csx_store256(uint8_t* output, const __m256i x, uint64_t tmp[4U])
 {
-	/* store four lanes as little-endian words and erase the staging buffer */
-	QSC_ALIGN(32) uint64_t tmp[4U];
-
+	/* store four little-endian lanes into the caller-owned staging buffer,
+	 * the borrowed scratch is erased by the caller after all SIMD blocks. */
 	_mm256_storeu_si256((__m256i*)tmp, x);
 
 	qsc_intutils_le64to8(output, tmp[3U]);
 	qsc_intutils_le64to8((output + 128U), tmp[2U]);
 	qsc_intutils_le64to8((output + 256U), tmp[1U]);
 	qsc_intutils_le64to8((output + 384U), tmp[0U]);
-	qsc_memutils_secure_erase(tmp, sizeof(tmp));
 }
 
 static void csx_increment256(__m256i* low, __m256i* high, const __m256i increment)
@@ -730,6 +727,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 	if (length >= CSX_AVX512_BLOCK)
 	{
 		csx_avx512_state ctxw;
+		QSC_ALIGN(64) uint64_t scratch[8U];
 		uint8_t ctrblk[64U];
 		__m512i tmpin;
 		size_t i;
@@ -752,7 +750,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 			{
 				tmpin = csx_load512((input + oft + (i * 8U)));
 				ctxw.outw[i] = _mm512_xor_si512(ctxw.outw[i], tmpin);
-				csx_store512((output + oft + (i * 8U)), ctxw.outw[i]);
+				csx_store512((output + oft + (i * 8U)), ctxw.outw[i], scratch);
 			}
 
 			csx_increment512(&ctxw.state[12U], &ctxw.state[13U], _mm512_set1_epi64(8));
@@ -765,6 +763,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 		ctx->state[12U] = qsc_intutils_le8to64((ctrblk + 56U));
 		_mm512_storeu_si512((__m512i*)ctrblk, ctxw.state[13U]);
 		ctx->state[13U] = qsc_intutils_le8to64((ctrblk + 56U));
+		qsc_memutils_secure_erase(scratch, sizeof(scratch));
 		qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
 		qsc_memutils_secure_erase(&tmpin, sizeof(tmpin));
 		qsc_memutils_secure_erase(ctrblk, sizeof(ctrblk));
@@ -775,6 +774,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 	if (length >= CSX_AVX2_BLOCK)
 	{
 		csx_avx256_state ctxw;
+		QSC_ALIGN(32) uint64_t scratch[4U];
 		uint8_t ctrblk[32U];
 		__m256i tmpin;
 		size_t i;
@@ -797,7 +797,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 			{
 				tmpin = csx_load256(input + oft + (i * 8U));
 				ctxw.outw[i] = _mm256_xor_si256(ctxw.outw[i], tmpin);
-				csx_store256((output + oft + (i * 8U)), ctxw.outw[i]);
+				csx_store256((output + oft + (i * 8U)), ctxw.outw[i], scratch);
 			}
 
 			csx_increment256(&ctxw.state[12U], &ctxw.state[13U], _mm256_set1_epi64x(4));
@@ -810,6 +810,7 @@ static void csx_transform(qsc_csx_state* ctx, uint8_t* output, const uint8_t* in
 		ctx->state[12U] = qsc_intutils_le8to64((ctrblk + 24U));
 		_mm256_storeu_si256((__m256i*)ctrblk, ctxw.state[13U]);
 		ctx->state[13U] = qsc_intutils_le8to64((ctrblk + 24U));
+		qsc_memutils_secure_erase(scratch, sizeof(scratch));
 		qsc_memutils_secure_erase(&ctxw, sizeof(ctxw));
 		qsc_memutils_secure_erase(&tmpin, sizeof(tmpin));
 		qsc_memutils_secure_erase(ctrblk, sizeof(ctrblk));
@@ -1063,15 +1064,9 @@ void qsc_csx_store_nonce(const qsc_csx_state* ctx, uint8_t nonce[QSC_CSX_NONCE_S
 	}
 }
 
-/**
- * \brief Check byte-count, tag-space, and nonce limits before transforming data.
- * \param ctx: The initialized cipher state.
- * \param length: The nonzero payload length.
- * \param finalize: True when a tag is read or written.
- * \return True if all counters and lengths remain representable.
- */
 static bool csx_transform_valid(const qsc_csx_state* ctx, size_t length, bool finalize)
 {
+	/* check byte-count, tag-space, and nonce limits before transforming data */
 	uint64_t blocks;
 	bool res;
 

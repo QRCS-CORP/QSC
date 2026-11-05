@@ -114,9 +114,6 @@
     <ClCompile Include="encoding_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="pbmac1_test.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="poly1305_test.c">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
@@ -281,6 +278,9 @@
     </ClCompile>
     <ClCompile Include="TLS\tls_stage37_parameter_variants_tests.c">
       <Filter>Source Files\Tests\TLS</Filter>
+    </ClCompile>
+    <ClCompile Include="pbmac1_test.c">
+      <Filter>Source Files\Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

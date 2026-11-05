@@ -663,6 +663,9 @@
     <ClInclude Include="falcon1024.h">
       <Filter>Header Files\Asymmetric\Signature\Falcon\Support</Filter>
     </ClInclude>
+    <ClInclude Include="ed448base.h">
+      <Filter>Header Files\Asymmetric\Cipher\EDDH\Support</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sha3.c">

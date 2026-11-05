@@ -49,6 +49,23 @@
  * Contact: contact@qrcscorp.ca
  */
 
+ /* Implementation acknowledgements:
+ *
+ * This QRCS implementation was developed with reference to the
+ * Botan cryptographic library, established cryptographic research,
+ * applicable NIST and IETF standards, and published algorithms.
+ *
+ * The implementation has been adapted and optimized for the QSC
+ * architecture, including its arithmetic engines, memory management,
+ * platform-specific acceleration, and security requirements.
+ *
+ * Reference: Botan Cryptographic Library
+ * https://botan.randombit.net/
+ *
+ * Copyright and licensing of third-party derived material remain
+ * subject to the applicable original license terms.
+ */
+
 #ifndef QSC_ED448_H
 #define QSC_ED448_H
 

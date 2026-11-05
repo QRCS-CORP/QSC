@@ -49,24 +49,34 @@
  * Contact: contact@qrcscorp.ca
  */
 
+ /* Implementation acknowledgements:
+ *
+ * This QRCS implementation was developed with reference to the
+ * Botan cryptographic library, established cryptographic research,
+ * applicable NIST and IETF standards, and published algorithms.
+ *
+ * The implementation has been adapted and optimized for the QSC
+ * architecture, including its arithmetic engines, memory management,
+ * platform-specific acceleration, and security requirements.
+ *
+ * Reference: Botan Cryptographic Library
+ * https://botan.randombit.net/
+ *
+ * Copyright and licensing of third-party derived material remain
+ * subject to the applicable original license terms.
+ */
+
 #ifndef QSC_ECDSAP521_H
 #define QSC_ECDSAP521_H
 
 #include "qsccommon.h"
-/** cond */
+
+ /* \cond NO_DOCUMENT */
+
 QSC_CPLUSPLUS_ENABLED_START
 
-/**
- * \details All API operations are synchronous and use caller-owned buffers.
- * Key material is not retained between calls. Callers must provide valid,
- * non-overlapping buffers sized according to this header, synchronize access
- * to buffers shared with other threads, and securely erase sensitive inputs.
- * Verification reports false on invalid signatures; other operations report
- * 0 on success and negative error codes on failure.
- */
-
 /*!
- * \file ecnistp521base.h
+ * \file ecdsap521.h
  * \brief Public API for NIST P-521 (secp521r1) ECDSA operations.
  *
  * \details
@@ -104,30 +114,32 @@ QSC_CPLUSPLUS_ENABLED_START
 */
 #define EC_NISTP521_SIGNATURE_SIZE 132U
 
-
-/**
+/*!
  * \brief Parameter-specific public sizes for ECDSA P-521.
  *
  * These constants are available independently of the default ECDSA facade selection.
  */
-/** \def QSC_ECDSAP521_SEED_SIZE
+/*! \def QSC_ECDSAP521_SEED_SIZE
  * \brief ECDSA P-521 seed size in bytes.
  */
 #define QSC_ECDSAP521_SEED_SIZE EC_NISTP521_SEED_SIZE
-/** \def QSC_ECDSAP521_PUBLICKEY_SIZE
+
+/*! \def QSC_ECDSAP521_PUBLICKEY_SIZE
  * \brief ECDSA P-521 publickey size in bytes.
  */
 #define QSC_ECDSAP521_PUBLICKEY_SIZE EC_NISTP521_PUBLICKEY_SIZE
-/** \def QSC_ECDSAP521_PRIVATEKEY_SIZE
+
+/*! \def QSC_ECDSAP521_PRIVATEKEY_SIZE
  * \brief ECDSA P-521 privatekey size in bytes.
  */
 #define QSC_ECDSAP521_PRIVATEKEY_SIZE EC_NISTP521_PRIVATEKEY_SIZE
-/** \def QSC_ECDSAP521_SIGNATURE_SIZE
+
+/*! \def QSC_ECDSAP521_SIGNATURE_SIZE
  * \brief ECDSA P-521 signature size in bytes.
  */
 #define QSC_ECDSAP521_SIGNATURE_SIZE EC_NISTP521_SIGNATURE_SIZE
 
-/**
+/*!
  * \brief Derive a P-521 public key from a raw private scalar.
  *
  * \details
@@ -139,9 +151,9 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
-QSC_EXPORT_API int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
+QSC_EXPORT_API int32_t qsc_ecdsap521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
 
-/**
+/*!
  * \brief Generate a P-521 public/private key pair from a 66-byte seed.
  *
  * \details
@@ -155,9 +167,9 @@ QSC_EXPORT_API int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, co
  *
  * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
-QSC_EXPORT_API int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+QSC_EXPORT_API int32_t qsc_ecdsap521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
 
-/**
+/*!
  * \brief Sign a message using a P-521 private key.
  *
  * \details
@@ -173,9 +185,9 @@ QSC_EXPORT_API int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey,
  *
  * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
-QSC_EXPORT_API int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+QSC_EXPORT_API int32_t qsc_ecdsap521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
-/**
+/*!
  * \brief Sign a message using a raw P-521 private scalar.
  *
  * \details
@@ -191,9 +203,9 @@ QSC_EXPORT_API int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const 
  *
  * \return [int32_t] Returns 0 on success, or a negative error code on failure.
  */
-QSC_EXPORT_API int32_t qsc_p521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+QSC_EXPORT_API int32_t qsc_ecdsap521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
 
-/**
+/*!
  * \brief Verify a P-521 signed message and recover the message bytes.
  *
  * \param message: [uint8_t*] Output message buffer.
@@ -204,9 +216,9 @@ QSC_EXPORT_API int32_t qsc_p521_sign_scalar(uint8_t* signedmsg, size_t* smsglen,
  *
  * \return [bool] Returns true on success, false on failure.
  */
-QSC_EXPORT_API bool qsc_p521_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+QSC_EXPORT_API bool qsc_ecdsap521_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
-/**
+/*!
  * \brief Verify a signature against a separately computed SHA-256, SHA-384 or SHA-512 digest.
  * \param message Receives the recovered message on success (smsglen minus signature bytes capacity).
  * \param msglen Receives recovered message length; zero on verification failure.
@@ -221,8 +233,125 @@ QSC_EXPORT_API bool qsc_p521_verify(uint8_t* message, size_t* msglen, const uint
  * All buffers remain caller-owned, must not overlap, and do not transfer ownership.
  * This operation does not modify shared state and is thread-safe for independent buffers.
  */
+QSC_EXPORT_API bool qsc_ecdsap521_verify_prehashed(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest, size_t digestlen);
+
+/*! \brief Caller-owned reusable six-column P-521 public-key comb table.
+ * \details Initialize before use; zero-initialization creates an inactive context.
+ * Entry m-1 stores (sum of bit j of m times 2^(87*j))*Q, for 1 <= m <= 63.
+ * Internal coordinates must not be modified, serialized or supplied by a peer.
+ * An initialized context may be shared by concurrent readers. Initialization,
+ * clearing and replacement require exclusive access. Contains no private data.
+ * Existing verification contexts and entry points remain ABI-compatible.
+ */
+typedef struct
+{
+	/*! \brief Affine comb points; internal field representation, least-significant word first. */
+	uint64_t comb[63U][2U][9U];
+	/*! \brief Validated raw big-endian public key, owned by this context. */
+	uint8_t publickey[EC_NISTP521_PUBLICKEY_SIZE];
+	/*! \brief True only after successful initialization. */
+	bool initialized;
+} qsc_ecdsap521_comb_verify_context;
+
+/*! \brief Validate a P-521 public key and construct its reusable comb table.
+ * \param context Caller-owned destination; exclusive access required.
+ * \param publickey Exactly EC_NISTP521_PUBLICKEY_SIZE readable bytes, disjoint from context.
+ * \return True on success; false for NULL or noncanonical/off-curve/identity keys.
+ * \details Clears context on failure when non-NULL. No retained pointers or heap
+ * allocation; thread-safe with distinct contexts. Initialization uses public data.
+ */
+QSC_EXPORT_API bool qsc_ecdsap521_comb_verify_context_initialize(qsc_ecdsap521_comb_verify_context* context, const uint8_t* publickey);
+
+/*! \brief Clear and invalidate a reusable comb context.
+ * \param context Caller-owned context; NULL is allowed. Exclusive access required.
+ */
+QSC_EXPORT_API void qsc_ecdsap521_comb_verify_context_clear(qsc_ecdsap521_comb_verify_context* context);
+
+/*! \brief Verify and recover a signed message using a reusable public-key comb.
+ * \param message Caller-owned output, capacity smsglen minus the signature size; non-NULL.
+ * \param msglen Caller-owned length output; zero on failure when non-NULL.
+ * \param signedmsg Read-only raw r||s followed by the message.
+ * \param smsglen Total signed-message size, at least EC_NISTP521_SIGNATURE_SIZE.
+ * \param context Initialized, immutable context from the matching initializer.
+ * \return True only for a valid signature; false on invalid arguments or signature.
+ * \details Uses the curve's standard SHA-2 digest. All buffers must be disjoint.
+ * Output contents are unspecified on failure. Public-input verification only;
+ * never supply secret scalars. Thread-safe with independent output buffers.
+ */
+QSC_EXPORT_API bool qsc_ecdsap521_verify_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_ecdsap521_comb_verify_context* context);
+
+/*! \brief Verify with a reusable comb and an independently supplied SHA-2 digest.
+ * \param message Caller-owned output, capacity smsglen minus the signature size; non-NULL.
+ * \param msglen Caller-owned length output; zero on failure when non-NULL.
+ * \param signedmsg Read-only raw r||s followed by the associated message.
+ * \param smsglen Total signed-message size, at least EC_NISTP521_SIGNATURE_SIZE.
+ * \param context Initialized, immutable context from the matching initializer.
+ * \param digest Caller-owned SHA-256, SHA-384 or SHA-512 digest.
+ * \param digestlen Exactly 32, 48 or 64 bytes; normalized as in the prehashed API.
+ * \return True only if the signature matches the supplied digest.
+ * \details Does not hash or bind the appended message to the digest; the caller
+ * must establish that relationship. Buffers must be disjoint; output contents
+ * are unspecified on failure. Public-input verification only. Concurrent readers
+ * may share context with independent writable buffers. No input is retained.
+ */
+QSC_EXPORT_API bool qsc_ecdsap521_verify_prehashed_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_ecdsap521_comb_verify_context* context, const uint8_t* digest, size_t digestlen);
+
+/*! \brief Compatibility declarations for the previous curve API names. */
+/*! \brief Compatibility name for qsc_ecdsap521_comb_verify_context; identical storage and ownership. */
+typedef qsc_ecdsap521_comb_verify_context qsc_p521_comb_verify_context;
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_publickey_from_privatekey.
+ * \copydetails qsc_ecdsap521_publickey_from_privatekey
+ */
+QSC_EXPORT_API int32_t qsc_p521_publickey_from_privatekey(uint8_t* publickey, const uint8_t* privatekey);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_keypair.
+ * \copydetails qsc_ecdsap521_keypair
+ */
+QSC_EXPORT_API int32_t qsc_p521_keypair(uint8_t* publickey, uint8_t* privatekey, const uint8_t* seed);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_sign.
+ * \copydetails qsc_ecdsap521_sign
+ */
+QSC_EXPORT_API int32_t qsc_p521_sign(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_sign_scalar.
+ * \copydetails qsc_ecdsap521_sign_scalar
+ */
+QSC_EXPORT_API int32_t qsc_p521_sign_scalar(uint8_t* signedmsg, size_t* smsglen, const uint8_t* message, size_t msglen, const uint8_t* privatekey);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_verify.
+ * \copydetails qsc_ecdsap521_verify
+ */
+QSC_EXPORT_API bool qsc_p521_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_verify_prehashed.
+ * \copydetails qsc_ecdsap521_verify_prehashed
+ */
 QSC_EXPORT_API bool qsc_p521_verify_prehashed(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey, const uint8_t* digest, size_t digestlen);
 
+/*! \brief Compatibility entry point for qsc_ecdsap521_comb_verify_context_initialize.
+ * \copydetails qsc_ecdsap521_comb_verify_context_initialize
+ */
+QSC_EXPORT_API bool qsc_p521_comb_verify_context_initialize(qsc_p521_comb_verify_context* context, const uint8_t* publickey);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_comb_verify_context_clear.
+ * \copydetails qsc_ecdsap521_comb_verify_context_clear
+ */
+QSC_EXPORT_API void qsc_p521_comb_verify_context_clear(qsc_p521_comb_verify_context* context);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_verify_with_comb_context.
+ * \copydetails qsc_ecdsap521_verify_with_comb_context
+ */
+QSC_EXPORT_API bool qsc_p521_verify_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_p521_comb_verify_context* context);
+
+/*! \brief Compatibility entry point for qsc_ecdsap521_verify_prehashed_with_comb_context.
+ * \copydetails qsc_ecdsap521_verify_prehashed_with_comb_context
+ */
+QSC_EXPORT_API bool qsc_p521_verify_prehashed_with_comb_context(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const qsc_p521_comb_verify_context* context, const uint8_t* digest, size_t digestlen);
+
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond NO_DOCUMENT */
 
 #endif

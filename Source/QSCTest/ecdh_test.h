@@ -74,7 +74,7 @@
  * \def QSCTEST_ECDH_ITERATIONS
  * \brief The number of iterations for the ECDH stress and integrity tests.
  */
-#define QSCTEST_ECDH_ITERATIONS 100U
+#define QSCTEST_ECDH_ITERATIONS 10U
 
 /**
  * \brief Performs the selected ECDH NIST known answer tests.

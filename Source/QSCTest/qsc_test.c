@@ -180,7 +180,7 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
-	
+	qsctest_ecdh_run();
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
@@ -367,22 +367,26 @@ int32_t main(void)
 			qsctest_sphincsplus_run();
 			qsctest_print_line("");
 			
-			qsctest_print_section("04.06", "EDDH KEY AGREEMENT QUALIFICATION");
+			qsctest_print_section("04.06", "ECDH KEY AGREEMENT QUALIFICATION");
+			qsctest_ecdh_run();
+			qsctest_print_line("");
+
+			qsctest_print_section("04.07", "EDDH KEY AGREEMENT QUALIFICATION");
 			qsctest_eddh_run();
 			qsctest_print_line("");
 
-			qsctest_print_section("04.07", "HQC");
+			qsctest_print_section("04.08", "HQC");
 			qsctest_hqc_run();
 			qsctest_print_line("");
 
-			qsctest_print_section("04.08", "Kyber");
+			qsctest_print_section("04.09", "Kyber");
 			qsctest_kyber_run();
 			qsctest_print_line("");
 
 #if defined(QSC_MISRA_FULL_COMPLIANCE)
 			qsctest_print_line("Warning: McEliece uses large static arrays internally, increase maximum stack allocation to 10-20MB.");
 #endif
-			qsctest_print_section("04.09", "McEliece");
+			qsctest_print_section("04.10", "McEliece");
 			qsctest_mceliece_run();
 			qsctest_print_line("");
 		}
@@ -412,6 +416,8 @@ int32_t main(void)
 			qsctest_benchmark_kmac_run();
 			qsctest_print_line("");
 			qsctest_benchmark_shake_run();
+			qsctest_print_line("");
+			qsctest_benchmark_hash_run();
 			qsctest_print_line("");
 		}
 
