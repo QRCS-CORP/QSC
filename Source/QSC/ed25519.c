@@ -3804,7 +3804,6 @@ static inline void ed25519_greduce(qsc_ed25519_gfe* r, const qsc_ed25519_gword z
 
 	for (fold = 0U; fold != 2; ++fold)
 	{
-		size_t i;
 		const qsc_ed25519_gword top = (carry << 1) | (r->v[ED25519_GWORDS - 1] >> (ED25519_GBITS - 1));
 
 		r->v[ED25519_GWORDS - 1] &= ED25519_GMAX >> 1;

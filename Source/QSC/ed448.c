@@ -1384,7 +1384,7 @@ int32_t qsc_ge448_from_bytes_negate_vartime(qsc_ge448_p3* h, const uint8_t* s)
 		{
 			ed448_store(check, &point.x);
 
-			if ((check[0U] & 1U) == (s[56U] >> 7))
+			if ((check[0U] & 1U) == ((uint32_t)s[56U] >> 7U))
 			{
 				ed448_sub(&point.x, &ed448_zero, &point.x);
 			}
