@@ -1156,12 +1156,10 @@ static bool chacha_has_capacity(const qsc_chacha_state* ctx, size_t length)
 
 	res = false;
 
-	if (ctx != NULL &&
-		ctx->state[0U] == UINT32_C(0x61707865) &&
+	if (ctx != NULL && ctx->state[0U] == UINT32_C(0x61707865) &&
 		((ctx->state[1U] == UINT32_C(0x3320646E) && ctx->state[2U] == UINT32_C(0x79622D32)) ||
 		 (ctx->state[1U] == UINT32_C(0x3120646E) && ctx->state[2U] == UINT32_C(0x79622D36))) &&
-		ctx->state[3U] == UINT32_C(0x6B206574) &&
-		ctx->available <= QSC_CHACHA_BLOCK_SIZE)
+		ctx->state[3U] == UINT32_C(0x6B206574) && ctx->available <= QSC_CHACHA_BLOCK_SIZE)
 	{
 		needed = (length > ctx->available) ? (uint64_t)(length - ctx->available) : 0U;
 		blocks = (needed / QSC_CHACHA_BLOCK_SIZE) + ((needed % QSC_CHACHA_BLOCK_SIZE) != 0U ? 1U : 0U);

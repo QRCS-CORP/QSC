@@ -372,7 +372,7 @@ static void csx_store512(uint8_t* output, const __m512i x, uint64_t tmp[8U])
 	qsc_intutils_le64to8((output + 640), tmp[2U]);
 	qsc_intutils_le64to8((output + 768), tmp[1U]);
 	qsc_intutils_le64to8((output + 896), tmp[0U]);
-	/* The borrowed scratch is erased by the caller after all SIMD blocks. */
+	/* the borrowed scratch is erased by the caller after all SIMD blocks. */
 }
 
 static void csx_increment512(__m512i* low, __m512i* high, const __m512i increment)
@@ -1030,8 +1030,7 @@ void qsc_csx_set_associated(qsc_csx_state* ctx, const uint8_t* data, size_t leng
 	QSC_ASSERT(data != NULL || length == 0U);
 	QSC_ASSERT(length <= UINT32_MAX);
 
-	if (ctx != NULL && ctx->counter != UINT64_MAX && data != NULL &&
-		length != 0U && length <= UINT32_MAX)
+	if (ctx != NULL && ctx->counter != UINT64_MAX && data != NULL && length != 0U && length <= UINT32_MAX)
 	{
 		uint8_t code[sizeof(uint32_t)] = { 0U };
 
@@ -1072,8 +1071,7 @@ static bool csx_transform_valid(const qsc_csx_state* ctx, size_t length, bool fi
 
 	res = length != 0U && length < UINT64_MAX - ctx->counter;
 #if defined(QSC_CSX_AUTHENTICATED)
-	res = res && ctx->kstate.position < QSC_KECCAK_512_RATE &&
-		(finalize == false || length <= SIZE_MAX - QSC_CSX_MAC_SIZE);
+	res = res && ctx->kstate.position < QSC_KECCAK_512_RATE && (finalize == false || length <= SIZE_MAX - QSC_CSX_MAC_SIZE);
 #else
 	(void)finalize;
 #endif

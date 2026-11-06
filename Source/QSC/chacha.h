@@ -302,8 +302,7 @@ QSC_EXPORT_API void qsc_chacha_poly1305_encrypt(qsc_chacha_poly1305_state* ctx, 
  * \note On error the output and stream counter are not modified. The caller
  * must provide space for length plus 16 authentication-tag bytes.
  */
-QSC_EXPORT_API bool qsc_chacha_poly1305_encrypt_checked(qsc_chacha_poly1305_state* ctx, uint8_t* output,
-    const uint8_t* input, size_t length);
+QSC_EXPORT_API bool qsc_chacha_poly1305_encrypt_checked(qsc_chacha_poly1305_state* ctx, uint8_t* output, const uint8_t* input, size_t length);
 
 QSC_CPLUSPLUS_ENABLED_END
 

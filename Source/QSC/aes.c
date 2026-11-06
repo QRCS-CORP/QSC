@@ -1,65 +1,14 @@
-/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
- * All Rights Reserved.
- *
- * NOTICE:
- * This software and all accompanying materials are the exclusive property of
- * Quantum Resistant Cryptographic Solutions Corporation (QRCS). The intellectual
- * and technical concepts contained herein are proprietary to QRCS and are
- * protected under applicable Canadian, U.S., and international copyright,
- * patent, and trade secret laws.
- *
- * CRYPTOGRAPHIC ALGORITHMS AND IMPLEMENTATIONS:
- * - This software includes implementations of cryptographic primitives and
- *   algorithms that are standardized or in the public domain, such as AES
- *   and SHA-3, which are not proprietary to QRCS.
- * - This software also includes cryptographic primitives, constructions, and
- *   algorithms designed by QRCS, including but not limited to RCS, SCB, CSX, QMAC, and
- *   related components, which are proprietary to QRCS.
- * - All source code, implementations, protocol compositions, optimizations,
- *   parameter selections, and engineering work contained in this software are
- *   original works of QRCS and are protected under this license.
- *
- * LICENSE AND USE RESTRICTIONS:
- * - This software is licensed under the Quantum Resistant Cryptographic Solutions
- *   Public Research and Evaluation License (QRCS-PREL), 2025-2026.
- * - Permission is granted solely for non-commercial evaluation, academic research,
- *   cryptographic analysis, interoperability testing, and feasibility assessment.
- * - Commercial use, production deployment, commercial redistribution, or
- *   integration into products or services is strictly prohibited without a
- *   separate written license agreement executed with QRCS.
- * - Licensing and authorized distribution are solely at the discretion of QRCS.
- *
- * EXPERIMENTAL CRYPTOGRAPHY NOTICE:
- * Portions of this software may include experimental, novel, or evolving
- * cryptographic designs. Use of this software is entirely at the user's risk.
- *
- * DISCLAIMER:
- * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE, SECURITY, OR NON-INFRINGEMENT. QRCS DISCLAIMS ALL
- * LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
- * ARISING FROM THE USE OR MISUSE OF THIS SOFTWARE.
- *
- * FULL LICENSE:
- * This software is subject to the Quantum Resistant Cryptographic Solutions
- * Public Research and Evaluation License (QRCS-PREL), 2025-2026. The complete license terms
- * are provided in the accompanying LICENSE file or at https://www.qrcscorp.ca.
- *
- * Written by: John G. Underhill
- * Contact: contact@qrcscorp.ca
- */
-
 #include "aes.h"
 #include "intutils.h"
 #include "memutils.h"
 
 /* AES context layout is part of the caller/library binary contract. */
 #if defined(QSC_SYSTEM_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
-QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_vaes512_v1 = 0U;
+	QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_vaes512_v1 = 0U;
 #elif defined(QSC_SYSTEM_AESNI_ENABLED)
-QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_aesni_v1 = 0U;
+	QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_aesni_v1 = 0U;
 #else
-QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_scalar_v1 = 0U;
+	QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_scalar_v1 = 0U;
 #endif
 
 /*!
@@ -1763,7 +1712,7 @@ static uint8x16_t aes_load_roundkey_arm(const uint32_t* key)
 
 	/* note reentrant. borrows the input; does not modify it or require SIMD alignment */
 	tmp = vreinterpretq_u8_u32(vld1q_u32(key));
-	/* Serialize numeric round-key words into AES byte lanes on either endian target. */
+	/* serialize numeric round-key words into AES byte lanes on either endian target. */
 	tmp = vrev32q_u8(tmp);
 
 	return tmp;
@@ -1947,9 +1896,9 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 /* CBC mode */
 
 #	if UINTPTR_MAX > UINT32_MAX
-	static void aes_bitslice_prepare_keys(const qsc_aes_state* ctx, uint64_t keys[15U][8U]);
-	static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool encryption, const uint64_t keys[15U][8U]);
-	static void aes_cbc_scalar_one_precomputed(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, const uint64_t keys[15U][8U]);
+		static void aes_bitslice_prepare_keys(const qsc_aes_state* ctx, uint64_t keys[15U][8U]);
+		static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool encryption, const uint64_t keys[15U][8U]);
+		static void aes_cbc_scalar_one_precomputed(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, const uint64_t keys[15U][8U]);
 #	endif
 
 #if UINTPTR_MAX > UINT32_MAX
@@ -2961,6 +2910,7 @@ static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* o
 			aes_ct_sbox64(q);
 			aes_bitslice_shiftrows(q, false);
 			aes_bitslice_mixcolumns(q, scratch);
+
 			for (size_t k = 0U; k < 8U; ++k)
 			{
 				q[k] ^= keys[round][k];
@@ -2969,6 +2919,7 @@ static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* o
 
 		aes_ct_sbox64(q);
 		aes_bitslice_shiftrows(q, false);
+
 		for (round = 0U; round < 8U; ++round)
 		{
 			q[round] ^= keys[ctx->rounds][round];
@@ -2980,15 +2931,18 @@ static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* o
 		{
 			aes_bitslice_shiftrows(q, true);
 			aes_ct_isbox64(q);
+
 			for (size_t k = 0U; k < 8U; ++k)
 			{
 				q[k] ^= keys[round][k];
 			}
+
 			aes_bitslice_invmixcolumns(q, scratch);
 		}
 
 		aes_bitslice_shiftrows(q, true);
 		aes_ct_isbox64(q);
+
 		for (round = 0U; round < 8U; ++round)
 		{
 			q[round] ^= keys[0U][round];
@@ -3176,6 +3130,7 @@ static void aes_ecb_transform_blocks(const qsc_aes_state* ctx, uint8_t* output, 
 			for (r = 1U; r < ctx->rounds; ++r)
 			{
 				rk = ctx->roundkeysw[r];
+
 				for (j = 0U; j < 4U; ++j)
 				{
 					if (encryption == true)
@@ -3200,8 +3155,10 @@ static void aes_ecb_transform_blocks(const qsc_aes_state* ctx, uint8_t* output, 
 				{
 					blocks[j] = _mm512_aesdeclast_epi128(blocks[j], rk);
 				}
+
 				_mm512_storeu_si512((void*)(output + pos + (j * 64U)), blocks[j]);
 			}
+
 			pos += 256U;
 		}
 #elif defined(QSC_SYSTEM_AESNI_ENABLED) && defined(__VAES__) && defined(__AVX2__)
@@ -3333,6 +3290,7 @@ void qsc_aes_ecb_encrypt_blocks(const qsc_aes_state* ctx, uint8_t* output, const
 	/* encrypt an integral number of AES-ECB blocks using an expanded encryption key */
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT((length % QSC_AES_BLOCK_SIZE) == 0U);
+
 	aes_ecb_transform_blocks(ctx, output, input, length, true);
 }
 
@@ -3341,6 +3299,7 @@ void qsc_aes_ecb_decrypt_blocks(const qsc_aes_state* ctx, uint8_t* output, const
 	/* decrypt an integral number of AES-ECB blocks using an expanded decryption key */
 	QSC_ASSERT(ctx != NULL);
 	QSC_ASSERT((length % QSC_AES_BLOCK_SIZE) == 0U);
+
 	aes_ecb_transform_blocks(ctx, output, input, length, false);
 }
 
@@ -3384,7 +3343,7 @@ size_t qsc_pkcs7_padding_length(const uint8_t* input)
 		count = input[QSC_AES_BLOCK_SIZE - 1U];
 		bad = ((count - 1U) >> 31U) | ((QSC_AES_BLOCK_SIZE - count) >> 31U);
 
-		/* Examine all sixteen bytes, independent of the padding value. */
+		/* examine all sixteen bytes, independent of the padding value. */
 		for (i = 0U; i < QSC_AES_BLOCK_SIZE; ++i)
 		{
 			mask = 0U - ((i - count) >> 31U);

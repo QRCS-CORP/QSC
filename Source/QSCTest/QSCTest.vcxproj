@@ -25,6 +25,10 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="HardwareTests|x64">
+      <Configuration>HardwareTests</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -67,6 +71,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -94,6 +105,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -111,6 +125,9 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -236,6 +253,33 @@
       <StackReserveSize>20480000</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;QSC_HARDWARE_ENABLED;QSC_HARDWARE_PKCS11_ENABLED;QSC_HARDWARE_NCRYPT_ENABLED;QSC_HARDWARE_TPM_ENABLED;QSC_HARDWARE_ATECC_ENABLED;QSC_HARDWARE_SE050_ENABLED;QSC_HARDWARE_PSA_ENABLED;QSC_HARDWARE_PLATFORM_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <ExceptionHandling>false</ExceptionHandling>
+      <CompileAs>CompileAsC</CompileAs>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)QSC;$(ProjectDir)..\ThirdParty\PKCS11;$(QSC_PKCS11_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <StackReserveSize>20480000</StackReserveSize>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -263,6 +307,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="hwmock.c" />
+    <ClCompile Include="hwmock_test.c" />
+    <ClCompile Include="hwprovider_test.c" />
+    <ClCompile Include="p11_test.c" />
+    <ClCompile Include="hwpkcs11tls_test.c" />
+    <ClCompile Include="hwncrypt_test.c" />
+    <ClCompile Include="hwncrypttls_test.c" />
+    <ClCompile Include="hwatecc_test.c" />
+    <ClCompile Include="hwse050_test.c" />
+    <ClCompile Include="hwpsanative_test.c" />
+    <ClCompile Include="hwpsa_test.c" />
+    <ClCompile Include="hwplatform_test.c" />
+    <ClCompile Include="hwtpm_test.c" />
+    <ClCompile Include="hwtpmquote_test.c" />
     <ClCompile Include="aesavs_test.c" />
     <ClCompile Include="aes_test.c" />
     <ClCompile Include="async_test.c" />
@@ -346,6 +404,20 @@
     <ClCompile Include="x509_test.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="hwmock.h" />
+    <ClInclude Include="hwmock_test.h" />
+    <ClInclude Include="hwprovider_test.h" />
+    <ClInclude Include="p11_test.h" />
+    <ClInclude Include="hwpkcs11tls_test.h" />
+    <ClInclude Include="hwncrypt_test.h" />
+    <ClInclude Include="hwncrypttls_test.h" />
+    <ClInclude Include="hwatecc_test.h" />
+    <ClInclude Include="hwse050_test.h" />
+    <ClInclude Include="hwpsanative_test.h" />
+    <ClInclude Include="hwpsa_test.h" />
+    <ClInclude Include="hwplatform_test.h" />
+    <ClInclude Include="hwtpm_test.h" />
+    <ClInclude Include="hwtpmquote_test.h" />
     <ClInclude Include="aesavs_test.h" />
     <ClInclude Include="aes_test.h" />
     <ClInclude Include="async_test.h" />
@@ -430,7 +502,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QSC\QSC.vcxproj">
-      <Project>{7b7f8e47-0f7c-4273-a229-a7ab2a452ea9}</Project>
+      <Project>{39B40E5F-DD73-43A6-B1C7-3E3B5E39D84A}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -233,7 +233,9 @@ static void qsctest_benchmark_free(qsctest_benchmark_buffers* buffers)
  */
 static void qsctest_benchmark_heading(const char* name, const char* operation)
 {
+	qsctest_print_line("");
 	qsctest_print_line(name);
+	qsctest_print_line("  --------------------------------------------------------");
 	qsctest_print_line(operation);
 	qsctest_print_line("  Profiles: 1 KiB x 1000 (1,024,000 B); 16 KiB x 6400 (100 MiB); 1 MiB x 1024 (1 GiB).");
 }

@@ -92,7 +92,7 @@ set(QSC_ACVP_ECC_SOURCES
     eddh25519.c eddh448.c eddsa25519.c eddsa448.c
     ed25519.c ed448.c
     donna128.c
-    sha2.c sha3.c memutils.c intutils.c
+    sha2.c sha3.c memutils.c intutils.c async.c
     csp.c cpuidex.c acp.c consoleutils.c stringutils.c sysutils.c rdp.c)
 set(QSC_ACVP_ECC_FILES "")
 foreach(QSC_ACVP_SOURCE IN LISTS QSC_ACVP_ECC_SOURCES)

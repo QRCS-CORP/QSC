@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
@@ -23,6 +23,10 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="HardwareTests|x64">
+      <Configuration>HardwareTests</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -65,6 +69,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -91,6 +102,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="PropertySheets">
@@ -193,6 +207,31 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='HardwareTests|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(QSC_PKCS11_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>QSC_HARDWARE_ENABLED;QSC_HARDWARE_PKCS11_ENABLED;QSC_HARDWARE_NCRYPT_ENABLED;QSC_HARDWARE_TPM_ENABLED;QSC_HARDWARE_ATECC_ENABLED;QSC_HARDWARE_SE050_ENABLED;QSC_HARDWARE_PSA_ENABLED;QSC_HARDWARE_PLATFORM_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <ExceptionHandling>false</ExceptionHandling>
+      <CompileAs>CompileAsC</CompileAs>
+      <PrecompiledHeaderFile />
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <OpenMPSupport>false</OpenMPSupport>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -218,6 +257,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="hwtypes.h" />
+    <ClInclude Include="hwprovider.h" />
+    <ClInclude Include="hwncrypt.h" />
+    <ClInclude Include="hwncrypttls.h" />
+    <ClInclude Include="hwatecc.h" />
+    <ClInclude Include="hwse050.h" />
+    <ClInclude Include="hwpsa.h" />
+    <ClInclude Include="hwplatform.h" />
+    <ClInclude Include="hwpsanative.h" />
+    <ClInclude Include="hwtpm.h" />
+    <ClInclude Include="hwtpmquote.h" />
+    <ClInclude Include="hwpkcs11.h" />
+    <ClInclude Include="hwpkcs11tls.h" />
+    <ClInclude Include="p11internal.h" />
     <ClInclude Include="acp.h" />
     <ClInclude Include="aes.h" />
     <ClInclude Include="arrayutils.h" />
@@ -249,6 +302,7 @@
     <ClInclude Include="hqcbase_avx2.h" />
     <ClInclude Include="oid.h" />
     <ClInclude Include="pbmac1.h" />
+    <ClInclude Include="pkcs11.h" />
     <ClInclude Include="qmac.h" />
     <ClInclude Include="qsccommon.h" />
     <ClInclude Include="consoleutils.h" />
@@ -367,6 +421,22 @@
     <ClInclude Include="x509aia.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="hwprovider.c" />
+    <ClCompile Include="hwncrypt.c" />
+    <ClCompile Include="hwncrypttls.c" />
+    <ClCompile Include="hwatecc.c" />
+    <ClCompile Include="hwse050.c" />
+    <ClCompile Include="hwpsa.c" />
+    <ClCompile Include="hwplatform.c" />
+    <ClCompile Include="hwpsanative.c" />
+    <ClCompile Include="hwtpm.c" />
+    <ClCompile Include="hwtpmquote.c" />
+    <ClCompile Include="p11loader.c" />
+    <ClCompile Include="p11session.c" />
+    <ClCompile Include="p11keys.c" />
+    <ClCompile Include="p11sign.c" />
+    <ClCompile Include="hwpkcs11tls.c" />
+    <ClCompile Include="p11agree.c" />
     <ClCompile Include="acp.c" />
     <ClCompile Include="aes.c" />
     <ClCompile Include="arrayutils.c" />

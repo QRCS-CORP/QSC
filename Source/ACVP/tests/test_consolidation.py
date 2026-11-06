@@ -108,6 +108,23 @@ class ConsolidationIntegrityTests(unittest.TestCase):
             path.write_text(json.dumps(good), encoding="utf-8")
             self.assertFalse(combine.all_stages_pass(path))
 
+    def test_source_revision_accepts_matching_pinned_commit(self):
+        sha = "a" * 40
+        record = {"qsc_git_sha": sha}
+        self.assertTrue(combine.source_revision_matches(record, record, sha))
+
+    def test_source_revision_rejects_cross_job_mismatch(self):
+        first = {"qsc_git_sha": "a" * 40}
+        second = {"qsc_git_sha": "b" * 40}
+        self.assertFalse(combine.source_revision_matches(first, second, first["qsc_git_sha"]))
+
+    def test_source_revision_rejects_missing_invalid_or_wrong_sha(self):
+        sha = "a" * 40
+        for value in (None, "abc", "A" * 40, "b" * 40):
+            with self.subTest(sha=value):
+                record = {"qsc_git_sha": value}
+                self.assertFalse(combine.source_revision_matches(record, record, sha))
+
 
 if __name__ == "__main__":
     unittest.main()

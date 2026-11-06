@@ -4,6 +4,7 @@
 import argparse
 import json
 from pathlib import Path
+import re
 import sys
 
 EXPECTED = {f"qsc-offline-{os}-class-{klass}"
@@ -30,6 +31,15 @@ def ecc_adapter_passes(data: dict) -> bool:
             and data.get("total_tests") == 33
             and data.get("skipped_tests") == 0
             and data.get("ecdsa_p384") == "TESTED")
+
+
+def source_revision_matches(result: dict, stage: dict, expected_sha: str | None) -> bool:
+    """Reject missing, malformed, inconsistent or unexpected QSC source commits."""
+    source_sha = result.get("qsc_git_sha")
+    return (isinstance(source_sha, str)
+            and re.fullmatch(r"[0-9a-f]{40}", source_sha) is not None
+            and source_sha == stage.get("qsc_git_sha")
+            and (expected_sha is None or source_sha == expected_sha))
 
 
 def all_stages_pass(path: Path) -> bool:
@@ -59,7 +69,12 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--local", action="store_true", help="Allow partial local evidence, not CI")
+    parser.add_argument("--expected-qsc-sha", help="Immutable source commit shared by all jobs")
     args = parser.parse_args()
+    if args.expected_qsc_sha is None and not args.local:
+        parser.error("CI consolidation requires --expected-qsc-sha")
+    if args.expected_qsc_sha is not None and not re.fullmatch(r"[0-9a-f]{40}", args.expected_qsc_sha):
+        parser.error("--expected-qsc-sha must be a 40-character lowercase commit SHA")
     root = Path(__file__).resolve().parents[2]
     if args.output.resolve().is_relative_to(root.resolve()):
         parser.error("Reports must be written outside the repository")
@@ -150,10 +165,18 @@ def main() -> int:
             except (ValueError, OSError, KeyError):
                 pq_signature_ok = False
             stage_ok = all_stages_pass(directory / "qualify-all.json")
+            try:
+                stage_data = json.loads((directory / "qualify-all.json").read_text(encoding="utf-8"))
+                if not isinstance(stage_data, dict):
+                    stage_data = {}
+            except (ValueError, OSError):
+                stage_data = {}
+            source_ok = source_revision_matches(result, stage_data, args.expected_qsc_sha)
             declared_class = directory.name.rsplit("-class-", 1)[-1]
             class_ok = result.get("security_class") == declared_class
             verified = {"job": directory.name, "stages_pass": stage_ok,
                         "class_match": class_ok,
+                        "source_match": source_ok,
                         "ecc_acvp_adapter_pass": ecc_adapter_ok,
                             "aes_interoperability_pass": aes_ok,
                             "pq_signature_adapter_pass": pq_signature_ok,
@@ -165,11 +188,16 @@ def main() -> int:
                             "pq_smoke_pass": pq_ok}
             results.append(checked_record(result, verified))
 
+    observed_shas = {item.get("qsc_git_sha") for item in results}
+    same_source = len(observed_shas) == 1 and all(
+        item.get("source_match", False) for item in results)
     missing = [] if args.local else sorted(EXPECTED - present)
     failures = [result["job"] for result in results
                 if result.get("status") != "PASS_WITH_COVERAGE_GAPS"
                 or not result.get("stages_pass", False)
                 or not result.get("class_match", False)
+                or not result.get("source_match", False)
+                or not same_source
                 or not result.get("local_sha_simulation_pass", False)
                 or not result.get("xof_offline_adapter_pass", False)
                 or not result.get("pbkdf_hkdf_adapter_pass", False)
@@ -187,12 +215,16 @@ def main() -> int:
         lines.append(f"| {result['job']} | {result.get('security_class', '?')} | {result.get('status', 'FAIL')} | {'PASS' if result['local_sha_simulation_pass'] else 'FAIL'} | {'PASS' if result['xof_offline_adapter_pass'] else 'FAIL'} | {'PASS' if result['pbkdf_hkdf_adapter_pass'] else 'FAIL'} | {'PASS' if result['aes_interoperability_pass'] else 'FAIL'} | {'PASS' if result['ecc_interoperability_pass'] else 'FAIL'} | {'PASS' if result['ecc_acvp_adapter_pass'] else 'FAIL'} | {'PASS' if result['pq_smoke_pass'] else 'FAIL'} | {'PASS' if result['mlkem_adapter_pass'] else 'FAIL'} | {'PASS' if result['pq_signature_adapter_pass'] else 'FAIL'} |")
     lines += ["", f"Missing runner artifacts: {', '.join(missing) if missing else 'none'}",
               f"Failed or unreadable results: {', '.join(failures) if failures else 'none'}", "",
+              "Uniform QSC source revision: " + ("YES" if same_source else "NO"),
+              "Expected QSC commit: " + str(args.expected_qsc_sha or "locally inferred"), "",
               "P-384 signer must pass the complete ECC target; pending source status does not qualify.",
               "All live NIST ACVP cases remain **NOT RUN** in this offline report.", "",
               "Overall: " + ("OFFLINE PASS WITH COVERAGE GAPS" if success else "FAIL/INCOMPLETE"), ""]
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "consolidated.json").write_text(
         json.dumps({"success": success, "missing": missing, "failed": failures,
+                    "source_uniform": same_source,
+                    "expected_qsc_sha": args.expected_qsc_sha,
                     "results": results}, indent=2) + "\n", encoding="utf-8")
     report = "\n".join(lines)
     (args.output / "consolidated.md").write_text(report, encoding="utf-8")

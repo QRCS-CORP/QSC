@@ -28,9 +28,32 @@ permissions:
   actions: read
 
 jobs:
+  pin-source:
+    name: Resolve immutable QSC source revision
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.pin.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.qsc_ref || github.sha }}
+          persist-credentials: false
+      - name: Pin selected revision
+        id: pin
+        shell: bash
+        run: |
+          sha=$(git rev-parse HEAD)
+          if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'Invalid QSC source commit' >&2
+            exit 1
+          fi
+          printf 'sha=%s\n' "$sha" >> "$GITHUB_OUTPUT"
+          printf 'Pinned QSC commit: %s\n' "$sha"
+
   offline-cavp:
     name: ${{ matrix.os }} - class ${{ matrix.security_class }}
     runs-on: ${{ matrix.os }}
+    needs: pin-source
     timeout-minutes: 110
     strategy:
       fail-fast: false
@@ -40,17 +63,25 @@ jobs:
         security_class: ['1', '3', '5']
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-source.outputs.sha }}
+          persist-credentials: false
       - name: Checkout QSC dependency (read-only)
         uses: actions/checkout@v4
         with:
           repository: QRCS-CORP/QSC
-          ref: ${{ inputs.qsc_ref || 'master' }}
+          ref: ${{ needs.pin-source.outputs.sha }}
           path: dependency/QSC
           persist-credentials: false
       - name: Record QSC source revision
         shell: bash
         run: |
           sha=$(git -C dependency/QSC rev-parse HEAD)
+          expected='${{ needs.pin-source.outputs.sha }}'
+          if [ "$sha" != "$expected" ]; then
+            printf 'QSC source revision mismatch: %s != %s\n' "$sha" "$expected" >&2
+            exit 1
+          fi
           printf 'QSC_DEPENDENCY_SHA=%s\n' "$sha" >> "$GITHUB_ENV"
           printf 'QSC dependency commit: %s\n' "$sha"
       - uses: actions/setup-python@v5
@@ -127,10 +158,13 @@ jobs:
   consolidate:
     name: Consolidated qualification report
     runs-on: ubuntu-24.04
-    needs: offline-cavp
+    needs: [pin-source, offline-cavp]
     if: always()
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-source.outputs.sha }}
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           pattern: qsc-offline-*
@@ -143,6 +177,7 @@ jobs:
         run: >-
           python Source/ACVP/combine.py
           --input "$RUNNER_TEMP/qsc-acvp-evidence"
+          --expected-qsc-sha "${{ needs.pin-source.outputs.sha }}"
           --output "$RUNNER_TEMP/qsc-acvp-consolidated"
       - name: Upload consolidated evidence
         if: always()

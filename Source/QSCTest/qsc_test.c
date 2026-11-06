@@ -1,4 +1,4 @@
-/* 2025 Quantum Resistant Cryptographic Solutions Corporation
+﻿/* 2025 Quantum Resistant Cryptographic Solutions Corporation
  * All Rights Reserved.
  *
  * NOTICE: This software and all accompanying materials are the exclusive 
@@ -73,6 +73,19 @@
 #include "encoding_reference_test.h"
 #include "falcon_test.h"
 #include "hqc_test.h"
+#include "hwprovider_test.h"
+#include "hwmock_test.h"
+#include "p11_test.h"
+#include "hwpkcs11tls_test.h"
+#include "hwncrypt_test.h"
+#include "hwncrypttls_test.h"
+#include "hwtpm_test.h"
+#include "hwtpmquote_test.h"
+#include "hwatecc_test.h"
+#include "hwpsanative_test.h"
+#include "hwpsa_test.h"
+#include "hwplatform_test.h"
+#include "hwse050_test.h"
 #include "kyber_test.h"
 #include "mceliece_test.h"
 #include "netutils_test.h"
@@ -168,6 +181,7 @@ int32_t main(void)
 	bool hfeat;
 #endif
 	bool valid;
+	bool runqual;
 	
 #if defined(QSC_DEBUG_MODE) && defined(QSCTEST_PRINT_STATS)
 	qsc_consoleutils_print_line("Loading pre-check...");
@@ -180,7 +194,6 @@ int32_t main(void)
 	qsc_timestamp_print_values();
 	qsc_consoleutils_print_line("");
 #endif
-	qsctest_ecdh_run();
 	/* if it fails here, check your AVX settings. AVX2 is enabled in project defaults.
 	 * If AVX is detected, AES-NI is automatically enabled, but some older CPUs may have AVX but not AES-NI.
 	 * If the test CPU does not have the AES-NI instruction set, disable AES-NI in the libraries common.h file
@@ -281,8 +294,166 @@ int32_t main(void)
 
 	if (valid == true)
 	{
-		if (qsctest_test_confirm("Run diagnostic qualification? [Y/N]: ") == true)
+#if defined(QSC_HARDWARE_ENABLED)
+		qsctest_print_line("[INFO] Hardware integration is enabled and will run with the standard diagnostic suites.");
+#endif
+		runqual = qsctest_test_confirm("Run diagnostic qualification? [Y/N]: ");
+		if (runqual == true)
 		{
+			qsctest_print_section("00.03", "HARDWARE INTEGRATION QUALIFICATION");
+#if defined(QSC_HARDWARE_ENABLED)
+			qsctest_print_line("[INFO] Stage 1: Universal hardware provider contract");
+
+			if (qsctest_hwprovider_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage1 hardware provider contract suite");
+			}
+			qsctest_print_line("[INFO] Stage 2: Deterministic provider and failure injection");
+
+			if (qsctest_hwmock_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage2 hardware mock fault-injection suite");
+			}
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] Hardware provider and mock suites: QSC_HARDWARE_ENABLED not selected");
+#endif
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PKCS11_ENABLED)
+			qsctest_print_line("[INFO] Stages 3-4: PKCS#11 module, session and key operations");
+
+			if (qsctest_p11_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage3 PKCS11 adapter qualification suite");
+			}
+
+			qsctest_print_line("[INFO] Stage 5: PKCS#11 TLS and X.509 integration");
+
+			if (qsctest_hwpkcs11tls_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage5 PKCS11 TLS/X509 integration suite");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] PKCS11 and PKCS11 TLS suites: feature not enabled");
+#endif
+
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_NCRYPT_ENABLED)
+			qsctest_print_line("[INFO] Stage 7: Windows NCrypt and TLS integration");
+
+			if (qsctest_hwncrypt_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage7 NCrypt provider integration suite");
+			}
+
+			if (qsctest_hwncrypttls_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage7 TPM TLS/X509 signer suite");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] Windows NCrypt provider and TLS suites: feature not enabled");
+#endif
+
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_TPM_ENABLED)
+			qsctest_print_line("[INFO] Stage 8: TPM2-TSS and signed quote verification");
+
+			if (qsctest_hwtpm_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage8 TPM provider contract suite");
+			}
+
+			if (qsctest_hwtpmquote_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage8 signed quote verification suite");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] TPM provider and quote suites: feature not enabled");
+#endif
+
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_ATECC_ENABLED)
+			qsctest_print_line("[INFO] Stage 9: Microchip ATECC device identity");
+
+			if (qsctest_hwatecc_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage9 ATECC device identity provider suite");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] ATECC mock suite: feature not enabled");
+#endif
+
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PKCS11_ENABLED) && defined(QSC_HARDWARE_SE050_ENABLED)
+			qsctest_print_line("[INFO] Stage 9: NXP SE050 PKCS#11 device profile");
+
+			if (qsctest_hwse050_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage9 SE050 PKCS11 device profile suite");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] SE050 PKCS11 mock suite: feature not enabled");
+#endif
+
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PSA_ENABLED)
+			qsctest_print_line("[INFO] Stage 10: Arm PSA Crypto provider");
+
+			if (qsctest_hwpsa_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage10 Arm PSA provider contract suite");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] Arm PSA mock suite: feature not enabled");
+#endif
+
+			qsctest_print_line("[INFO] Stage 10: Native PSA device smoke (opt-in)");
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PSA_ENABLED) && \
+    defined(QSC_HARDWARE_PSA_NATIVE_ENABLED) && defined(QSC_TEST_PSA_KEY_ID) && \
+    defined(QSC_TEST_PSA_LOCATION)
+
+			if (qsctest_hwpsanative_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage10 native PSA device smoke tests");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[SKIP] Stage10 native PSA device smoke: no explicit target and credential opt-in");
+#endif
+
+#if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PLATFORM_ENABLED)
+			qsctest_print_line("[INFO] Stage 11: Apple and Android platform keystore");
+
+			if (qsctest_hwplatform_run() == false)
+			{
+				valid = false;
+				qsctest_print_line("[FAIL] Stage11 Apple/Android platform provider contract tests");
+			}
+
+			qsctest_print_line("");
+#else
+			qsctest_print_line("[DISABLED] Apple/Android platform mock suite: feature not enabled");
+#endif
+
 			qsctest_print_section("01.01", "AES CIPHER / FIPS KAT");
 			qsctest_aes_run();
 			qsctest_print_line("");
@@ -339,14 +510,6 @@ int32_t main(void)
 			}
 			qsctest_print_line("");
 
-			qsctest_print_section("05.01", "X.509 CERTIFICATE QUALIFICATION");
-			qsctest_x509_run();
-			qsctest_print_line("");
-
-			qsctest_print_section("06.01", "TLS 1.3 PROTOCOL QUALIFICATION");
-			qsctest_tls_run();
-			qsctest_print_line("");
-
 			qsctest_print_section("04.01", "Dilithium");
 			qsctest_dilithium_run();
 			qsctest_print_line("");
@@ -389,6 +552,15 @@ int32_t main(void)
 			qsctest_print_section("04.10", "McEliece");
 			qsctest_mceliece_run();
 			qsctest_print_line("");
+
+			qsctest_print_section("05.01", "X.509 CERTIFICATE QUALIFICATION");
+			qsctest_x509_run();
+			qsctest_print_line("");
+
+			qsctest_print_section("06.01", "TLS 1.3 PROTOCOL QUALIFICATION");
+			qsctest_tls_run();
+			qsctest_print_line("");
+
 		}
 		else
 		{

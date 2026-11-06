@@ -2,6 +2,10 @@
 #include "qsccommon.h"
 #include "memutils.h"
 #include <stdio.h>
+#if defined(QSC_SYSTEM_OS_WINDOWS)
+#	include <conio.h>
+#	include <io.h>
+#endif
 #include <string.h>
 #include <ctype.h>
 
@@ -282,10 +286,14 @@ char qsctest_get_wait(void)
 {
 	char res;
 
+	res = '\0';
 #if defined(QSC_SYSTEM_OS_WINDOWS)
-	res = (char)getwchar();
+	if (_isatty(_fileno(stdin)) != 0)
+	{
+		res = (char)_getch();
+	}
 #else
-	res = getchar();
+	res = (char)getchar();
 #endif
 
 	return res;

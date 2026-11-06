@@ -1,0 +1,229 @@
+name: QSC native ARM64 ACVP offline qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      qsc_ref:
+        description: 'Commit SHA to qualify (blank: selected working branch revision)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  pin-source:
+    name: Resolve immutable QSC source revision
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.pin.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.qsc_ref || github.sha }}
+          persist-credentials: false
+      - name: Pin selected revision
+        id: pin
+        shell: bash
+        run: |
+          sha=$(git rev-parse HEAD)
+          if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'Invalid QSC source commit' >&2
+            exit 1
+          fi
+          printf 'sha=%s\n' "$sha" >> "$GITHUB_OUTPUT"
+          printf 'Pinned QSC commit: %s\n' "$sha"
+
+  offline-cavp:
+    name: ${{ matrix.platform }} - class ${{ matrix.security_class }}
+    runs-on: ${{ matrix.os }}
+    needs: pin-source
+    timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - platform: linux-arm64-gcc
+            os: ubuntu-24.04-arm
+            compiler: gcc
+            security_class: '1'
+          - platform: linux-arm64-gcc
+            os: ubuntu-24.04-arm
+            compiler: gcc
+            security_class: '3'
+          - platform: linux-arm64-gcc
+            os: ubuntu-24.04-arm
+            compiler: gcc
+            security_class: '5'
+          - platform: linux-arm64-clang
+            os: ubuntu-24.04-arm
+            compiler: clang
+            security_class: '1'
+          - platform: linux-arm64-clang
+            os: ubuntu-24.04-arm
+            compiler: clang
+            security_class: '3'
+          - platform: linux-arm64-clang
+            os: ubuntu-24.04-arm
+            compiler: clang
+            security_class: '5'
+          - platform: macos-arm64
+            os: macos-26
+            compiler: clang
+            security_class: '1'
+          - platform: macos-arm64
+            os: macos-26
+            compiler: clang
+            security_class: '3'
+          - platform: macos-arm64
+            os: macos-26
+            compiler: clang
+            security_class: '5'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-source.outputs.sha }}
+          persist-credentials: false
+      - name: Checkout QSC dependency (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: QRCS-CORP/QSC
+          ref: ${{ needs.pin-source.outputs.sha }}
+          path: dependency/QSC
+          persist-credentials: false
+      - name: Record QSC source revision
+        shell: bash
+        run: |
+          sha=$(git -C dependency/QSC rev-parse HEAD)
+          expected='${{ needs.pin-source.outputs.sha }}'
+          if [ "$sha" != "$expected" ]; then
+            printf 'QSC source revision mismatch: %s != %s\n' "$sha" "$expected" >&2
+            exit 1
+          fi
+          printf 'QSC_DEPENDENCY_SHA=%s\n' "$sha" >> "$GITHUB_ENV"
+          printf 'QSC dependency commit: %s\n' "$sha"
+      - name: Verify native ARM64 architecture
+        shell: bash
+        run: |
+          arch=$(uname -m)
+          if [ "$arch" != "aarch64" ] && [ "$arch" != "arm64" ]; then
+            printf 'Expected native ARM64 runner, observed %s\n' "$arch" >&2
+            exit 1
+          fi
+          printf 'Native runner architecture: %s\n' "$arch"
+      - name: Install Ninja on macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: brew install ninja
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent reference implementation
+        shell: bash
+        run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Configure Linux ARM64
+        if: runner.os == 'Linux'
+        shell: bash
+        run: >-
+          cmake -G Ninja -S Source/ACVP -B "$RUNNER_TEMP/qsc-acvp-build"
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=${{ matrix.compiler }}
+          -DQSC_ACVP_TLS_CLASS=${{ matrix.security_class }}
+      - name: Configure macOS ARM64
+        if: runner.os == 'macOS'
+        shell: bash
+        run: >-
+          cmake -G Ninja -S Source/ACVP -B "$RUNNER_TEMP/qsc-acvp-build"
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_OSX_ARCHITECTURES=arm64
+          -DQSC_ACVP_TLS_CLASS=${{ matrix.security_class }}
+      - name: Build independent adapters
+        id: adapters
+        continue-on-error: true
+        shell: bash
+        run: |
+          failure=0
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_hash --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_aes --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_pq --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_ecc_preliminary --parallel 4 || failure=1
+          exit "$failure"
+      - name: Build complete QSC and ECC including P-384
+        id: complete
+        continue-on-error: true
+        shell: bash
+        run: |
+          failure=0
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_cavp --parallel 4 || failure=1
+          cmake --build "$RUNNER_TEMP/qsc-acvp-build" --config Release --target qsc_acvp_ecc --parallel 4 || failure=1
+          exit "$failure"
+      - name: Run all qualification stages consecutively
+        id: qualify
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          state=failed
+          if [ '${{ steps.complete.outcome }}' = 'success' ]; then
+            state=success
+          fi
+          python Source/ACVP/qualify_all.py \
+            --build-dir "$RUNNER_TEMP/qsc-acvp-build" \
+            --output "$RUNNER_TEMP/qsc-acvp-results" \
+            --security-class '${{ matrix.security_class }}' \
+            --full-build "$state"
+      - name: Upload all offline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qsc-offline-${{ matrix.platform }}-class-${{ matrix.security_class }}
+          path: ${{ runner.temp }}/qsc-acvp-results/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce complete qualification
+        if: always()
+        shell: bash
+        run: |
+          test '${{ steps.adapters.outcome }}' = 'success'
+          test '${{ steps.complete.outcome }}' = 'success'
+          test '${{ steps.qualify.outcome }}' = 'success'
+
+  consolidate:
+    name: Consolidated native ARM64 qualification report
+    runs-on: ubuntu-24.04
+    needs: [pin-source, offline-cavp]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-source.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: qsc-offline-*
+          path: ${{ runner.temp }}/qsc-acvp-evidence
+        continue-on-error: true
+      - name: Generate strict consolidated report
+        id: combine
+        continue-on-error: true
+        shell: bash
+        run: >-
+          python Source/ACVP/combine.py
+          --input "$RUNNER_TEMP/qsc-acvp-evidence"
+          --native-matrix
+          --expected-qsc-sha "${{ needs.pin-source.outputs.sha }}"
+          --output "$RUNNER_TEMP/qsc-acvp-consolidated"
+      - name: Upload consolidated evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qsc-offline-consolidated
+          path: ${{ runner.temp }}/qsc-acvp-consolidated/
+          if-no-files-found: error
+      - name: Enforce consolidated verdict
+        if: always()
+        shell: bash
+        run: test '${{ steps.combine.outcome }}' = 'success'
