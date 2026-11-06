@@ -52,15 +52,15 @@
 #ifndef DOXYMAIN_H
 #define DOXYMAIN_H
 
- /*! \mainpage QSC: Quantum Secure Cryptographic Solutions Library Version 1.2
+ /*! \mainpage QSC: Quantum Secure Cryptographic Solutions Library Version 1.4.0.0
   *
   * \brief Main documentation page for the QSC Library.
   *
   * \details
   * QSC (Quantum Secure Cryptographic Solutions) is a compact, self-contained, and highly optimized
-  * cryptographic library written in C23. It is designed to provide next-generation, post-quantum
+  * cryptographic library written in portable C. It is designed to provide next-generation, post-quantum
   * secure cryptographic primitives for applications requiring long-term security against both
-  * classical and quantum adversaries. The library adheres to MISRA secure coding standards and is
+  * classical and quantum adversaries. The library follows a MISRA-adjacent secure coding discipline and is
   * structured for clarity, ease of verification, and integration into secure communication platforms,
   * including public-internet TLS stacks and PKI certificate infrastructure.
   *
@@ -73,14 +73,22 @@
   * \b Key \b Encapsulation \b Mechanisms \b (KEM):
   * - \b ML-KEM (Kyber): Module-LWE based key encapsulation, NIST FIPS-203. Parameter sets
   *   ML-KEM-512, ML-KEM-768, and ML-KEM-1024. AVX2-accelerated implementations available.
-  * - \b Classic \b McEliece: Niederreiter dual-form code-based KEM, NIST PQC Round 3.
-  * - \b HQC: QC-MDPC code-based KEM, NIST PQC Round 4. AVX2-accelerated implementations available.
-  * - \b ECDH \b (X25519): Elliptic Curve Diffie-Hellman key exchange over Curve25519, RFC 7748.
+  * - \b Classic \b McEliece: Niederreiter code-based KEM, NIST PQC Round 3.
+  * - \b HQC: Quasi-cyclic code-based KEM, NIST PQC Round 4. Parameter sets for NIST
+  *   security categories 1, 3, and 5; AVX2-accelerated implementations available.
+  * - \b Kyber-1280: Independent experimental and nonstandard KEM parameter profile
+  *   (kyber1280.h), separate from the FIPS 203 ML-KEM parameter sets.
+  * - \b ECDH (P-256 / P-384 / P-521): NIST prime-curve key generation and key
+  *   agreement with raw key encodings (ecdh.h, ecdhp256.h, ecdhp384.h, ecdhp521.h).
+  * - \b EDDH (X25519 / X448): Montgomery-curve Diffie-Hellman key exchange, RFC 7748
+  *   (eddh.h, eddh25519.h, eddh448.h).
   *
   * \b Digital \b Signature \b Schemes:
   * - \b ML-DSA (Dilithium): Module-lattice based signatures, NIST FIPS-204. Parameter sets
   *   ML-DSA-44, ML-DSA-65, and ML-DSA-87. AVX2-accelerated implementations available.
-  * - \b SLH-DSA (SPHINCS+): Stateless hash-based signatures, NIST FIPS-205.
+  * - \b SLH-DSA (SPHINCS+): Stateless hash-based signatures, NIST FIPS-205;
+  *   dedicated SHAKE-128/192/256 small- and fast-signature parameter set APIs
+  *   with pure and prehash signing (slhdsa.h).
   * - \b Falcon: NTRU lattice-based compact signatures, NIST PQC Round 3.
   *   AVX2-accelerated implementations available.
   * - \b ECDSA \b (P-256 / P-384 / P-521): Elliptic curve signatures over NIST P-256 (secp256r1),
@@ -88,7 +96,8 @@
   *   (HMAC-SHA256, HMAC-SHA384, and HMAC-SHA512 respectively). Jacobian projective coordinates
   *   with Solinas and Barrett reduction. Interoperable with TLS 1.2/1.3 and public CA certificates.
   *   Standards: FIPS 186-5, RFC 6979, RFC 8422.
-  * - \b EdDSA \b (Ed25519): Edwards-curve digital signatures, RFC 8032.
+  * - \b EdDSA (Ed25519 / Ed448): Edwards-curve digital signatures, RFC 8032
+  *   (eddsa.h, eddsa25519.h, eddsa448.h).
   *
   * \par Symmetric Cryptography
   * \b Authenticated \b Encryption \b (AEAD):
@@ -122,6 +131,9 @@
   * - \b HKDF: Extract-and-expand KDF using HMAC-SHA2-256 and HMAC-SHA2-512.
   * - \b ACP: Auto Entropy Collection Provider; aggregates multiple entropy sources (acp.h).
   * - \b CSP: OS-native cryptographic entropy provider (csp.h).
+  * - \b ETR: External true-random source callback with source validation, SHAKE-512
+  *   conditioning and fail-closed error handling (etr.h). Source availability and
+  *   entropy assurance depend on the caller-supplied external device or service.
   * - \b RDP: Hardware entropy via Intel RDRAND and RDSEED (rdp.h).
   *
   * \par TLS 1.3 Protocol Stack
@@ -439,6 +451,27 @@
   * - \b x509types.h: Normalised in-memory structures for all X.509 objects; buffer constants sized
   *   for the largest current PQC profile (ML-DSA-87: 4627-byte signature, 2592-byte public key).
   *
+  * \par Hardware Security and Protected-Key Integration
+  * Hardware integration is optional and selected at compile time. It does not change
+  * the default software cryptographic APIs or silently substitute software private-key
+  * operations when protected-key policy is required. Hardware availability, residency,
+  * vendor compliance and FIPS validation depend on the configured provider and device.
+  * - \b Hardware provider facade (hwprovider.h, hwtypes.h): Versioned backend
+  *   operations, opaque key references, capability queries and explicit key-use policy.
+  * - \b PKCS#11 / HSM (hwpkcs11.h, hwpkcs11tls.h): Optional Cryptoki token
+  *   sessions and non-exportable ECDSA signing for TLS 1.3 and X.509/PKCS#10.
+  *   Requires an externally installed provider library and compile-time opt-in.
+  * - \b Windows TPM (hwncrypt.h, hwncrypttls.h): Microsoft Platform Crypto
+  *   Provider protected keys and TLS/X.509 ECDSA signing, with no software-KSP fallback.
+  * - \b Linux TPM 2.0 (hwtpm.h, hwtpmquote.h): Optional TPM2-TSS persistent-key
+  *   adapter and separately trusted TPM2 quote/PCR policy verification.
+  * - \b Arm PSA / TF-M (hwpsa.h, hwpsanative.h): OEM PSA Crypto callbacks and
+  *   optional native PSA client for protected persistent keys.
+  * - \b Secure elements (hwatecc.h, hwse050.h): ATECC608 P-256 identity bridge
+  *   and NXP SE050/SE05x PKCS#11 profile preflight via externally supplied middleware.
+  * - \b Platform key stores (hwplatform.h): Optional Apple Secure Enclave and
+  *   Android Keystore bridge for protected P-256 signing keys.
+  *
   * \par System Utilities
   * \b Memory, \b Data, \b and \b File \b Management:
   * - \b memutils.h: SIMD-optimised memory operations: copy, clear, XOR, compare, and secure erase.
@@ -544,8 +577,9 @@
   * TLS, TLS 1.3, RFC 8446, Hybrid Key Exchange, Post-Quantum TLS, Key Schedule, HKDF,
   * Record Layer, AEAD, KeyUpdate, NewSessionTicket, PSK, 0-RTT, HelloRetryRequest,
   * CRL, OCSP, PKCS10, PKCS12, ASN.1, DER, BER, PEM, OID,
-  * ML-KEM, ML-DSA, SLH-DSA, Falcon, McEliece, HQC,
-  * ECDSA, ECDH, EdDSA, AES, ChaCha20, SIMD, AVX, AVX2, AVX512,
+  * ML-KEM, ML-DSA, SLH-DSA, Falcon, McEliece, HQC, Kyber-1280,
+  * ECDSA, ECDH, X25519, X448, Ed25519, Ed448, AES, ChaCha20, SIMD, AVX, AVX2, AVX512,
+  * Hardware Security, HSM, PKCS#11, TPM 2.0, Arm PSA, Secure Enclave, Keystore, ETR,
   * Secure Memory, Constant-Time, Forward Secrecy, MISRA, QSC.
   *
   * \par Example
@@ -570,8 +604,8 @@
   * All rights reserved by QRCS Corporation, copyrighted and patents pending.
   *
   * \author John G. Underhill
-  * \date 2026-05-01
-  * \version 1.3.0.0
+  * \date 2026-11-06
+  * \version 1.4.0.0
   */
 
 #endif

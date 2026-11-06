@@ -110,8 +110,8 @@ static void print_title(void)
     qsctest_print_line(" QRCS | QSCTest");
     qsctest_print_line(" CRYPTOGRAPHIC QUALIFICATION AND PERFORMANCE SUITE");
     qsctest_print_line("--------------------------------------------------------------------------------------------------------------");
-    qsctest_print_line(" Release : v1.2.0.0c (B3)  |  License : QRCS-PL");
-    qsctest_print_line(" Date    : June 11, 2026");
+    qsctest_print_line(" Release : v1.4.0.0  |  License : QRCS-PL");
+    qsctest_print_line(" Date    : November 6, 2026");
     qsctest_print_line(" Contact : contact@qrcscorp.ca");
     qsctest_print_line("==============================================================================================================");
     qsctest_print_line("");

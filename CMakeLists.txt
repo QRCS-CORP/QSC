@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(
     QSC
-    VERSION 1.0.0
+    VERSION 1.4.0.0
     DESCRIPTION "Quantum-Secure Cryptographic Library"
     LANGUAGES C
 )
