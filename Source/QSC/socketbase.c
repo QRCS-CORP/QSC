@@ -47,6 +47,7 @@
 #	endif
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /* The event polling API uses the platform's native poll descriptor without changing public socket state. */
 #if defined(QSC_SYSTEM_OS_WINDOWS)
@@ -2909,3 +2910,5 @@ bool qsc_socket_iocp_destroy(qsc_socket_iocp* port)
 }
 
 #endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

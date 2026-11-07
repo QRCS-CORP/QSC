@@ -52,9 +52,9 @@
 #ifndef QSC_DILITHIUMBASE_H
 #define QSC_DILITHIUMBASE_H
 
- /* \cond NO_DOCUMENT */
-
 #include "qsccommon.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -146,6 +146,6 @@ bool qsc_dilithium_ref_open(uint8_t* message, size_t* msglen, const uint8_t* con
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

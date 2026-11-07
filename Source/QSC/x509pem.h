@@ -161,7 +161,6 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_certificate_decode_pem(const char* pem, 
  *
  * \param chain: [struct] The certificate chain object to free.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_chain_free(qsc_x509_chain* chain);
 
@@ -174,7 +173,6 @@ QSC_EXPORT_API void qsc_x509_chain_free(qsc_x509_chain* chain);
  *
  * \param store: [struct] The certificate store object to free.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_store_free(qsc_x509_store* store);
 

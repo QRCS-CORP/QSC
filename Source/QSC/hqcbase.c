@@ -2,7 +2,7 @@
 #include "memutils.h"
 #include "sha3.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 #define HQC_PRNG_DOMAIN 0
 #define HQC_G_FCT_DOMAIN 0
@@ -2584,4 +2584,4 @@ bool qsc_hqc_ref_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const u
     return res;
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

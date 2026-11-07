@@ -84,7 +84,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_X509_CRL_WRITE_MAX 8192U
 
 /*!
- * \struct qsc_x509_crl_builder
+ * \struct qsc_x509_crl_builder_t
  * \brief A mutable certificate revocation list builder.
  *
  * \details
@@ -102,7 +102,7 @@ typedef struct qsc_x509_crl_builder_t
     qsc_x509_extensions extensions;                         /*!< Optional CRL extension set. */
     qsc_x509_crl_entry entries[QSC_X509_CRL_REVOKED_MAX];   /*!< Revoked certificate entries. */
     size_t entrycount;                                      /*!< The number of active revoked entries. */
-} qsc_x509_crl_builder;
+} qsc_x509_crl_builder; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \brief Initialize a CRL builder.
@@ -114,7 +114,6 @@ typedef struct qsc_x509_crl_builder_t
  *
  * \param builder: [struct] The CRL builder to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_crl_builder_initialize(qsc_x509_crl_builder* builder);
 
@@ -127,7 +126,6 @@ QSC_EXPORT_API void qsc_x509_crl_builder_initialize(qsc_x509_crl_builder* builde
  *
  * \param builder: [struct] The CRL builder to clear.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_crl_builder_clear(qsc_x509_crl_builder* builder);
 

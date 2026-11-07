@@ -106,7 +106,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /**
- * \def QSC_CSX_EXTENDED_ROUND_COUNTS
+ * \par Configuration macro: \c QSC_CSX_EXTENDED_ROUND_COUNTS
  * \brief Select the optional 40-round CSX cipher instead of the default 20-round cipher.
  * \details This macro controls only CSX mixing rounds. Both modes always use
  * standard 24-round Keccak/KMAC for authentication and key derivation.

@@ -71,7 +71,7 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -183,6 +183,6 @@ QSC_EXPORT_API void qsc_x448_public_from_private(uint8_t* publickey, const uint8
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

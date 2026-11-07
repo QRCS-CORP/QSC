@@ -2,6 +2,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* AES context layout is part of the caller/library binary contract. */
 #if defined(QSC_SYSTEM_AESNI_ENABLED) && defined(QSC_SYSTEM_HAS_VAES512)
 	QSC_EXPORT_API const uint8_t qsc_aes_layout_contract_vaes512_v1 = 0U;
@@ -5293,3 +5295,5 @@ bool qsc_aes_gcm256_transform(qsc_aes_gcm256_state* ctx, uint8_t* output, const 
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

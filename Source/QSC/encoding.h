@@ -637,6 +637,20 @@ QSC_EXPORT_API void qsc_encoding_ber_free_element(qsc_encoding_ber_element* elem
 /*                           DER Functions                                    */
 /* ========================================================================== */
 
+
+/**
+ * \brief Validate the first complete DER element without allocating a tree.
+ * \param buffer: Caller-owned, length-bounded DER input (read only).
+ * \param buflen: Number of accessible bytes.
+ * \param consumed: Receives the validated element size, or zero on failure.
+ * \return True for structurally valid definite-length DER with minimally encoded
+ *         tags and lengths; false for malformed input. ASN.1 type-specific
+ *         canonical restrictions and schema validation are not performed.
+ * \note Trailing bytes are not rejected; require *consumed == buflen for an exact
+ *       document. The function performs no allocations and is thread safe.
+ */
+QSC_EXPORT_API bool qsc_encoding_der_validate(const uint8_t* buffer, size_t buflen, size_t* consumed);
+
 /*!
  * \brief Decode a single DER element from an octet buffer.
  *
@@ -655,19 +669,6 @@ QSC_EXPORT_API void qsc_encoding_ber_free_element(qsc_encoding_ber_element* elem
  *
  * \return [qsc_encoding_ber_element*] Pointer to the decoded element, or NULL on error.
  */
-/**
- * \brief Validate the first complete DER element without allocating a tree.
- * \param buffer: Caller-owned, length-bounded DER input (read only).
- * \param buflen: Number of accessible bytes.
- * \param consumed: Receives the validated element size, or zero on failure.
- * \return True for structurally valid definite-length DER with minimally encoded
- *         tags and lengths; false for malformed input. ASN.1 type-specific
- *         canonical restrictions and schema validation are not performed.
- * \note Trailing bytes are not rejected; require *consumed == buflen for an exact
- *       document. The function performs no allocations and is thread safe.
- */
-QSC_EXPORT_API bool qsc_encoding_der_validate(const uint8_t* buffer, size_t buflen, size_t* consumed);
-
 QSC_EXPORT_API qsc_encoding_ber_element* qsc_encoding_der_decode_element(const uint8_t* buffer, size_t buflen, size_t* consumed);
 
 /*!

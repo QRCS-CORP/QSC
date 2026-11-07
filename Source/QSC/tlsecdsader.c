@@ -1,6 +1,8 @@
 #include "tlsecdsader.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static size_t ecdsa_der_leading_zero_skip(const uint8_t* comp, size_t complen)
 {
     size_t skip;
@@ -332,3 +334,5 @@ qsc_tls_status qsc_tls_ecdsa_der_decode(const uint8_t* der, size_t derlen, size_
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

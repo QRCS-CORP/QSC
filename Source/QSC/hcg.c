@@ -3,6 +3,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* QSC-HCG-SHA2-512-02 */
 static const uint8_t QSC_DEFAULT_INFO[QSC_HCG_INFO_SIZE] = { 
 	0x51U, 0x53U, 0x43U, 0x2DU, 0x48U, 0x43U, 0x47U, 0x2DU, 0x53U, 
@@ -216,3 +218,4 @@ void qsc_hcg_update(qsc_hcg_state* ctx, const uint8_t* seed, size_t seedlen)
 	}
 }
 
+/* \endcond DOXYGEN_NO_DOCUMENT */

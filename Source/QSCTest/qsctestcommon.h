@@ -52,13 +52,13 @@
 #ifndef QSCTEST_COMMON_H
 #define QSCTEST_COMMON_H
 
- /* \cond NO_DOCUMENT */
+ /* \cond DOXYGEN_NO_DOCUMENT */
 
 #include "qsccommon.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

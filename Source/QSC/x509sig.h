@@ -91,9 +91,9 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 typedef struct qsc_x509_ecdsa_signature_t
 {
-	uint8_t r[QSC_X509_MAX_SIGNATURE_COMPONENT_SIZE];
-	uint8_t s[QSC_X509_MAX_SIGNATURE_COMPONENT_SIZE];
-	size_t length;
+	uint8_t r[QSC_X509_MAX_SIGNATURE_COMPONENT_SIZE];  /*!< Recorded r value for the enclosing operation. */
+	uint8_t s[QSC_X509_MAX_SIGNATURE_COMPONENT_SIZE];  /*!< Recorded s value for the enclosing operation. */
+	size_t length;  /*!< Length or size in bytes of the associated buffer. */
 } qsc_x509_ecdsa_signature;
 
 /*!

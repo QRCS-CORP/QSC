@@ -1,5 +1,7 @@
 #include "hwse050.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PKCS11_ENABLED) && defined(QSC_HARDWARE_SE050_ENABLED)
 
 #include "memutils.h"
@@ -142,4 +144,7 @@ qsc_hw_status qsc_hw_se050_preflight(qsc_hw_pkcs11_module* module, uint64_t slot
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED && QSC_HARDWARE_SE050_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

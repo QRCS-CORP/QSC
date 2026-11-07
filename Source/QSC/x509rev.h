@@ -73,7 +73,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
- * \enum qsc_x509_revocation_mode
+ * \enum qsc_x509_revocation_mode_t
  * \brief Revocation checking policy modes.
  */
 typedef enum qsc_x509_revocation_mode_t
@@ -81,10 +81,10 @@ typedef enum qsc_x509_revocation_mode_t
     QSC_X509_REVOCATION_MODE_NONE = 0,              /*!< Disable revocation checking. */
     QSC_X509_REVOCATION_MODE_BEST_EFFORT = 1,       /*!< Attempt revocation checking but do not hard-fail when a CRL cannot be obtained or validated. */
     QSC_X509_REVOCATION_MODE_REQUIRE_VALID_CRL = 2  /*!< Require a valid CRL-based revocation result for successful validation. */
-} qsc_x509_revocation_mode;
+} qsc_x509_revocation_mode; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
- * \enum qsc_x509_revocation_status
+ * \enum qsc_x509_revocation_status_t
  * \brief Certificate revocation checking result codes.
  */
 typedef enum qsc_x509_revocation_status_t
@@ -97,7 +97,7 @@ typedef enum qsc_x509_revocation_status_t
     QSC_X509_REVOCATION_STATUS_CRL_EXPIRED = 5,             /*!< The CRL validity interval did not cover the supplied validation time. */
     QSC_X509_REVOCATION_STATUS_ISSUER_MISMATCH = 6,         /*!< The CRL issuer did not match the supplied issuer certificate. */
     QSC_X509_REVOCATION_STATUS_ERROR = 7                    /*!< A non-specific error occurred during revocation processing. */
-} qsc_x509_revocation_status;
+} qsc_x509_revocation_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \typedef qsc_x509_crl_resolver_callback
@@ -120,7 +120,7 @@ typedef qsc_asn1_status (*qsc_x509_crl_resolver_callback)(const qsc_x509_certifi
 typedef qsc_asn1_status (*qsc_x509_delta_crl_resolver_callback)(const qsc_x509_certificate* certificate, const qsc_x509_certificate* issuer, qsc_x509_crl* basecrl, qsc_x509_crl* deltacrl, bool* deltaavailable, void* context);
 
 /*!
- * \struct qsc_x509_revocation_options
+ * \struct qsc_x509_revocation_options_t
  * \brief Revocation checking configuration options.
  *
  * \details
@@ -137,7 +137,7 @@ typedef struct qsc_x509_revocation_options_t
     void* resolvercontext;                                      /*!< Caller-defined opaque context passed to the CRL resolver callback. */
     void* deltaresolvercontext;                                 /*!< Caller-defined opaque context passed to the delta CRL resolver callback. */
     void* verifycontext;                                        /*!< Caller-defined opaque context passed to the CRL signature verification callback. */
-} qsc_x509_revocation_options;
+} qsc_x509_revocation_options; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \brief Initialize a revocation options structure.
@@ -148,7 +148,6 @@ typedef struct qsc_x509_revocation_options_t
  *
  * \param options: [struct] The revocation options structure to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_revocation_options_initialize(qsc_x509_revocation_options* options);
 

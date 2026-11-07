@@ -108,7 +108,7 @@ typedef struct qsc_tls_io_connection
     size_t rxbufferlen;                               /*!< Number of valid bytes in the inbound stream buffer. */
     size_t plaintextbufferlen;                        /*!< Number of valid bytes in the retained plaintext buffer. */
     size_t plaintextbufferoffset;                     /*!< Offset of the next retained plaintext byte to return. */
-} qsc_tls_io_connection;
+} qsc_tls_io_connection; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Attach a TLS engine and socket to an I/O adapter.

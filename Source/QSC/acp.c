@@ -6,6 +6,8 @@
 #include "sha3.h"
 #include "sysutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define ACP_PRESEED_SIZE 64U
 
 static void acp_add_computer_name(qsc_keccak_state* kstate)
@@ -240,3 +242,5 @@ uint64_t qsc_acp_uint64(void)
 
 	return num;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -13,7 +13,7 @@
 #	include <x86intrin.h>
 #endif
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /*! \def ECDHP521_RESTRICT
  * \brief Compiler spelling of the private nonaliasing pointer contract.
@@ -5120,4 +5120,4 @@ bool qsc_p521_key_exchange(uint8_t* secret, const uint8_t* publickey, const uint
 	return qsc_ecdhp521_key_exchange(secret, publickey, privatekey);
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -309,7 +309,7 @@ QSC_EXPORT_API bool qsc_sphincsplus_sign(uint8_t* signedmsg, size_t* smsglen, co
  * \param context: [const uint8_t*] Pointer to the context array.
  * \param ctxlen: [size_t] The context array length.
  * \param privatekey: [const uint8_t*] Pointer to the private signature-key.
- * \param seed: [const uint8_t*] Pointer to the random generator.
+ * \param rng_generate: [const uint8_t*] Pointer to the random generator.
  * 
  * \return [bool] Returns true if the message was signed successfully.
  */

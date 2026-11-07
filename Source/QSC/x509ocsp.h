@@ -83,7 +83,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_X509_OCSP_NONCE_MAX 32U
 
 /*!
- * \enum qsc_x509_ocsp_cert_status
+ * \enum qsc_x509_ocsp_cert_status_t
  * \brief OCSP certificate status codes.
  */
 typedef enum qsc_x509_ocsp_cert_status_t
@@ -91,10 +91,10 @@ typedef enum qsc_x509_ocsp_cert_status_t
     QSC_X509_OCSP_STATUS_GOOD = 0,          /*!< The responder reported that the certificate status is good. */
     QSC_X509_OCSP_STATUS_REVOKED = 1,       /*!< The responder reported that the certificate has been revoked. */
     QSC_X509_OCSP_STATUS_UNKNOWN = 2        /*!< The responder could not determine the certificate status. */
-} qsc_x509_ocsp_cert_status;
+} qsc_x509_ocsp_cert_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
- * \struct qsc_x509_ocsp_response
+ * \struct qsc_x509_ocsp_response_t
  * \brief A parsed OCSP response status summary.
  *
  * \details
@@ -109,7 +109,7 @@ typedef struct qsc_x509_ocsp_response_t
     bool hasnonce;                          /*!< Indicates whether the response included a nonce value. */
     uint8_t nonce[QSC_X509_OCSP_NONCE_MAX]; /*!< The responder nonce bytes when present. */
     size_t noncelen;                        /*!< The number of valid bytes in the nonce buffer. */
-} qsc_x509_ocsp_response;
+} qsc_x509_ocsp_response; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \typedef qsc_x509_ocsp_fetch_callback

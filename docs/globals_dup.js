@@ -1,7 +1,9 @@
 var globals_dup =
 [
-    [ "b", "globals.html", null ],
+    [ "_", "globals.html", null ],
+    [ "b", "globals_b.html", null ],
     [ "e", "globals_e.html", null ],
+    [ "f", "globals_f.html", null ],
     [ "g", "globals_g.html", null ],
     [ "i", "globals_i.html", null ],
     [ "q", "globals_q.html", null ],

@@ -3,6 +3,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool list_random_index(uint32_t minimum, uint32_t maximum, uint32_t* index)
 {
 	uint32_t limit;
@@ -784,3 +786,5 @@ bool qsc_list_self_test()
 	return ret;
 }
 #endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

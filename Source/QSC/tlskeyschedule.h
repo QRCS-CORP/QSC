@@ -150,7 +150,7 @@ QSC_CPLUSPLUS_ENABLED_START
     bool handshakedone;                                                 /*!< True after handshake_secret derivation has completed. */
     bool initialized;                                                   /*!< True when the key schedule state has been initialized. */
     bool masterdone;                                                    /*!< True after master_secret derivation has completed. */
-} qsc_tls_key_schedule_state;
+} qsc_tls_key_schedule_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Initialize a TLS key schedule state.

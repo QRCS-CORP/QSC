@@ -16,6 +16,8 @@
 #include "stringutils.h"
 #include "timestamp.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* RFC 9846 4.2.4 HelloRetryRequest magic random value. */
 static const uint8_t tls_client_hrr_special_random[32U] = 
 {
@@ -3022,3 +3024,5 @@ qsc_tls_cipher_suite qsc_tls_client_get_negotiated_cipher_suite(const qsc_tls_cl
 
     return (state != NULL) ? state->negotiatedsuite : qsc_tls_cipher_suite_none; 
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

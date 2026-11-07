@@ -7,7 +7,6 @@ var common_8h =
     [ "QSC_ECDSA_S1EC25519", "common_8h.html#ac4725b9deca98ea403c272df2fedff52", null ],
     [ "QSC_EXPORT_API", "common_8h.html#a2ef395ab64e46f80b9e391669b062bef", null ],
     [ "QSC_FALCON_S5SHAKE256F1024", "common_8h.html#a0a3984c136eb31ce41a2a448f8ab649e", null ],
-    [ "QSC_KYBER_FIPS203", "common_8h.html#a46edbc192cd8649f54cf52ba3da9379f", null ],
     [ "QSC_KYBER_S5P3168", "common_8h.html#ac9d7063fccb0ebbcdfad1892b72f3d6b", null ],
     [ "QSC_MCELIECE_S5N6688T128", "common_8h.html#a45ca7dd236d5ffa74d4ed894100fde96", null ],
     [ "QSC_NTRU_S5HPS4096821", "common_8h.html#add5c7827e5d6a7956b66096064228972", null ],

@@ -52,9 +52,9 @@
 #ifndef QSC_DILITHIUMBASE_AVX2_H
 #define QSC_DILITHIUMBASE_AVX2_H
 
- /* \cond NO_DOCUMENT */
-
 #include "qsccommon.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -139,6 +139,6 @@ bool qsc_dilithium_avx2_open(uint8_t* message, size_t* msglen, const uint8_t* co
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

@@ -96,7 +96,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_X509_CRL_REVOKED_MAX 1024U
 
 /*!
- * \struct qsc_x509_crl_entry
+ * \struct qsc_x509_crl_t_entry_t
  * \brief A decoded revoked-certificate entry from a CRL.
  *
  * \details
@@ -106,12 +106,12 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 typedef struct qsc_x509_crl_entry_t
 {
-    uint8_t serialnumber[QSC_X509_SERIAL_NUMBER_MAX];       /*! The revoked certificate serial number. */
-    size_t serialnumberlen;                                 /*! The length of the serial number in bytes. */
-    qsc_asn1_time revocationdate;                           /*! The revocation date decoded from the CRL entry. */
-    uint8_t rawextensions[QSC_X509_CRL_ENTRY_MAX];          /*! The raw extension entries. */
-    size_t rawextensionslen;                                /*! The length of raw extension entries. */
-} qsc_x509_crl_entry;
+    uint8_t serialnumber[QSC_X509_SERIAL_NUMBER_MAX];       /*!< The revoked certificate serial number. */
+    size_t serialnumberlen;                                 /*!< The length of the serial number in bytes. */
+    qsc_asn1_time revocationdate;                           /*!< The revocation date decoded from the CRL entry. */
+    uint8_t rawextensions[QSC_X509_CRL_ENTRY_MAX];          /*!< The raw extension entries. */
+    size_t rawextensionslen;                                /*!< The length of raw extension entries. */
+} qsc_x509_crl_entry; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \struct qsc_x509_crl
@@ -125,27 +125,27 @@ typedef struct qsc_x509_crl_entry_t
  */
 typedef struct qsc_x509_crl_t
 {
-    uint32_t version;                                       /*! The CRL version number. */
-    qsc_x509_algorithm_identifier tbsignature;              /*! The signature algorithm identifier from the TBSCertList. */
-    qsc_x509_name issuer;                                   /*! The issuer distinguished name of the CRL. */
-    qsc_asn1_time thisupdate;                               /*! The CRL thisUpdate time. */
-    bool nextupdate_present;                                /*! Indicates whether nextUpdate is present. */
-    qsc_asn1_time nextupdate;                               /*! The CRL nextUpdate time when present. */
-    qsc_x509_crl_entry revoked[QSC_X509_CRL_REVOKED_MAX];   /*! The fixed-capacity array of decoded revoked entries. */
-    size_t revokedcount;                                    /*! The number of valid entries in the revoked array. */
-    qsc_x509_extensions extensions;                         /*! The X.509 extensions structure */
-    qsc_x509_algorithm_identifier signaturealgorithm;       /*! The outer CertificateList signature algorithm identifier. */
-    uint8_t signature[QSC_X509_SIGNATURE_MAX];              /*! The raw signature bit-string content. */
-    size_t signaturelen;                                    /*! The signature length in bytes. */
-    uint8_t signatureunusedbits;                            /*! The number of unused bits in the signature BIT STRING. */
-    const uint8_t* tbsdata;                                 /*! Pointer to the raw TBSCertList DER payload inside the source buffer. */
-    size_t tbsdatalen;                                      /*! The length in bytes of the TBSCertList DER payload. */
-    const uint8_t* der;                                     /*! Pointer to the original source DER buffer. */
-    size_t derlen;                                          /*! The length in bytes of the original source DER buffer. */
-} qsc_x509_crl;
+    uint32_t version;                                       /*!< The CRL version number. */
+    qsc_x509_algorithm_identifier tbsignature;              /*!< The signature algorithm identifier from the TBSCertList. */
+    qsc_x509_name issuer;                                   /*!< The issuer distinguished name of the CRL. */
+    qsc_asn1_time thisupdate;                               /*!< The CRL thisUpdate time. */
+    bool nextupdate_present;                                /*!< Indicates whether nextUpdate is present. */
+    qsc_asn1_time nextupdate;                               /*!< The CRL nextUpdate time when present. */
+    qsc_x509_crl_entry revoked[QSC_X509_CRL_REVOKED_MAX];   /*!< The fixed-capacity array of decoded revoked entries. */
+    size_t revokedcount;                                    /*!< The number of valid entries in the revoked array. */
+    qsc_x509_extensions extensions;                         /*!< The X.509 extensions structure */
+    qsc_x509_algorithm_identifier signaturealgorithm;       /*!< The outer CertificateList signature algorithm identifier. */
+    uint8_t signature[QSC_X509_SIGNATURE_MAX];              /*!< The raw signature bit-string content. */
+    size_t signaturelen;                                    /*!< The signature length in bytes. */
+    uint8_t signatureunusedbits;                            /*!< The number of unused bits in the signature BIT STRING. */
+    const uint8_t* tbsdata;                                 /*!< Pointer to the raw TBSCertList DER payload inside the source buffer. */
+    size_t tbsdatalen;                                      /*!< The length in bytes of the TBSCertList DER payload. */
+    const uint8_t* der;                                     /*!< Pointer to the original source DER buffer. */
+    size_t derlen;                                          /*!< The length in bytes of the original source DER buffer. */
+} qsc_x509_crl; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
- * \enum qsc_x509_crl_verify_status
+ * \enum qsc_x509_crl_verify_status_t
  * \brief CRL verification result codes.
  *
  * \details
@@ -156,18 +156,18 @@ typedef struct qsc_x509_crl_t
 typedef enum qsc_x509_crl_verify_status_t
 {
 
-    QSC_X509_CRL_VERIFY_STATUS_SUCCESS = 0,                 /*! Verification completed successfully. */
-    QSC_X509_CRL_VERIFY_STATUS_INVALID_INPUT = 1,           /*! One or more input arguments were invalid. */
-    QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL = 2,             /*! The CRL structure was malformed or internally inconsistent. */
-    QSC_X509_CRL_VERIFY_STATUS_ALGORITHM_MISMATCH = 3,      /*! The inner and outer signature algorithm identifiers did not match. */
-    QSC_X509_CRL_VERIFY_STATUS_ISSUER_MISMATCH = 4,         /*! The CRL issuer did not match the supplied issuer certificate. */
-    QSC_X509_CRL_VERIFY_STATUS_EXPIRED = 5,                 /*! The CRL was expired relative to the supplied evaluation time. */
-    QSC_X509_CRL_VERIFY_STATUS_NOT_YET_VALID = 6,           /*! The CRL was not yet valid relative to the supplied evaluation time. */
-    QSC_X509_CRL_VERIFY_STATUS_KEY_USAGE_REJECTED = 7,      /*! The issuer certificate key-usage policy rejected CRL signing. */
-    QSC_X509_CRL_VERIFY_STATUS_SIGNATURE_REJECTED = 8,      /*! The CRL signature was rejected by the verification callback. */
-    QSC_X509_CRL_VERIFY_STATUS_CALLBACK_FAILURE = 9,        /*! The caller supplied verification callback failed to execute successfully. */
+    QSC_X509_CRL_VERIFY_STATUS_SUCCESS = 0,                 /*!< Verification completed successfully. */
+    QSC_X509_CRL_VERIFY_STATUS_INVALID_INPUT = 1,           /*!< One or more input arguments were invalid. */
+    QSC_X509_CRL_VERIFY_STATUS_INVALID_CRL = 2,             /*!< The CRL structure was malformed or internally inconsistent. */
+    QSC_X509_CRL_VERIFY_STATUS_ALGORITHM_MISMATCH = 3,      /*!< The inner and outer signature algorithm identifiers did not match. */
+    QSC_X509_CRL_VERIFY_STATUS_ISSUER_MISMATCH = 4,         /*!< The CRL issuer did not match the supplied issuer certificate. */
+    QSC_X509_CRL_VERIFY_STATUS_EXPIRED = 5,                 /*!< The CRL was expired relative to the supplied evaluation time. */
+    QSC_X509_CRL_VERIFY_STATUS_NOT_YET_VALID = 6,           /*!< The CRL was not yet valid relative to the supplied evaluation time. */
+    QSC_X509_CRL_VERIFY_STATUS_KEY_USAGE_REJECTED = 7,      /*!< The issuer certificate key-usage policy rejected CRL signing. */
+    QSC_X509_CRL_VERIFY_STATUS_SIGNATURE_REJECTED = 8,      /*!< The CRL signature was rejected by the verification callback. */
+    QSC_X509_CRL_VERIFY_STATUS_CALLBACK_FAILURE = 9,        /*!< The caller supplied verification callback failed to execute successfully. */
     QSC_X509_CRL_VERIFY_STATUS_UNSUPPORTED = 10             /*! A required feature or algorithm was not supported. */
-} qsc_x509_crl_verify_status;
+} qsc_x509_crl_verify_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \typedef qsc_x509_crl_signature_verify_callback
@@ -196,7 +196,6 @@ typedef bool (*qsc_x509_crl_signature_verify_callback)(const qsc_x509_crl* crl, 
  *
  * \param crl: [struct] The CRL object to clear.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_crl_clear(qsc_x509_crl* crl);
 
@@ -255,7 +254,7 @@ QSC_EXPORT_API bool qsc_x509_crl_is_current(const qsc_x509_crl* crl, const qsc_a
  *
  * \param crl: [const][struct] The decoded CRL to inspect.
  *
- * \return [enum] Returns a \ref qsc_x509_crl_verify_status result code.
+ * \return [enum] Returns a \ref qsc_x509_crl_verify_status_t result code.
  */
 QSC_EXPORT_API qsc_x509_crl_verify_status qsc_x509_crl_check_algorithms(const qsc_x509_crl* crl);
 
@@ -318,7 +317,7 @@ QSC_EXPORT_API bool qsc_x509_crl_is_revoked(const qsc_x509_crl* crl, const qsc_x
  * \param callback: The caller supplied CRL signature verification callback.
  * \param state: Caller-defined opaque state passed through to \p callback.
  *
- * \return [enum] Returns a \ref qsc_x509_crl_verify_status result code.
+ * \return [enum] Returns a \ref qsc_x509_crl_verify_status_t result code.
  */
 QSC_EXPORT_API qsc_x509_crl_verify_status qsc_x509_crl_verify(const qsc_x509_crl* crl, const qsc_x509_certificate* issuer, const qsc_asn1_time* now, qsc_x509_crl_signature_verify_callback callback, void* state);
 

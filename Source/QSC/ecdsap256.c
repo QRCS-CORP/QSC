@@ -5,7 +5,7 @@
 #include "intrinsics.h"
 #include "sha2.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /*! \def ECDSAP256_X64
  * \brief Native x86-64 compiler target, excluding ARM64EC.
@@ -9304,4 +9304,4 @@ bool qsc_p256_verify_prehashed_with_comb_context(uint8_t* message, size_t* msgle
 	return qsc_ecdsap256_verify_prehashed_with_comb_context(message, msglen, signedmsg, smsglen, context, digest, digestlen);
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

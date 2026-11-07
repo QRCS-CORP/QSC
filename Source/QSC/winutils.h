@@ -134,7 +134,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_WINTOOLS_SERVICE_LIST_DESCRIPTION
 
 ///*!
-//* \def QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY
+//* \par Configuration macro: \c QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY
 //* \brief Only include running services when listing services
 //*/
 //#define QSC_WINTOOLS_SERVICE_LIST_ACTIVE_ONLY
@@ -222,7 +222,7 @@ QSC_EXPORT_API bool qsc_winutils_process_terminate(const char* name);
 /**
 * \brief Create a registry key and add a value
 *
-* \param keypath: [const char*] The fully qualified path; root\subkey
+* \param keypath: [const char*] The fully qualified path; root\\subkey
 * \param value: [const char*] The value to add
 * \param vtype: [qsc_winutils_registry_value_types] The value type
 *
@@ -233,14 +233,14 @@ QSC_EXPORT_API bool qsc_winutils_registry_key_add(const char* keypath, const cha
 /**
 * \brief Delete a registry key
 *
-* \param keypath: [const char*] The fully qualified path; root\subkey
+* \param keypath: [const char*] The fully qualified path; root\\subkey
 *
 * \return [bool] Returns true if the key was deleted
 */
 QSC_EXPORT_API bool qsc_winutils_registry_key_delete(const char* keypath);
 
 /**
-* \brief Create a list of registry keys under a starting key, ex. 'HKEY_CURRENT_USER\Software'
+* \brief Create a list of registry keys under a starting key, ex. 'HKEY_CURRENT_USER\\Software'
 *
 * \param result: [char*] The result output string
 * \param reslen: [size_t] The length of the result string

@@ -6,6 +6,8 @@
 #include "tlskeyschedule.h"
 #include "tlsrecord.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static qsc_tls_status tls_io_deadline_remaining(uint64_t startms, uint32_t timeoutms, uint32_t* remainingms)
 {
     qsc_tls_status status;
@@ -664,3 +666,5 @@ qsc_tls_status qsc_tls_io_shutdown(qsc_tls_io_connection* io)
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

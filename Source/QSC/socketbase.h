@@ -87,9 +87,9 @@ QSC_SYSTEM_CONDITION_IGNORE(5105)
 #endif
 
 ///*!
-//\def QSC_SOCKET_DUAL_IPV6_STACK
-//* \brief Enables a dual stack ipv4 and ipv6 listener.
-//*/
+//\par Configuration macro: \c QSC_SOCKET_DUAL_IPV6_STACK
+//  brief Enables a dual stack ipv4 and ipv6 listener.
+// * end comment
 //#if !defined(QSC_SOCKET_DUAL_IPV6_STACK)
 //#	define QSC_SOCKET_DUAL_IPV6_STACK
 //#endif
@@ -266,29 +266,29 @@ typedef struct
 
 /*** Function Prototypes ***/
 
-///**
-//* \brief The socket exception callback prototype
+// **
+//  brief The socket exception callback prototype
 //*
-//* \param source: [qsc_socket*] The socket source
-//* \param error: [qsc_socket_exceptions] The socket exception
-//*/
+//  param source: [qsc_socket*] The socket source
+//  param error: [qsc_socket_exceptions] The socket exception
+// * end comment
 //QSC_EXPORT_API void qsc_socket_exception_callback(qsc_socket* source, qsc_socket_exceptions error);
 
-///**
-//* \brief The socket receive asynchronous callback prototype
+// **
+//  brief The socket receive asynchronous callback prototype
 //*
-//* \param source:v[qsc_socket*] The socket source
-//* \param message:	[const uint8_t*] The socket message buffer
-//* \param msglen:v[size_t*] A pointer to the size of the message
-//*/
+//  param source:v[qsc_socket*] The socket source
+//  param message:	[const uint8_t*] The socket message buffer
+//  param msglen:v[size_t*] A pointer to the size of the message
+// * end comment
 //QSC_EXPORT_API void qsc_socket_receive_async_callback(qsc_socket* source, const uint8_t* message, size_t* msglen);
 
-///**
-//* \brief The receive polling callback prototype
+// **
+//  brief The receive polling callback prototype
 //*
-//* \param source: [const qsc_socket*] The socket source
-//* \param error: [size_t] The socket exception
-//*/
+//  param source: [const qsc_socket*] The socket source
+//  param error: [size_t] The socket exception
+// * end comment
 //QSC_EXPORT_API void qsc_socket_receive_poll_callback(const qsc_socket* source, size_t error);
 
 /*** Accessors ***/

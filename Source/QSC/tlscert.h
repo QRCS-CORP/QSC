@@ -191,7 +191,7 @@ typedef struct qsc_tls_client_authorization_info
 	size_t certificatefingerprintlen;						/*!< Length of the certificate fingerprint in bytes. */
 	qsc_x509_verify_status verifystatus;					/*!< X.509 verification status reported by the validation layer. */
 	bool chainvalid;										/*!< Indicates that certificate-chain validation succeeded. */
-} qsc_tls_client_authorization_info;
+} qsc_tls_client_authorization_info; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Authorize a cryptographically valid mTLS client certificate.
@@ -414,8 +414,8 @@ QSC_EXPORT_API bool qsc_tls_x509_validate_chain(const qsc_tls_certificate_view* 
  * \brief Verify a TLS CertificateVerify signature using the QSC X.509 bridge.
  *
  * \param scheme: [enum] The TLS signature scheme.
- * \param transcript: [const uint8_t*] The transcript bytes covered by the signature.
- * \param transcriptlen: [size_t] The length of the transcript in bytes.
+ * \param input: [const uint8_t*] The transcript bytes covered by the signature.
+ * \param inputlen: [size_t] The length of the transcript in bytes.
  * \param signature: [const uint8_t*] The encoded signature bytes.
  * \param signaturelen: [size_t] The length of the signature in bytes.
  * \param signer: [struct*] The signer certificate view.

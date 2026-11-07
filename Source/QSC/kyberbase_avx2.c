@@ -6,7 +6,7 @@
 #include "memutils.h"
 #include "sha3.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 #define KYBER_ZETA_SIZE 128
 #define KYBER_MONT 2285U /* 2^16 mod q */
@@ -1796,6 +1796,6 @@ bool qsc_kyber_avx2_decapsulate(uint8_t ss[QSC_KYBER_MSGBYTES], const uint8_t ct
     return true;
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

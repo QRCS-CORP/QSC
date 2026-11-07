@@ -184,7 +184,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 ///*!
-// * \def QSC_DILITHIUM_RANDOMIZED_SIGNING
+// * \par Configuration macro: \c QSC_DILITHIUM_RANDOMIZED_SIGNING
 // * \brief Enables randomized signing.
 // */
 //#define QSC_DILITHIUM_RANDOMIZED_SIGNING

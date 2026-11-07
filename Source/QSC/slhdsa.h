@@ -54,6 +54,8 @@
 
 #include "qsccommon.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 QSC_CPLUSPLUS_ENABLED_START
 
 
@@ -820,5 +822,7 @@ QSC_EXPORT_API bool qsc_slhdsa_shake256f_verify_prehash(const uint8_t* signature
 QSC_EXPORT_API bool qsc_slhdsa_shake256f_verify(const uint8_t* signature, size_t siglen, const uint8_t* message, size_t msglen, const uint8_t* context, size_t ctxlen, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

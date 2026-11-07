@@ -35,7 +35,7 @@ typedef enum qsc_tls_server_state_phase
     qsc_tls_server_phase_closed = 8,
     qsc_tls_server_phase_failed = 9,
     qsc_tls_server_phase_waiting_end_of_early_data = 10 /*!< Reserved compatibility value; unreachable because QSC does not accept 0-RTT. */
-} qsc_tls_server_state_phase;
+} qsc_tls_server_state_phase; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Server-side TLS 1.3 resumption-ticket lookup callback.
@@ -65,7 +65,7 @@ typedef struct qsc_tls_server_certificate_identity
     char hostname[QSC_TLS_MAX_HOSTNAME_SIZE + 1U];       /*!< The DNS name or wildcard pattern for this identity. */
     qsc_tls_local_certificate_config localcert;          /*!< The local certificate configuration selected for the identity. */
     bool configured;                                     /*!< Indicates that the identity slot is populated. */
-} qsc_tls_server_certificate_identity;
+} qsc_tls_server_certificate_identity; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_server_config
@@ -73,13 +73,13 @@ typedef struct qsc_tls_server_certificate_identity
  */
 typedef struct qsc_tls_server_config
 {
-    const qsc_tls_cipher_suite* ciphersuitepreference;
-    size_t ciphersuitepreferencecount;
-    const qsc_tls_named_group* groupspreference;
-    size_t groupspreferencecount;
-    const qsc_tls_signature_scheme* sigschemepreference;
-    size_t sigschemepreferencecount;
-    qsc_tls_local_certificate_config localcert;
+    const qsc_tls_cipher_suite* ciphersuitepreference;  /*!< Ordered supported cipher suites; caller-owned array. */
+    size_t ciphersuitepreferencecount;  /*!< Number of entries in ciphersuitepreference. */
+    const qsc_tls_named_group* groupspreference;  /*!< Ordered allowed key-exchange groups; caller-owned array. */
+    size_t groupspreferencecount;  /*!< Number of entries in groupspreference. */
+    const qsc_tls_signature_scheme* sigschemepreference;  /*!< Ordered supported signature schemes; caller-owned array. */
+    size_t sigschemepreferencecount;  /*!< Number of entries in sigschemepreference. */
+    qsc_tls_local_certificate_config localcert;  /*!< Local certificate and private signing configuration. */
     qsc_tls_server_certificate_identity identities[QSC_TLS_MAX_SERVER_IDENTITIES]; /*!< Optional SNI-selectable server identities. */
     size_t identitycount;                                /*!< Number of valid SNI-selectable identities. */
     bool requiresni;                                     /*!< Reject ClientHello messages without a recognized SNI name when true. */
@@ -93,7 +93,7 @@ typedef struct qsc_tls_server_config
     qsc_tls_psk_lookup_callback psklookup;              /*!< Optional: enable PSK resumption when non-NULL. */
     void* psklookupstate;                               /*!< Caller-owned state forwarded to psklookup. */
     bool acceptearlydata;                               /*!< Reserved 0-RTT switch; QSC rejects true because server anti-replay acceptance is not supported. */
-} qsc_tls_server_config;
+} qsc_tls_server_config; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_server_state
@@ -101,38 +101,38 @@ typedef struct qsc_tls_server_config
  */
 typedef struct qsc_tls_server_state
 {
-    qsc_tls_server_config config;
+    qsc_tls_server_config config;  /*!< Server policy copied or borrowed during initialization. */
     qsc_tls_qsc_x509_context x509context;                    /*!< Connection-owned mutable QSC X.509 validation context when the built-in bridge is used. */
-    qsc_tls_server_state_phase phase;
-    qsc_tls_cipher_suite negotiatedsuite;
-    qsc_tls_hash_algorithm negotiatedhash;
-    qsc_tls_named_group negotiatedgroup;
-    qsc_tls_signature_scheme negotiatedsigscheme;
-    uint8_t clientrandom[32U];
-    uint8_t serverrandom[32U];
-    uint8_t serverkeyshare[QSC_TLS_MAX_HYBRID_SERVER_KEYSHARE_SIZE];
-    size_t serverkeysharelen;
-    uint8_t sharedsecret[QSC_TLS_MAX_SHARED_SECRET_SIZE];
-    size_t sharedsecretlen;
+    qsc_tls_server_state_phase phase;  /*!< Current server handshake state-machine phase. */
+    qsc_tls_cipher_suite negotiatedsuite;  /*!< Cipher suite selected during negotiation. */
+    qsc_tls_hash_algorithm negotiatedhash;  /*!< Transcript hash selected for the cipher suite. */
+    qsc_tls_named_group negotiatedgroup;  /*!< Negotiated key-exchange group. */
+    qsc_tls_signature_scheme negotiatedsigscheme;  /*!< Negotiated peer signature scheme. */
+    uint8_t clientrandom[32U];  /*!< ClientHello random value, 32 bytes. */
+    uint8_t serverrandom[32U];  /*!< ServerHello random value, 32 bytes. */
+    uint8_t serverkeyshare[QSC_TLS_MAX_HYBRID_SERVER_KEYSHARE_SIZE];  /*!< Serialized server key share, capacity QSC_TLS_MAX_HYBRID_SERVER_KEYSHARE_SIZE bytes. */
+    size_t serverkeysharelen;  /*!< Number of valid bytes in serverkeyshare. */
+    uint8_t sharedsecret[QSC_TLS_MAX_SHARED_SECRET_SIZE];  /*!< Negotiated key-exchange secret, capacity QSC_TLS_MAX_SHARED_SECRET_SIZE bytes. */
+    size_t sharedsecretlen;  /*!< Number of valid bytes in sharedsecret. */
     uint8_t handshakebuffer[QSC_TLS_STREAM_BUFFER_MAX_SIZE];   /*!< Inbound handshake-message reassembly buffer. */
     size_t handshakebufferlen;                                 /*!< Number of valid bytes in the handshake reassembly buffer. */
-    qsc_tls_transcript_state transcript;
-    qsc_tls_key_schedule_state keyschedule;
-    qsc_tls_record_state readrecord;
-    qsc_tls_record_state writerecord;
-    qsc_tls_peer_capabilities clientcapabilities;
-    qsc_tls_alert_description lastalert;
+    qsc_tls_transcript_state transcript;  /*!< Incremental handshake transcript state. */
+    qsc_tls_key_schedule_state keyschedule;  /*!< TLS 1.3 traffic-secret and key-schedule state. */
+    qsc_tls_record_state readrecord;  /*!< Inbound record protection state. */
+    qsc_tls_record_state writerecord;  /*!< Outbound record protection state. */
+    qsc_tls_peer_capabilities clientcapabilities;  /*!< Peer-advertised groups and signature capabilities. */
+    qsc_tls_alert_description lastalert;  /*!< Most recent TLS alert status. */
     char servername[QSC_TLS_MAX_HOSTNAME_SIZE + 1U];       /*!< The bounded ClientHello SNI hostname, when supplied. */
     size_t servernamelen;                                  /*!< The length in bytes of the stored SNI hostname. */
     bool servernamereceived;                               /*!< Indicates that a server_name extension was received. */
     bool servernameaccepted;                               /*!< Indicates that SNI matched a configured certificate identity. */
     uint8_t clientalpn[QSC_TLS_MAX_ALPN_PROTOCOLS][QSC_TLS_MAX_ALPN_SIZE];
-    size_t clientalpnlens[QSC_TLS_MAX_ALPN_PROTOCOLS];
-    size_t clientalpncount;
-    uint8_t selectedalpn[QSC_TLS_MAX_ALPN_SIZE];
-    size_t selectedalpnlen;
-    bool alpnselected;
-    bool helloretryrequestsent;
+    size_t clientalpnlens[QSC_TLS_MAX_ALPN_PROTOCOLS];  /*!< Lengths of the client-advertised ALPN identifiers. */
+    size_t clientalpncount;  /*!< Number of valid client-advertised ALPN identifiers. */
+    uint8_t selectedalpn[QSC_TLS_MAX_ALPN_SIZE];  /*!< Selected ALPN protocol identifier. */
+    size_t selectedalpnlen;  /*!< Length in bytes of the negotiated ALPN identifier. */
+    bool alpnselected;  /*!< Indicates whether ALPN negotiation selected a protocol. */
+    bool helloretryrequestsent;  /*!< Indicates that this handshake emitted HelloRetryRequest. */
     qsc_tls_named_group hrrgroup;                       /*!< Group selected for HRR, valid when helloretryrequestsent==true. */
     uint8_t hrrcookie[32U];                             /*!< Stateful cookie emitted with HelloRetryRequest. */
     size_t hrrcookielen;                                /*!< Length of the active HelloRetryRequest cookie. */
@@ -142,7 +142,7 @@ typedef struct qsc_tls_server_state
     bool clientcertificatevalidationattempted;               /*!< True after the presented client certificate chain has been submitted to the configured validation interface. */
     bool clientcertificatevalidated;                         /*!< True after the presented client certificate chain has passed validation. */
     bool clientauthenticated;                                /*!< True only after validated client certificate proof and authorization. */
-    bool changecipherspecreceived;
+    bool changecipherspecreceived;  /*!< Tracks a received compatibility ChangeCipherSpec record. */
     bool closenotifyreceived;                             /*!< True after an authenticated peer close_notify has been received. */
     bool pskaccepted;                                   /*!< True if we accepted a client PSK (resumption handshake). */
     bool pskticketagevalid;                             /*!< True when the selected ticket age matched server elapsed time within policy tolerance. */
@@ -151,10 +151,10 @@ typedef struct qsc_tls_server_state
     bool earlydataaccepted;                             /*!< Reserved compatibility field; always false because QSC does not accept 0-RTT. */
     bool earlydatadone;                                 /*!< Reserved compatibility field; always false because EndOfEarlyData is not accepted. */
     uint8_t stashedserverfinhash[QSC_TLS_HASH_MAX_SIZE]; /*!< CH..server_Finished transcript hash retained for application-key derivation. */
-    size_t stashedserverfinhashlen;
-    uint8_t legacy_session_id[32U];
-    size_t legacy_session_id_len;
-} qsc_tls_server_state;
+    size_t stashedserverfinhashlen;  /*!< Length in bytes of the saved server Finished transcript hash. */
+    uint8_t legacy_session_id[32U];  /*!< ClientHello legacy session identifier, at most 32 bytes. */
+    size_t legacy_session_id_len;  /*!< Number of valid bytes in legacy_session_id. */
+} qsc_tls_server_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 
 /**
@@ -257,7 +257,17 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_server_config_add_certificate_identity(qsc
  */
 QSC_EXPORT_API qsc_tls_status qsc_tls_server_config_set_sni_required(qsc_tls_server_config* config, bool required);
 
+/** \brief Initialize a server handshake state from its configuration.
+ * \param state: Caller-owned server state to initialize.
+ * \param config: Server policy whose referenced arrays must remain valid while used.
+ * \return TLS status indicating successful initialization or a configuration error.
+ * \note The caller must dispose of initialized state after use; do not access one state concurrently.
+ */
 QSC_EXPORT_API qsc_tls_status qsc_tls_server_initialize(qsc_tls_server_state* state, const qsc_tls_server_config* config);
+/** \brief Dispose of a TLS server handshake state and release its retained resources.
+ * \param state: Caller-owned server state to dispose of.
+ * \note Do not use the state after disposal without reinitialization.
+ */
 QSC_EXPORT_API void qsc_tls_server_dispose(qsc_tls_server_state* state);
 
 /**
@@ -272,7 +282,15 @@ QSC_EXPORT_API void qsc_tls_server_dispose(qsc_tls_server_state* state);
 QSC_EXPORT_API qsc_tls_status qsc_tls_server_process_record(qsc_tls_server_state* state, const uint8_t* input, size_t inlen, size_t* consumed,
     uint8_t* output, size_t outlen, size_t* written);
 
+/** \brief Query whether a server handshake has completed successfully.
+ * \param state: Server handshake state to examine.
+ * \return True when the server handshake is complete; false otherwise.
+ */
 QSC_EXPORT_API bool qsc_tls_server_is_handshake_complete(const qsc_tls_server_state* state);
+/** \brief Read the cipher suite selected by the server handshake.
+ * \param state: Server handshake state to examine.
+ * \return The negotiated cipher suite, or the implementation's unset value before negotiation.
+ */
 QSC_EXPORT_API qsc_tls_cipher_suite qsc_tls_server_get_negotiated_cipher_suite(const qsc_tls_server_state* state);
 
 QSC_CPLUSPLUS_ENABLED_END

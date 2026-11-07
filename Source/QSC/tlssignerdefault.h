@@ -99,7 +99,7 @@ typedef struct qsc_tls_signer_default_context
     qsc_tls_signature_scheme scheme;    /*!< The TLS signature scheme this context signs under. */
     const uint8_t* privatekey;          /*!< Caller-owned private-key bytes. */
     size_t privatekeylen;               /*!< Length of privatekey in bytes. */
-} qsc_tls_signer_default_context;
+} qsc_tls_signer_default_context; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Produce a TLS CertificateVerify signature.

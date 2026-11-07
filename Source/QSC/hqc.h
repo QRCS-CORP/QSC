@@ -222,9 +222,9 @@ QSC_EXPORT_API bool qsc_hqc_encapsulate(uint8_t* secret, uint8_t* ciphertext, co
 * \brief Generates cipher text and shared secret for given public key and a random seed.
 * \note Intended for deterministic testing. This does not claim NIST ACVP conformance.
 * 
-* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of QSC_HQC_CIPHERTEXT_SIZE bytes)
-* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of QSC_HQC_SHAREDSECRET_SIZE bytes)
-* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of QSC_HQC_PUBLICKEY_SIZE bytes)
+* \param ciphertext: [uint8_t*] Pointer to output cipher text (an already allocated array of QSC_HQC_CIPHERTEXT_SIZE bytes)
+* \param secret: [uint8_t*] Pointer to output shared secret (an already allocated array of QSC_HQC_SHAREDSECRET_SIZE bytes)
+* \param publickey: [const uint8_t*] Pointer to input public key (an already allocated array of QSC_HQC_PUBLICKEY_SIZE bytes)
 * \param seed: [const uint8_t*] Pointer to the random seed (a populated random array of QSC_HQC_SEED_SIZE bytes)
 */
 void qsc_hqc_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t seed[QSC_HQC_SEED_SIZE]);
@@ -249,7 +249,6 @@ QSC_EXPORT_API bool qsc_hqc_generate_keypair(uint8_t* publickey, uint8_t* privat
 * \param publickey:	[uint8_t*] Pointer to output public key (an already allocated array of QSC_HQC_PUBLICKEY_SIZE bytes)
 * \param privatekey: [uint8_t*] Pointer to output private key (an already allocated array of QSC_HQC_PRIVATEKEY_SIZE bytes)
 * \param seed: [uint8_t*] Input random seed, QSC_HQC_SEED_SIZE bytes; must not alias the outputs.
- * \return No return value. Inputs must point to valid nonoverlapping buffers.
 */
 QSC_EXPORT_API void qsc_hqc_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
 

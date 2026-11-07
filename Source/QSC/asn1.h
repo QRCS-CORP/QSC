@@ -505,7 +505,7 @@ QSC_EXPORT_API int32_t qsc_asn1_time_compare(const qsc_asn1_time* a, const qsc_a
  * checking structure sizes during certificate parsing.
  *
  * \param element: [const qsc_encoding_ber_element*] The ASN.1 element.
- * \param length: [size_t*] Receives the computed encoded length.
+ * \param size: [size_t*] Receives the computed encoded length.
  *
  * \return [qsc_asn1_status] Returns QSC_ASN1_STATUS_SUCCESS on success.
  */

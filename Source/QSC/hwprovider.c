@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \struct qsc_hw_provider
  * \brief Private provider lifecycle state; never contains a private key.
  */
@@ -573,4 +575,7 @@ qsc_hw_status qsc_hw_provider_close(qsc_hw_provider** provider)
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

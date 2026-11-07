@@ -4,7 +4,7 @@
 #include "memutils.h"
 #include "intrinsics.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /*! \brief X25519 arithmetic and immutable Edwards generator table.
  * \details Based in part on the Botan implementation and public-domain SUPERCOP ref10.
@@ -8536,4 +8536,4 @@ void qsc_ge25519_basepoint_to_bytes(uint8_t* out, const uint8_t* scalar)
 	qsc_memutils_secure_erase(&projective, sizeof(projective));
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

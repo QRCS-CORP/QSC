@@ -1,5 +1,7 @@
 #include "tlssigalgs.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static const qsc_tls_signature_scheme_descriptor qsc_tls_sigalg_descriptors[] =
 {
 	{ qsc_tls_sig_ecdsa_secp256r1_sha256, "ecdsa_secp256r1_sha256", qsc_tls_hash_sha256, 72U, true, true, false, false },
@@ -263,3 +265,5 @@ const char* qsc_tls_signature_scheme_name(qsc_tls_signature_scheme scheme)
 
 	return (desc != NULL) ? desc->name : "unknown";
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

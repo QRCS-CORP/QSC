@@ -8,6 +8,8 @@
 #	include "kyberbase.h"
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool kyber_decapsulation_key_is_valid(const uint8_t* privatekey)
 {
 	uint8_t hash[QSC_KYBER_SYMBYTES] = { 0U };
@@ -163,3 +165,5 @@ void qsc_kyber_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, 
 	qsc_kyber_ref_generate_seeded_keypair(publickey, privatekey, d, z);
 #endif
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

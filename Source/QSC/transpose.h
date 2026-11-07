@@ -80,7 +80,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * - <a href="https://docs.microsoft.com/en-us/">Microsoft Intutils Documentation</a>
  * - <a href="https://pubs.opengroup.org/onlinepubs/">POSIX Standard Documentation</a>
  *
- * \keywords transpose, conversion, big-endian, hexadecimal, string, integer, utility
+ * keywords transpose, conversion, big-endian, hexadecimal, string, integer, utility
  */
 
 /**

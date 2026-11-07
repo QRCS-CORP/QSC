@@ -79,6 +79,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * resumption PSK is retained in qsc_tls_session_ticket but is not serialized by
  * qsc_tls_session_ticket_encode().
  */
+/** \struct qsc_tls_session_ticket
+ * \brief TLS 1.3 resumption ticket and its associated local PSK metadata.
+ */
 
 typedef struct qsc_tls_session_ticket
 {
@@ -99,7 +102,7 @@ typedef struct qsc_tls_session_ticket
     size_t alpnlen;                                      /*!< Length of alpn. */
     qsc_tls_cipher_suite suite;                          /*!< Originating cipher suite; its KDF hash binds the PSK. */
     uint16_t protocolversion;                            /*!< TLS version associated with the PSK; QSC tickets use TLS 1.3. */
-} qsc_tls_session_ticket;
+} qsc_tls_session_ticket; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Encode a TLS session ticket structure.

@@ -1,6 +1,8 @@
 #include "x509time.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static int32_t x509_parse_int(const char* s, size_t len)
 {
     int32_t v;
@@ -340,3 +342,5 @@ bool qsc_x509_time_parse_generalizedtime(const char* s, size_t len, qsc_x509_tim
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

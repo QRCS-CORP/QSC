@@ -203,7 +203,6 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_spki_get_ec_coordinates(const qsc_x509_s
  *
  * \param algorithm: [struct] The algorithm identifier object to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_algorithm_identifier_initialize(qsc_x509_algorithm_identifier* algorithm);
 
@@ -216,7 +215,6 @@ QSC_EXPORT_API void qsc_x509_algorithm_identifier_initialize(qsc_x509_algorithm_
  *
  * \param spki: [struct] The subject public key information object to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_subject_public_key_info_initialize(qsc_x509_subject_public_key_info* spki);
 

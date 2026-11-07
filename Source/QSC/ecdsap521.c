@@ -14,6 +14,8 @@
 #	include <x86intrin.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /*! \def ECDSAP521_RESTRICT
  * \brief Compiler spelling of the private nonaliasing pointer contract.
  */
@@ -3585,4 +3587,4 @@ bool qsc_p521_verify_prehashed_with_comb_context(uint8_t* message, size_t* msgle
 	return qsc_ecdsap521_verify_prehashed_with_comb_context(message, msglen, signedmsg, smsglen, context, digest, digestlen);
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

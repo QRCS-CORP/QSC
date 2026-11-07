@@ -19,7 +19,7 @@
 #	include <immintrin.h>
 #endif
 
- /* \cond NO_DOCUMENT */
+ /* \cond DOXYGEN_NO_DOCUMENT */
 
 /*! \brief 256-bit field element: 8 x uint32_t, little-endian (word 0 is least significant) */
 typedef uint32_t ecdhp256_field[8U];
@@ -3219,5 +3219,5 @@ int32_t qsc_crypto_scalarmult_secp256r1(uint8_t* secret, const uint8_t* privatek
 	return qsc_ecdhp256_scalar_multiply(secret, privatekey, publickey);
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 

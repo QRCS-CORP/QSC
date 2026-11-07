@@ -3,6 +3,8 @@
 #include "tlscodec.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 qsc_tls_status qsc_tls_handshake_write_header(uint8_t* output, size_t outlen, size_t* offset, qsc_tls_handshake_type type, size_t bodylen)
 {
     QSC_ASSERT(output != NULL);
@@ -238,3 +240,5 @@ qsc_tls_status qsc_tls_handshake_decode_key_update(const uint8_t* input, size_t 
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

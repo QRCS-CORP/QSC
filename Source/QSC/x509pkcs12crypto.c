@@ -12,6 +12,8 @@
 #   include "rcs.h"
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define X509_PKCS12_AES256_CBC_KEY_SIZE 32U
 #define X509_PKCS12_AES128_CBC_KEY_SIZE 16U
 #define X509_PKCS12_AES_BLOCK_SIZE 16U
@@ -517,3 +519,5 @@ bool qsc_x509_pkcs12_decrypt_encrypted_private_key_info(const uint8_t* data, siz
 
     return (status == QSC_ASN1_STATUS_SUCCESS);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

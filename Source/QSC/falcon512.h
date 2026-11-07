@@ -62,12 +62,14 @@
 
 #include "qsccommon.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 QSC_CPLUSPLUS_ENABLED_START
 
-/** \def QSC_FALCON512_PRIVATEKEY_SIZE 
+/** \par Constant: \c QSC_FALCON512_PRIVATEKEY_SIZE 
 * \brief Size in bytes of a Falcon-512 secret key. 
 */
-#define QSC_FALCON512_PRIVATEKEY_SIZE 1281U
+#define QSC_FALCON512_PRIVATEKEY_SIZE 1281U /*!< Falcon-512 private key size in bytes. */
 
 /** \def QSC_FALCON512_PUBLICKEY_SIZE 
 * \brief Size in bytes of a Falcon-512 public key. 
@@ -120,5 +122,7 @@ QSC_EXPORT_API bool qsc_falcon512_sign(uint8_t* signedmsg, size_t* smsglen, cons
 QSC_EXPORT_API bool qsc_falcon512_verify(uint8_t* message, size_t* msglen, const uint8_t* signedmsg, size_t smsglen, const uint8_t* publickey);
 
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

@@ -97,7 +97,7 @@ QSC_CPLUSPLUS_ENABLED_START
     uint64_t highmask;          /*!< Bits for extension types 64 through 127. */
     uint64_t psk_ke_mask;       /*!< Bits for extension types 128 through 191. */
     uint64_t tailmask;          /*!< Bits for extension types 192 through 255 and folded higher values. */
-} qsc_tls_extension_bitmap;
+} qsc_tls_extension_bitmap; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_psk_identity_view
@@ -114,7 +114,7 @@ typedef struct qsc_tls_psk_identity_view
     const uint8_t* identity;       /*!< Pointer to the PSK identity or ticket byte string. */
     size_t identitylen;            /*!< Length, in bytes, of the PSK identity. */
     uint32_t obfuscatedticketage;  /*!< Obfuscated ticket age value encoded with the identity. */
-} qsc_tls_psk_identity_view;
+} qsc_tls_psk_identity_view; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Reset a TLS extension appearance bitmap.

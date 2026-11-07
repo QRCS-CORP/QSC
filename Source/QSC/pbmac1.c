@@ -1,6 +1,8 @@
 #include "pbmac1.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool pbmac1_keyparams_valid(const qsc_pbmac1_keyparams* keyparams)
 {
 	bool res;
@@ -407,3 +409,5 @@ bool qsc_pbmac1_verify(const uint8_t* code, size_t codelen, const qsc_pbmac1_key
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

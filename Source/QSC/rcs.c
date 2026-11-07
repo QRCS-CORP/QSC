@@ -2,6 +2,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* Build profile: 14/21 Rijndael-256 rounds by default, or 22/30 when
  * QSC_RCS_EXTENDED_ROUND_COUNTS is selected in rcs.h. Both profiles use
  * the standard 24-round Keccak/KMAC implementation. */
@@ -2286,3 +2288,5 @@ bool qsc_rcs_extended_transform(qsc_rcs_state* ctx, uint8_t* output, const uint8
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

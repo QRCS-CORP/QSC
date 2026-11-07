@@ -187,7 +187,6 @@ QSC_CPLUSPLUS_ENABLED_START
  *
  * \param builder: [struct] The certificate builder to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_certificate_builder_initialize(qsc_x509_certificate_builder* builder);
 
@@ -201,7 +200,6 @@ QSC_EXPORT_API void qsc_x509_certificate_builder_initialize(qsc_x509_certificate
  *
  * \param builder: [struct] The certificate builder to clear.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_certificate_builder_clear(qsc_x509_certificate_builder* builder);
 

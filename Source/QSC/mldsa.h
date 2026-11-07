@@ -56,7 +56,7 @@
 
 QSC_CPLUSPLUS_ENABLED_START
 
-/** \def QSC_MLDSA_SEED_SIZE
+/** \par Constant: \c QSC_MLDSA_SEED_SIZE
  * brief Length of the seeded key-generation input in bytes.
  */
 #define QSC_MLDSA_SEED_SIZE 32U

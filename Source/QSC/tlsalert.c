@@ -3,6 +3,8 @@
 #include "tlsrecord.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 qsc_tls_status qsc_tls_alert_decode(const uint8_t* input, size_t inlen, qsc_tls_alert_description* description)
 {
 	QSC_ASSERT(input != NULL);
@@ -353,3 +355,5 @@ const char* qsc_tls_alert_to_string(qsc_tls_alert_description description)
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

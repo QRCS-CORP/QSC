@@ -20,6 +20,8 @@
 #   include <windows.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_SYSTEM_COMPILER_MSC)
 #   pragma intrinsic(_ReadWriteBarrier)
 #   define QSC_COMPILER_BARRIER() _ReadWriteBarrier()
@@ -2032,3 +2034,5 @@ bool qsc_memutils_zeroed(const void* input, size_t length)
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -72,7 +72,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
- * \enum qsc_x509_verify_status
+ * \enum qsc_x509_verify_status_t
  * \brief Certificate and chain verification result codes.
  */
 typedef enum qsc_x509_verify_status_t
@@ -98,7 +98,7 @@ typedef enum qsc_x509_verify_status_t
     QSC_X509_VERIFY_STATUS_REVOCATION_UNKNOWN = 18,             /*!< Certificate revocation status could not be determined. */
     QSC_X509_VERIFY_STATUS_CHAIN_LOOP = 19,                     /*!< A loop was detected during certification path processing. */
     QSC_X509_VERIFY_STATUS_NAME_MISMATCH = 20                   /*!< The certificate identity did not match the requested hostname or address. */
-} qsc_x509_verify_status;
+} qsc_x509_verify_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \typedef qsc_x509_signature_verify_callback
@@ -117,7 +117,7 @@ typedef enum qsc_x509_verify_status_t
 typedef bool (*qsc_x509_signature_verify_callback)(const qsc_x509_certificate* certificate, const qsc_x509_certificate* issuer, void* state);
 
 /*!
- * \enum qsc_x509_verify_purpose
+ * \enum qsc_x509_verify_purpose_t
  * \brief Certificate usage-purpose selectors.
  */
 typedef enum qsc_x509_verify_purpose_t
@@ -125,10 +125,10 @@ typedef enum qsc_x509_verify_purpose_t
     QSC_X509_VERIFY_PURPOSE_GENERIC = 0,                        /*!< Apply generic certificate validation without a specialized application usage requirement. */
     QSC_X509_VERIFY_PURPOSE_TLS_SERVER = 1,                     /*!< Validate the certificate for use as a TLS server certificate. */
     QSC_X509_VERIFY_PURPOSE_TLS_CLIENT = 2                      /*!< Validate the certificate for use as a TLS client certificate. */
-} qsc_x509_verify_purpose;
+} qsc_x509_verify_purpose; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
- * \struct qsc_x509_verify_options
+ * \struct qsc_x509_verify_options_t
  * \brief Optional controls for extended certificate and chain verification.
  *
  * \details
@@ -141,7 +141,7 @@ typedef struct qsc_x509_verify_options_t
     qsc_x509_verify_purpose purpose;                            /*!< The requested certificate usage purpose. */
     const qsc_x509_revocation_options* revocation;              /*!< Optional revocation-checking configuration, or NULL when revocation processing is not requested. */
     bool rejectunsupportedcriticalextensions;                   /*!< Reject certificates containing unsupported critical extensions when set to true. */
-} qsc_x509_verify_options;
+} qsc_x509_verify_options; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \brief Initialize a verification options structure.
@@ -152,7 +152,6 @@ typedef struct qsc_x509_verify_options_t
  *
  * \param options: [struct] The verification options structure to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_verify_options_initialize(qsc_x509_verify_options* options);
 

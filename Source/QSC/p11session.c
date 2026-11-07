@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \file p11session.c
  * \brief Serialized, bounded Cryptoki sessions and transient PIN authentication.
  * \details No implicit Security Officer login, credential caching, or automatic PIN retry.
@@ -192,4 +194,7 @@ qsc_hw_status qsc_hw_pkcs11_session_close(qsc_hw_pkcs11_session** session)
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

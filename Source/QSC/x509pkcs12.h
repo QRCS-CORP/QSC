@@ -107,7 +107,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \struct qsc_x509_pkcs12_bundle
+ * \struct qsc_x509_pkcs12_bundle_t
  * \brief A parsed PKCS #12 bundle containing an optional private key and certificate set.
  *
  * \details
@@ -120,7 +120,7 @@ typedef struct qsc_x509_pkcs12_bundle_t
     bool hasprivatekey;                                                     /*!< Indicates whether the bundle contained a decodable private key. */
     qsc_x509_certificate certificates[QSC_X509_PKCS12_MAX_CERTIFICATES];    /*!< The decoded certificate objects extracted from the bundle. */
     size_t certificatecount;                                                /*!< The number of valid certificate entries stored in the certificates array. */
-} qsc_x509_pkcs12_bundle;
+} qsc_x509_pkcs12_bundle; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \brief Initialize a PKCS #12 bundle container.
@@ -132,7 +132,6 @@ typedef struct qsc_x509_pkcs12_bundle_t
  *
  * \param bundle: [struct] The PKCS #12 bundle container to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_pkcs12_initialize(qsc_x509_pkcs12_bundle* bundle);
 
@@ -147,7 +146,6 @@ QSC_EXPORT_API void qsc_x509_pkcs12_initialize(qsc_x509_pkcs12_bundle* bundle);
  *
  * \param bundle: [struct] The initialized PKCS #12 bundle to clear.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_pkcs12_clear(qsc_x509_pkcs12_bundle* bundle);
 

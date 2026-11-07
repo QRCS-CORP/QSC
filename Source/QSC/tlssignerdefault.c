@@ -10,6 +10,8 @@
 #include "tlsecdsader.h"
 #include "tlssigalgs.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /**
  * \brief Sign a TLS CertificateVerify input with the chosen EdDSA parameter set.
  * \param scheme Selected Ed25519 or Ed448 signature scheme.
@@ -638,3 +640,5 @@ bool qsc_tls_signer_default_verify(qsc_tls_signature_scheme scheme, const uint8_
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

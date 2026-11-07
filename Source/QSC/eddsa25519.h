@@ -71,7 +71,7 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -147,6 +147,6 @@ QSC_EXPORT_API bool qsc_ed25519_verify(uint8_t* message, size_t* msglen, const u
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

@@ -49,6 +49,12 @@
  * Contact: contact@qrcscorp.ca
  */
 
+#include "qsccommon.h"
+
+QSC_CPLUSPLUS_ENABLED_START
+
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \file mldsa_parameter_impl.h
  * \brief Private shared source for three explicit ML-DSA compilation units.
  * \details Each module selects a public security level through a plain constant.
@@ -143,19 +149,43 @@
 
 /* Source specialization is retained, as in the qualified Kyber design. */
 #if defined(QSC_SYSTEM_HAS_AVX2)
+/** \brief Selected backend entry point for randomized key-pair generation.
+ */
 #define mldsa_backend_generate_keypair qsc_dilithium_avx2_generate_keypair
+/** \brief Selected backend entry point for deterministic key-pair generation.
+ */
 #define mldsa_backend_seeded_generate_keypair qsc_dilithium_avx2_seeded_generate_keypair
+/** \brief Selected backend entry point for signed-message generation.
+ */
 #define mldsa_backend_sign qsc_dilithium_avx2_sign
+/** \brief Selected backend entry point for detached signature generation.
+ */
 #define mldsa_backend_sign_signature qsc_dilithium_avx2_sign_signature
+/** \brief Selected backend entry point for detached signature verification.
+ */
 #define mldsa_backend_verify qsc_dilithium_avx2_verify
+/** \brief Selected backend entry point for signed-message verification and recovery.
+ */
 #define mldsa_backend_open qsc_dilithium_avx2_open
 #include "dilithiumbase_avx2.c"
 #else
+/** \brief Selected backend entry point for randomized key-pair generation.
+ */
 #define mldsa_backend_generate_keypair qsc_dilithium_ref_generate_keypair
+/** \brief Selected backend entry point for deterministic key-pair generation.
+ */
 #define mldsa_backend_seeded_generate_keypair qsc_dilithium_ref_seeded_generate_keypair
+/** \brief Selected backend entry point for signed-message generation.
+ */
 #define mldsa_backend_sign qsc_dilithium_ref_sign
+/** \brief Selected backend entry point for detached signature generation.
+ */
 #define mldsa_backend_sign_signature qsc_dilithium_ref_sign_signature
+/** \brief Selected backend entry point for detached signature verification.
+ */
 #define mldsa_backend_verify qsc_dilithium_ref_verify
+/** \brief Selected backend entry point for signed-message verification and recovery.
+ */
 #define mldsa_backend_open qsc_dilithium_ref_open
 #include "dilithiumbase.c"
 #endif
@@ -320,3 +350,7 @@ bool mldsa_export_verify_ex(uint8_t* msg, size_t* msglen, const uint8_t* ctx, si
 
     return res;
 }
+
+QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

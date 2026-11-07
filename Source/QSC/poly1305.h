@@ -121,7 +121,7 @@ QSC_EXPORT_API typedef struct qsc_poly1305_state
 	uint8_t buf[QSC_POLY1305_BLOCK_SIZE];	/*!< The buffer parameter */
 	size_t fnl;								/*!< The fnl size */
 	size_t rmd;								/*!< The rmd size */
-} qsc_poly1305_state;
+} qsc_poly1305_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 
 /**

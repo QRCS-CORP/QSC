@@ -37,6 +37,8 @@
 #include <arm_neon.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /*
  * Average and standard deviation for the maximum size (in bits) of
  * coefficients of (f,g), depending on depth. These values are used
@@ -9800,3 +9802,4 @@ bool qsc_falcon_ref_1024_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size_
 	return res;
 }
 
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -176,7 +176,6 @@ QSC_EXPORT_API bool qsc_x509_csr_verify_with_spki(const qsc_x509_csr* csr, const
  *
  * \param csr: [struct] The CSR object to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_csr_initialize(qsc_x509_csr* csr);
 
@@ -188,7 +187,6 @@ QSC_EXPORT_API void qsc_x509_csr_initialize(qsc_x509_csr* csr);
  *
  * \param csr: [struct] The CSR object to clear.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_csr_clear(qsc_x509_csr* csr);
 

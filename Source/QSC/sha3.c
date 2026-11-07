@@ -2,6 +2,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \def KPA_LEAF_HASH128
  * \brief Legacy KPA-128 leaf digest size in bytes. */
 #define KPA_LEAF_HASH128 16ULL
@@ -6719,3 +6721,5 @@ void qsc_kmac_512x8(uint8_t* out0, uint8_t* out1, uint8_t* out2, uint8_t* out3,
 #endif
 	}
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

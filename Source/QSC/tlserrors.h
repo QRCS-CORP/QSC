@@ -74,7 +74,7 @@ typedef enum qsc_tls_status
 	qsc_tls_status_invalid_message = -8,			/*!< The TLS message was malformed, truncated, or semantically invalid. */
 	qsc_tls_status_record_overflow = -9,			/*!< A TLS record exceeded the RFC 9846 record-layer size limit. */
 	qsc_tls_status_timeout = -10					/*!< The configured cumulative TLS operation deadline expired. */
-} qsc_tls_status;
+} qsc_tls_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Convert a TLS status code to a descriptive diagnostic string.

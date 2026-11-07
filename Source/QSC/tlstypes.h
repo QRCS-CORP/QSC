@@ -71,7 +71,7 @@ typedef enum qsc_tls_hash_algorithm
 	qsc_tls_hash_sha256 = 1,	/*!< SHA-256 hash algorithm. */
 	qsc_tls_hash_sha384 = 2,	/*!< SHA-384 hash algorithm. */
 	qsc_tls_hash_sha512 = 3		/*!< SHA-512 hash algorithm. */
-} qsc_tls_hash_algorithm;
+} qsc_tls_hash_algorithm; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_record_content_type
@@ -84,7 +84,7 @@ typedef enum qsc_tls_record_content_type
 	qsc_tls_record_content_alert = 21,				/*!< Alert record type. */
 	qsc_tls_record_content_handshake = 22,			/*!< Handshake record type. */
 	qsc_tls_record_content_application_data = 23	/*!< ApplicationData record type. */
-} qsc_tls_record_content_type;
+} qsc_tls_record_content_type; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_alert_description
@@ -120,7 +120,7 @@ typedef enum qsc_tls_alert_description
 	qsc_tls_alert_certificate_required = 116,				/*!< A certificate was required but not provided. */
 	qsc_tls_alert_general_error = 117,					/*!< A generic error occurred that cannot be mapped to a more specific alert. */
 	qsc_tls_alert_no_application_protocol = 120				/*!< No mutually supported application protocol was found. */
-} qsc_tls_alert_description;
+} qsc_tls_alert_description; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_cipher_suite
@@ -132,7 +132,7 @@ typedef enum qsc_tls_cipher_suite
 	qsc_tls_cipher_suite_tls_aes_128_gcm_sha256 = 0x1301,		/*!< TLS_AES_128_GCM_SHA256. */
 	qsc_tls_cipher_suite_tls_aes_256_gcm_sha384 = 0x1302,		/*!< TLS_AES_256_GCM_SHA384. */
 	qsc_tls_cipher_suite_tls_chacha20_poly1305_sha256 = 0x1303	/*!< TLS_CHACHA20_POLY1305_SHA256. */
-} qsc_tls_cipher_suite;
+} qsc_tls_cipher_suite; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_extension_type
@@ -151,7 +151,7 @@ typedef enum qsc_tls_extension_type
 	qsc_tls_extension_psk_key_exchange_modes = 45,					/*!< psk_key_exchange_modes extension. */
 	qsc_tls_extension_signature_algorithms_cert = 50,				/*!< signature_algorithms_cert extension. */
 	qsc_tls_extension_key_share = 51								/*!< key_share extension. */
-} qsc_tls_extension_type;
+} qsc_tls_extension_type; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_named_group
@@ -171,7 +171,7 @@ typedef enum qsc_tls_named_group
 	qsc_tls_group_x25519_mlkem768 = 0x11EC,			/*!< Hybrid x25519 plus ML-KEM-768 named group. */
 	qsc_tls_group_secp256r1_mlkem768 = 0x11EB,		/*!< Hybrid secp256r1 plus ML-KEM-768 named group. */
 	qsc_tls_group_secp384r1_mlkem1024 = 0x11ED		/*!< Hybrid secp384r1 plus ML-KEM-1024 named group. */
-} qsc_tls_named_group;
+} qsc_tls_named_group; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_signature_scheme
@@ -188,7 +188,7 @@ typedef enum qsc_tls_signature_scheme
 	qsc_tls_sig_mldsa44 = 0x0904,					/*!< ML-DSA-44 signature scheme. */
 	qsc_tls_sig_mldsa65 = 0x0905,					/*!< ML-DSA-65 signature scheme. */
 	qsc_tls_sig_mldsa87 = 0x0906					/*!< ML-DSA-87 signature scheme. */
-} qsc_tls_signature_scheme;
+} qsc_tls_signature_scheme; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_handshake_type
@@ -208,7 +208,7 @@ typedef enum qsc_tls_handshake_type
 	qsc_tls_handshake_type_finished = 20,				/*!< Finished. */
 	qsc_tls_handshake_type_key_update = 24,				/*!< KeyUpdate. */
 	qsc_tls_handshake_type_message_hash = 254			/*!< Synthetic message_hash for the HelloRetryRequest transcript transform. */
-} qsc_tls_handshake_type;
+} qsc_tls_handshake_type; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_psk_key_exchange_mode
@@ -218,7 +218,7 @@ typedef enum qsc_tls_psk_key_exchange_mode
 {
 	qsc_tls_psk_key_exchange_mode_psk_ke = 0,			/*!< PSK-only key exchange. */
 	qsc_tls_psk_key_exchange_mode_psk_dhe_ke = 1		/*!< PSK with (EC)DHE key exchange. */
-} qsc_tls_psk_key_exchange_mode;
+} qsc_tls_psk_key_exchange_mode; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_certificate_type
@@ -228,7 +228,7 @@ typedef enum qsc_tls_certificate_type
 {
 	qsc_tls_certificate_type_x509 = 0,					/*!< X.509 certificate. */
 	qsc_tls_certificate_type_raw_public_key = 2			/*!< Raw public key. */
-} qsc_tls_certificate_type;
+} qsc_tls_certificate_type; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_alert_level
@@ -239,7 +239,7 @@ typedef enum qsc_tls_alert_level
 {
 	qsc_tls_alert_level_warning = 1,					/*!< Warning-level alert. */
 	qsc_tls_alert_level_fatal = 2						/*!< Fatal-level alert. */
-} qsc_tls_alert_level;
+} qsc_tls_alert_level; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 QSC_CPLUSPLUS_ENABLED_END
 

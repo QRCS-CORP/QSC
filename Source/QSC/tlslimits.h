@@ -402,12 +402,33 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 #define QSC_TLS_HKDF_LABEL_MAX_WIRE_SIZE (2U + 1U + (QSC_TLS_HKDF_LABEL_PREFIX_SIZE + QSC_TLS_LABEL_MAX_SIZE) + 1U + QSC_TLS_CONTEXT_MAX_SIZE)
 
+/** \typedef qsc_tls_limit_assert_keyshare
+ * \brief Validate that maximum TLS key-share storage covers every configured hybrid group.
+ */
 typedef char qsc_tls_limit_assert_keyshare[(QSC_TLS_MAX_KEYSHARE_SIZE >= QSC_TLS_MAX_HYBRID_CLIENT_KEYSHARE_SIZE) ? 1 : -1];
+/** \typedef qsc_tls_limit_assert_extension
+ * \brief Validate that the extension buffer covers the maximum ClientHello extension encoding.
+ */
 typedef char qsc_tls_limit_assert_extension[(QSC_TLS_MAX_EXTENSION_SIZE >= QSC_TLS_CLIENT_HELLO_EXTENSIONS_MAX_SIZE) ? 1 : -1];
+/** \typedef qsc_tls_limit_assert_client_hello
+ * \brief Validate the configured ClientHello maximum against required extension overhead.
+ */
 typedef char qsc_tls_limit_assert_client_hello[(QSC_TLS_CLIENT_HELLO_BODY_MAX_SIZE >= (43U + QSC_TLS_KEY_SHARE_CLIENT_EXTENSION_MAX_SIZE)) ? 1 : -1];
+/** \typedef qsc_tls_limit_assert_server_hello
+ * \brief Validate the configured ServerHello maximum against required extension overhead.
+ */
 typedef char qsc_tls_limit_assert_server_hello[(QSC_TLS_SERVER_HELLO_BODY_MAX_SIZE >= (72U + QSC_TLS_KEY_SHARE_SERVER_EXTENSION_MAX_SIZE)) ? 1 : -1];
+/** \typedef qsc_tls_limit_assert_private
+ * \brief Validate that private-key scratch storage covers classical and KEM components.
+ */
 typedef char qsc_tls_limit_assert_private[(QSC_TLS_MAX_PRIVATE_KEY_SIZE >= (QSC_TLS_MAX_CLASSICAL_PRIVATE_KEY_SIZE + QSC_TLS_MAX_KEM_PRIVATE_KEY_SIZE)) ? 1 : -1];
+/** \typedef qsc_tls_limit_assert_signature
+ * \brief Validate that CertificateVerify storage covers the largest supported ML-DSA signature.
+ */
 typedef char qsc_tls_limit_assert_signature[(QSC_TLS_CERTIFICATE_VERIFY_MAX_SIGNATURE_SIZE >= QSC_MLDSA87_SIGNATURE_SIZE) ? 1 : -1];
+/** \typedef qsc_tls_limit_assert_ciphersuites
+ * \brief Validate that the cipher-suite table can hold the configured algorithm choices.
+ */
 typedef char qsc_tls_limit_assert_ciphersuites[(QSC_TLS_MAX_CIPHER_SUITES >= 3U) ? 1 : -1];
 
 QSC_CPLUSPLUS_ENABLED_END

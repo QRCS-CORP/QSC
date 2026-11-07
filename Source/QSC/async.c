@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #   if !defined(WIN32_LEAN_AND_MEAN)
 #       define WIN32_LEAN_AND_MEAN
@@ -982,3 +984,5 @@ void qsc_async_thread_wait_all(qsc_thread* handles, size_t count)
 		}
 	}
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

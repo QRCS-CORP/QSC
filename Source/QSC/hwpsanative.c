@@ -1,5 +1,7 @@
 #include "hwpsanative.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PSA_ENABLED) && defined(QSC_HARDWARE_PSA_NATIVE_ENABLED)
 
 #include <psa/crypto.h>
@@ -468,4 +470,7 @@ qsc_hw_status qsc_hw_psa_native_initialize(qsc_hw_psa_context* context,
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PSA_ENABLED && QSC_HARDWARE_PSA_NATIVE_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

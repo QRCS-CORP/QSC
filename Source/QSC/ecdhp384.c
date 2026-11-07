@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 #if !defined(QSC_ECDHP384_FORCE_PORTABLE) && !defined(_M_ARM64EC) && (defined(__x86_64__) || defined(_M_X64))
 #	if defined(_MSC_VER)
@@ -4033,4 +4033,4 @@ int32_t qsc_crypto_scalarmult_secp384r1(uint8_t* secret, const uint8_t* privatek
 	return qsc_ecdhp384_scalar_multiply(secret, privatekey, publickey);
 }
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */

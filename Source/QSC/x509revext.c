@@ -15,6 +15,8 @@
 #include "x509verify.h"
 #include <time.h>
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define X509_ASN1_TAG_ENUMERATED 10U
 #define X509_OID_CRL_NUMBER_LEN 3U
 #define X509_OID_DELTA_CRL_INDICATOR_LEN 3U
@@ -2335,3 +2337,5 @@ bool qsc_x509_ocsp_stapled_verify(const uint8_t* stapled, size_t stapledlen, con
 
     return statusgood;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

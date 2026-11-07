@@ -7,6 +7,8 @@
 #include "x509sig.h"
 #include "x509write.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_CRLWRITE_PEM_LABEL "X509 CRL"
 
 static size_t qsc_x509_crlwrite_get_pem_length(size_t derlen)
@@ -985,3 +987,5 @@ qsc_asn1_status qsc_x509_crl_encode_pem(const qsc_x509_crl* crl, char* output, s
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

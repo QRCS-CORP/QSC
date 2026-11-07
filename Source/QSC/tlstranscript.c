@@ -3,6 +3,8 @@
 #include "sha2.h"
 #include "intutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 qsc_tls_status qsc_tls_transcript_initialize(qsc_tls_transcript_state* state, qsc_tls_hash_algorithm hash)
 {
     QSC_ASSERT(state != NULL);
@@ -301,3 +303,5 @@ size_t qsc_tls_transcript_digest_size(qsc_tls_hash_algorithm hash)
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

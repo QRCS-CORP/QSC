@@ -3,6 +3,8 @@
 #include "tlscodec.h"
 #include "tlsextensions.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 qsc_tls_status qsc_tls_session_ticket_encode(const qsc_tls_session_ticket* ticket, uint8_t* output, size_t outlen, size_t* written)
 {
     QSC_ASSERT(ticket != NULL);
@@ -229,3 +231,5 @@ void qsc_tls_session_ticket_dispose(qsc_tls_session_ticket* ticket)
         qsc_memutils_secure_erase(ticket, sizeof(*ticket));
     }
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

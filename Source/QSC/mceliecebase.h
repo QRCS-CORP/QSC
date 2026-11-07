@@ -54,7 +54,7 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+ /* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -95,6 +95,6 @@ bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gene
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \cond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

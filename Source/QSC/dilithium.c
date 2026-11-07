@@ -6,6 +6,8 @@
 #	include "dilithiumbase.h"
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 bool qsc_dilithium_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t))
 {
 	QSC_ASSERT(publickey != NULL);
@@ -141,3 +143,5 @@ bool qsc_dilithium_verify_ex(uint8_t* message, size_t* msglen, const uint8_t* co
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

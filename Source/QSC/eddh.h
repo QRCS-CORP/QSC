@@ -91,7 +91,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * It is intended for secure key encapsulation and is suitable for cryptographic protocols requiring robust,
  * constant-time elliptic curve operations.
  *
- * \section ecdh_links Reference Links:
+ * \section eddh_links Reference Links:
  *  - <a href="https://github.com/jedisct1/libsodium/tree/master">Adapted from libsodium source by Frank Denis</a>
  *  - <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Official ECurve25519 EDDH Specificationd25519 Documentation</a>
  *  - <a href="https://cr.yp.to/ecdh.html"></a>
@@ -113,7 +113,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_EDDH_PRIVATEKEY_SIZE 32U
 
     /*!
-    * \def QSC_EDDH_SECRET_SIZE
+    * \def QSC_EDDH_SHAREDSECRET_SIZE
     * \brief The EDDH shared-secret size in bytes.
     */
 #   define QSC_EDDH_SHAREDSECRET_SIZE 32U
@@ -145,7 +145,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_EDDH_PRIVATEKEY_SIZE 56U
 
     /*!
-    * \def QSC_EDDH_SECRET_SIZE
+    * \def QSC_EDDH_SHAREDSECRET_SIZE
     * \brief The X448 shared-secret size in bytes.
     */
 #   define QSC_EDDH_SHAREDSECRET_SIZE 56U
@@ -179,7 +179,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * QSC_EDDH_PRIVATEKEY_SIZE.
  *
  * \param publickey:  [uint8_t*] Pointer to the output public-key array.
- * \param privatekey:[const uint8_t*] Pointer to the input private-key array.
+ * \param privatekey: [const uint8_t*] Pointer to the input private-key array.
  */
 QSC_EXPORT_API void qsc_eddh_public_from_private(uint8_t* publickey, const uint8_t* privatekey);
 

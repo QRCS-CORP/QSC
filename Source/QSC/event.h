@@ -114,7 +114,7 @@ QSC_EXPORT_API typedef struct qsc_event_handler
 {
     qsc_event_callback callback;	/*!< [qsc_event_callback] The callback function. */
     char name[QSC_EVENT_NAME_SIZE];	/*!< [char[]] The event handler name. */
-} qsc_event_handler;
+} qsc_event_handler; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
 * \struct event_state
@@ -126,7 +126,7 @@ QSC_EXPORT_API typedef struct event_state
 	size_t lcount;					/*!< The listener count  */
 	qsc_mutex opmtx;				/*!< The operations mutex  */
 	bool initialized;				/*!< The initialized flag  */
-} event_state;
+} event_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Clear a listener for a specified event.

@@ -1,5 +1,7 @@
 #include "hwncrypttls.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_NCRYPT_ENABLED)
 
 #include "memutils.h"
@@ -509,4 +511,7 @@ qsc_asn1_status qsc_hw_ncrypt_x509_csr_sign(const qsc_x509_csr* csr,
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_NCRYPT_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

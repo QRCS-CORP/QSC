@@ -73,9 +73,11 @@
 #ifndef QSC_HQCBASE_H
 #define QSC_HQCBASE_H
 
-/* \cond NO_DOCUMENT */
-
 #include "qsccommon.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \brief Selects HQC-3 when no explicit HQC parameter guard has been defined.
@@ -530,6 +532,8 @@ bool qsc_hqc_avx2_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool
  */
 void qsc_hqc_avx2_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, uint8_t* seed);
 
-/* \cond NO_DOCUMENT */
+QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

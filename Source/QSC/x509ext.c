@@ -6,6 +6,8 @@
 #include "x509name.h"
 #include "x509write.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool x509_extension_oid_equal(const qsc_x509_extension* left, const qsc_x509_extension* right)
 {
 	bool res;
@@ -1463,3 +1465,5 @@ qsc_asn1_status qsc_x509_ext_subject_alt_name_add_ip(qsc_x509_subject_alt_name* 
 
 	return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

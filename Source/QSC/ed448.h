@@ -71,7 +71,7 @@
 
 #include "qsccommon.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -584,6 +584,6 @@ int32_t qsc_sc448_verify(const uint8_t* x, const uint8_t* y, size_t n);
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

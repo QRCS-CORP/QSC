@@ -100,7 +100,7 @@ typedef struct qsc_tls_signature_scheme_descriptor
 	bool certificateverifycapable;      /*!< True if the scheme may be used in the TLS CertificateVerify message. */
 	bool ispq;                          /*!< True if the scheme is post-quantum. */
 	bool ismldsa;                       /*!< True if the scheme belongs to the ML-DSA family. */
-} qsc_tls_signature_scheme_descriptor;
+} qsc_tls_signature_scheme_descriptor; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Get the registry descriptor for a TLS signature scheme.

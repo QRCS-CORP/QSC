@@ -137,7 +137,7 @@ typedef enum qsc_x509w_status_t
     QSC_X509W_STATUS_ENCODING_ERROR = 14,     /*!< DER, PEM, or wrapper object encoding failed. */
     QSC_X509W_STATUS_PROFILE_ERROR = 15,      /*!< The validation or deployment profile is inconsistent or invalid. */
     QSC_X509W_STATUS_CALLBACK_ERROR = 16      /*!< A caller-supplied callback failed or rejected the operation. */
-} qsc_x509w_status;
+} qsc_x509w_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_stage_t
@@ -157,7 +157,7 @@ typedef enum qsc_x509w_stage_t
     QSC_X509W_STAGE_TRUST = 9,            /*!< Trust-anchor or chain trust decision. */
     QSC_X509W_STAGE_EXPORT = 10,          /*!< Object export or re-encoding. */
     QSC_X509W_STAGE_CONFIGURATION = 11    /*!< Deployment or wrapper configuration processing. */
-} qsc_x509w_stage;
+} qsc_x509w_stage; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_certificate_role_t
@@ -170,7 +170,7 @@ typedef enum qsc_x509w_certificate_role_t
     QSC_X509W_CERTIFICATE_ROLE_TLS_CLIENT = 2,    /*!< The certificate is intended for TLS client authentication. */
     QSC_X509W_CERTIFICATE_ROLE_CA = 3,            /*!< The certificate is intended to act as a certificate authority. */
     QSC_X509W_CERTIFICATE_ROLE_TRUST_ANCHOR = 4   /*!< The certificate is intended to be loaded as a trust anchor. */
-} qsc_x509w_certificate_role;
+} qsc_x509w_certificate_role; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_profile_preset_t
@@ -183,7 +183,7 @@ typedef enum qsc_x509w_profile_preset_t
     QSC_X509W_PROFILE_PRESET_CA = 3,                  /*!< CA and trust-material validation defaults. */
     QSC_X509W_PROFILE_PRESET_STRICT_REVOCATION = 4,   /*!< TLS server defaults with mandatory CRL revocation checking. */
     QSC_X509W_PROFILE_PRESET_DEVELOPMENT = 5          /*!< Relaxed development and test defaults. */
-} qsc_x509w_profile_preset;
+} qsc_x509w_profile_preset; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_revocation_mode_t
@@ -198,7 +198,7 @@ typedef enum qsc_x509w_revocation_mode_t
     QSC_X509W_REVOCATION_MODE_OCSP_REQUIRED = 4,           /*!< Reserved hook requiring OCSP status. */
     QSC_X509W_REVOCATION_MODE_CRL_OR_OCSP_REQUIRED = 5,    /*!< Reserved hook requiring either CRL or OCSP status. */
     QSC_X509W_REVOCATION_MODE_CRL_AND_OCSP_REQUIRED = 6    /*!< Reserved hook requiring both CRL and OCSP status. */
-} qsc_x509w_revocation_mode;
+} qsc_x509w_revocation_mode; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_locator_policy_t
@@ -209,7 +209,7 @@ typedef enum qsc_x509w_locator_policy_t
     QSC_X509W_LOCATOR_POLICY_DISABLED = 0,          /*!< Embedded locator information is ignored. */
     QSC_X509W_LOCATOR_POLICY_ALLOW_EMBEDDED = 1,    /*!< Embedded locator information is allowed but not required. */
     QSC_X509W_LOCATOR_POLICY_REQUIRE_EMBEDDED = 2   /*!< Embedded locator information is required by policy. */
-} qsc_x509w_locator_policy;
+} qsc_x509w_locator_policy; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_revocation_source_t
@@ -220,7 +220,7 @@ typedef enum qsc_x509w_revocation_source_t
     QSC_X509W_REVOCATION_SOURCE_NONE = 0,   /*!< No revocation source was used. */
     QSC_X509W_REVOCATION_SOURCE_CRL = 1,    /*!< Revocation status was determined from a CRL. */
     QSC_X509W_REVOCATION_SOURCE_OCSP = 2    /*!< Revocation status was determined from OCSP. */
-} qsc_x509w_revocation_source;
+} qsc_x509w_revocation_source; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_x509w_availability_t
@@ -232,7 +232,7 @@ typedef enum qsc_x509w_availability_t
     QSC_X509W_AVAILABILITY_UNCHECKED = 1,    /*!< Availability was not checked by the offline wrapper. */
     QSC_X509W_AVAILABILITY_AVAILABLE = 2,    /*!< Required material or locator information was available. */
     QSC_X509W_AVAILABILITY_UNAVAILABLE = 3   /*!< Required material or locator information was unavailable. */
-} qsc_x509w_availability;
+} qsc_x509w_availability; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_profile_t
@@ -249,7 +249,7 @@ typedef struct qsc_x509w_profile_t
     qsc_x509w_revocation_mode revocationmode;        /*!< Revocation policy requested by the caller. */
     qsc_x509w_locator_policy aiaissuerpolicy;        /*!< Future policy hook for issuer-locator handling. */
     qsc_x509w_locator_policy ocsppolicy;             /*!< Future policy hook for OCSP locator handling. */
-} qsc_x509w_profile;
+} qsc_x509w_profile; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_result_t
@@ -276,7 +276,7 @@ typedef struct qsc_x509w_result_t
     bool aiahintpresent;                            /*!< True if issuer-locator extension hints were present. */
     bool ocsphintpresent;                           /*!< True if OCSP locator hints were present. */
     char message[QSC_X509W_RESULT_MESSAGE_MAX];     /*!< Fixed diagnostic message buffer populated by the wrapper. */
-} qsc_x509w_result;
+} qsc_x509w_result; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_trust_store_t
@@ -289,7 +289,7 @@ typedef struct qsc_x509w_trust_store_t
     qsc_x509_store store;                                  /*!< Underlying QSC store descriptor initialized to reference the embedded anchors. */
     qsc_x509_crl crls[QSC_X509W_CRL_MAX];                  /*!< Embedded CRL storage. */
     size_t crlcount;                                       /*!< Number of valid CRLs currently stored. */
-} qsc_x509w_trust_store;
+} qsc_x509w_trust_store; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_server_identity_t
@@ -302,7 +302,7 @@ typedef struct qsc_x509w_server_identity_t
     qsc_x509_certificate intermediates[QSC_X509W_CHAIN_MAX - 1U]; /*!< Intermediate certificates following the leaf in presented-chain order. */
     size_t intermediatecount;                                 /*!< Number of intermediates currently loaded. */
     qsc_x509_private_key privatekey;                          /*!< Private key associated with the leaf certificate. */
-} qsc_x509w_server_identity;
+} qsc_x509w_server_identity; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_deployment_config_t
@@ -322,7 +322,7 @@ typedef struct qsc_x509w_deployment_config_t
     bool loadcrls;                                    /*!< Load CRLs from crlpath when true. */
     bool rejectunsupportedcriticalextensions;         /*!< Reject unsupported critical extensions when validating loaded material. */
     bool requirerevocation;                           /*!< Require revocation information during deployment validation when true. */
-} qsc_x509w_deployment_config;
+} qsc_x509w_deployment_config; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_tls_bridge_t
@@ -343,7 +343,7 @@ typedef struct qsc_x509w_tls_bridge_t
     qsc_x509_time currenttime;                        /*!< Embedded current-time storage for TLS verification use. */
     uint8_t verifybuffer[QSC_X509W_VERIFY_BUFFER_SIZE]; /*!< Reserved compatibility storage; connection verification does not share this buffer. */
     bool initialized;                                 /*!< True when the bridge has been configured and is ready for attachment. */
-} qsc_x509w_tls_bridge;
+} qsc_x509w_tls_bridge; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_x509w_tls_local_certificate_t
@@ -364,7 +364,7 @@ typedef struct qsc_x509w_tls_local_certificate_t
     qsc_tls_signature_scheme verifyscheme;                                /*!< TLS CertificateVerify signature scheme. */
     uint8_t privatekeydata[QSC_TLS_MAX_SIGNING_PRIVATE_KEY_SIZE];        /*!< Raw private key bytes for the signing scheme. */
     size_t privatekeylen;                                                 /*!< Length in bytes of the private key. */
-} qsc_x509w_tls_local_certificate;
+} qsc_x509w_tls_local_certificate; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Initialize a validation profile to wrapper defaults.

@@ -58,7 +58,7 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file x509_name.h
+ * \file x509name.h
  * \brief Distinguished name parsing and formatting helpers for the QSC X.509 layer.
  *
  * \details

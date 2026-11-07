@@ -35,6 +35,8 @@
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(_MSC_VER)
 #  pragma float_control(precise, on)
 #elif defined(__GNUC__) && !defined(__clang__)
@@ -10005,3 +10007,5 @@ bool qsc_falcon_avx2_1024_open(uint8_t* m, size_t* mlen, const uint8_t* sm, size
 }
 
 #endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

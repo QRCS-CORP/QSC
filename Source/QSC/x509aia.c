@@ -4,6 +4,8 @@
 #include "memutils.h"
 #include "qsccommon.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool x509_aia_oid_equals(const qsc_asn1_oid* oid, const uint8_t* data, size_t datalen)
 {
     bool res;
@@ -81,3 +83,5 @@ bool qsc_x509_aia_get_ocsp_url(const uint8_t* ext, size_t extlen, char* url, siz
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

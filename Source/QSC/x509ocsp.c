@@ -14,6 +14,8 @@
 #include "x509verify.h"
 #include "x509write.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define X509_OCSP_MAX_RESPONSE_CERT_DER 8192U
 #define X509_OCSP_REQUEST_MAX 512U
 #define X509_OCSP_SHA1_HASH_SIZE 20U
@@ -1790,3 +1792,5 @@ bool qsc_x509_ocsp_verify_responder(const qsc_x509_certificate* responder, const
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

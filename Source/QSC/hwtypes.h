@@ -62,7 +62,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * No device or vendor runtime is required by this header.
  */
 
-/** \def QSC_HARDWARE_ENABLED
+/** \par Configuration macro: \c QSC_HARDWARE_ENABLED
  * \brief Define this compile-time option in both QSC and its consumer to enable hardware provider APIs.
  * \note Undefined by default; no backend is linked without explicit selection.
  */
@@ -92,7 +92,7 @@ typedef enum qsc_hw_status
 	qsc_hw_status_busy = 12,				/**< Active key references or operations prevent closure. */
 	qsc_hw_status_buffer_too_small = 13,	/**< Output capacity insufficient; required size may be reported. */
 	qsc_hw_status_internal = 14				/**< Unclassified backend failure. */
-} qsc_hw_status;
+} qsc_hw_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \enum qsc_hw_algorithm
  * \brief Explicit algorithm identities; support must be queried per backend.
@@ -114,7 +114,7 @@ typedef enum qsc_hw_algorithm
 	qsc_hw_algorithm_ml_kem_512 = 12,	/**< ML-KEM-512. */
 	qsc_hw_algorithm_ml_kem_768 = 13,	/**< ML-KEM-768. */
 	qsc_hw_algorithm_ml_kem_1024 = 14	/**< ML-KEM-1024. */
-} qsc_hw_algorithm;
+} qsc_hw_algorithm; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \enum qsc_hw_custody
  * \brief Actual private-key custody, not an attestation claim.
@@ -125,7 +125,7 @@ typedef enum qsc_hw_custody
 	qsc_hw_custody_software = 1,				/**< Software-managed private key. */
 	qsc_hw_custody_hardware_wrapped = 2,		/**< Software key protected at rest by hardware wrapping. */
 	qsc_hw_custody_hardware_nonexportable = 3	/**< Private-key operation remains inside selected hardware. */
-} qsc_hw_custody;
+} qsc_hw_custody; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \enum qsc_hw_usage
  * \brief Bit flags describing authorized key operations.
@@ -136,7 +136,7 @@ typedef enum qsc_hw_usage
 	qsc_hw_usage_sign = 1U,		/**< Key may produce signatures. */
 	qsc_hw_usage_agree = 2U,	/**< Key may perform key agreement. */
 	qsc_hw_usage_attest = 4U	/**< Key may produce attestation evidence. */
-} qsc_hw_usage;
+} qsc_hw_usage; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \enum qsc_hw_capability_flag
  * \brief Bit flags for provider-level optional functionality.
@@ -151,7 +151,7 @@ typedef enum qsc_hw_capability_flag
 	qsc_hw_capability_random = 16U,		/**< Provider random generation supported. */
 	qsc_hw_capability_attest = 32U,		/**< Provider attestation supported. */
 	qsc_hw_capability_public_key = 64U	/**< Public key retrieval supported. */
-} qsc_hw_capability_flag;
+} qsc_hw_capability_flag; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \struct qsc_hw_key_policy
  * \brief Caller-required policy for opening or creating a key.
@@ -167,7 +167,7 @@ typedef struct qsc_hw_key_policy
 	bool allow_software_fallback;		/**< Explicitly permit software custody when hardware is not required. */
 	bool allow_export;					/**< Permit keys whose private material is extractable. */
 	bool allow_derived_secret_export;	/**< Permit raw ECDH secret output to host memory. */
-} qsc_hw_key_policy;
+} qsc_hw_key_policy; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \struct qsc_hw_key_info
  * \brief Backend-supplied metadata for one opened/generated key.
@@ -181,7 +181,7 @@ typedef struct qsc_hw_key_info
 	uint32_t usage;				/**< Actual authorized qsc_hw_usage bits. */
 	qsc_hw_custody custody;		/**< Actual reported private-key custody. */
 	bool extractable;			/**< Private key can be extracted under backend policy. */
-} qsc_hw_key_info;
+} qsc_hw_key_info; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** \struct qsc_hw_capabilities
  * \brief Backend capability snapshot, not evidence of attestation or FIPS validation.
@@ -196,7 +196,7 @@ typedef struct qsc_hw_capabilities
 	bool requires_serialization;	/**< Caller must serialize operations. */
 	bool operation_can_block;		/**< Operations may await device or user interaction. */
 	bool supports_cancel;			/**< Backend supports an explicit cancellation mechanism. */
-} qsc_hw_capabilities;
+} qsc_hw_capabilities; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 QSC_CPLUSPLUS_ENABLED_END
 

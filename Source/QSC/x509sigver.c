@@ -11,6 +11,8 @@
 #include "x509spki.h"
 #include "x509verify.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool x509_sigver_ct_equal(const uint8_t* left, const uint8_t* right, size_t length)
 {
     uint8_t diff;
@@ -511,3 +513,5 @@ bool qsc_x509_qsc_csr_signature_verify(const qsc_x509_csr* csr, void* state)
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

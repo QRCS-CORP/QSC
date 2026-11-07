@@ -1,7 +1,7 @@
 #include "ed448.h"
 #include "ed448base.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /*! \typedef ed448_point
  * \brief Private extended Edwards point with X*Y = Z*T.
@@ -1842,4 +1842,4 @@ void qsc_ge448_basepoint_to_bytes(uint8_t* out, const uint8_t* scalar)
 	qsc_memutils_secure_erase(&point, sizeof(point));
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

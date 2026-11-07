@@ -3,7 +3,7 @@
 #include "memutils.h"
 #include "intrinsics.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /*! \def EDDH448_NATIVE_CARRY
  * \brief Select x86-64 carry intrinsics, excluding ARM64EC and the portable override.
@@ -1072,4 +1072,4 @@ void qsc_x448_public_from_private(uint8_t* publickey, const uint8_t* privatekey)
 	}
 }
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -6,6 +6,8 @@
 #include "x509host.h"
 #include "x509store.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /*
  * Maximum number of permitted or excluded subtrees that will be
  * processed per NameConstraints extension.  Values beyond this limit
@@ -2116,3 +2118,5 @@ qsc_x509_verify_status qsc_x509_chain_verify(const qsc_x509_chain* chain, const 
 {
     return qsc_x509_chain_verify_ex(chain, store, now, callback, state, (const qsc_x509_verify_options*)NULL);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

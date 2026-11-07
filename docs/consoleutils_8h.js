@@ -25,7 +25,6 @@ var consoleutils_8h =
     [ "qsc_consoleutils_masked_password", "consoleutils_8h.html#aa046fda793793f8b1aae1f4a3004e402", null ],
     [ "qsc_consoleutils_message_confirm", "consoleutils_8h.html#a113a085f3a13dcd3c9b7fbf132d160d1", null ],
     [ "qsc_consoleutils_print_array", "consoleutils_8h.html#a7a3c24b3296785b47630ca8c8213a857", null ],
-    [ "qsc_consoleutils_print_concatenated_line", "consoleutils_8h.html#a0bd7f426c2f3cc608fd48e29c94b354d", null ],
     [ "qsc_consoleutils_print_double", "consoleutils_8h.html#ac586b3f86b9a06853693ae0ba21b7622", null ],
     [ "qsc_consoleutils_print_formatted", "consoleutils_8h.html#a5302a62ca2bcdb5087bbe7768e28178f", null ],
     [ "qsc_consoleutils_print_formatted_line", "consoleutils_8h.html#a8442655d16edcaeac65cfb71620e5f49", null ],

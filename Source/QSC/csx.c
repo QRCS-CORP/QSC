@@ -5,6 +5,8 @@
 #	include "intrinsics.h"
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \brief Select the CSX mixing-round profile; Keccak always uses 24 rounds. */
 /* CSX uses the established 20-round cipher by default. */
 #if defined(QSC_CSX_EXTENDED_ROUND_COUNTS)
@@ -1242,3 +1244,5 @@ bool qsc_csx_extended_transform(qsc_csx_state* ctx, uint8_t* output, const uint8
 
 	return res;
 }
+
+/* \cond DOXYGEN_NO_DOCUMENT */

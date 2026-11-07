@@ -1,6 +1,8 @@
 #include "hqc.h"
 #include "sha3.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 bool qsc_hqc_decapsulate(uint8_t* secret, const uint8_t* ciphertext, const uint8_t* privatekey)
 {
 	QSC_ASSERT(secret != NULL);
@@ -93,3 +95,5 @@ void qsc_hqc_generate_seeded_keypair(uint8_t* publickey, uint8_t* privatekey, ui
 	qsc_hqc_ref_generate_seeded_keypair(publickey, privatekey, seed);
 #endif
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

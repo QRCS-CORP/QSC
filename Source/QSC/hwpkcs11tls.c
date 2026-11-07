@@ -1,5 +1,7 @@
 #include "hwpkcs11tls.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_PKCS11_ENABLED)
 
 #include "memutils.h"
@@ -491,4 +493,7 @@ qsc_asn1_status qsc_hw_pkcs11_x509_csr_sign(const qsc_x509_csr* csr,
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

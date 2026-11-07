@@ -3,6 +3,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define SHA2_256_ROUNDS_COUNT 64U
 #define SHA2_384_ROUNDS_COUNT 80U
 #define SHA2_512_ROUNDS_COUNT 80U
@@ -3193,3 +3195,5 @@ void qsc_hkdf512_extract(uint8_t* output, size_t otplen, const uint8_t* key, siz
 		qsc_hmac512_finalize(&ctx, output);
 	}
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

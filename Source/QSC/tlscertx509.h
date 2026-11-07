@@ -58,7 +58,7 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /**
- * \file tlscert_x509.h
+ * \file tlscertx509.h
  * \brief X.509-backed implementation of the TLS certificate interface.
  *
  * Provides a compatibility adapter over the canonical QSC X.509 TLS bridge in

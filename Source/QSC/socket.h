@@ -117,7 +117,7 @@ typedef int32_t socket_t;
 #endif
 
 /*!
-\const QSC_UNINITIALIZED_SOCKET
+const QSC_UNINITIALIZED_SOCKET
 * An uninitialized socket handle
 */
 #if defined(QSC_SYSTEM_OS_WINDOWS)

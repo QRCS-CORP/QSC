@@ -6,6 +6,8 @@
 #include "sha2.h"
 #include "pbmac1.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static const uint8_t OID_PKCS7_DATA[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x07U, 0x01U };
 static const uint8_t OID_PKCS7_ENCRYPTED_DATA[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x07U, 0x06U };
 static const uint8_t OID_PKCS12_CERT_BAG[] = { 0x2AU, 0x86U, 0x48U, 0x86U, 0xF7U, 0x0DU, 0x01U, 0x0CU, 0x0AU, 0x01U, 0x03U };
@@ -1765,3 +1767,5 @@ bool qsc_x509_pkcs12_parse(const uint8_t* data, size_t datalen, const char* pass
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

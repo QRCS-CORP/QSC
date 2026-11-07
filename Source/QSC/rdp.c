@@ -5,6 +5,8 @@
 #include "memutils.h"
 #include "sysutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* RDRAND is guaranteed to generate a random number within 10 retries on a working CPU */
 #define RDP_RDR_RETRY 10U
 /* successful return of a rdrand step call */
@@ -201,3 +203,5 @@ uint64_t qsc_rdp_uint64(void)
 
 	return num;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

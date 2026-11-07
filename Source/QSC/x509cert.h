@@ -58,7 +58,7 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file x509_cert.h
+ * \file x509cert.h
  * \brief X.509 certificate parsing helpers for the QSC X.509 layer.
  *
  * \details

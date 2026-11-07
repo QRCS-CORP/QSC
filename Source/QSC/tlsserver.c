@@ -19,6 +19,8 @@
 #include "x509host.h"
 #include "x509name.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool tls_server_local_certificate_sign(qsc_tls_signature_scheme scheme, const uint8_t* input, size_t inputlen, uint8_t* signature, size_t* signaturelen, void* state);
 static qsc_tls_status server_validate_client_certificate_chain(qsc_tls_server_state* state, const qsc_tls_certificate_view* chain, size_t chainlength);
 static qsc_tls_status server_authorize_client_certificate_identity(qsc_tls_server_state* state);
@@ -3867,3 +3869,5 @@ qsc_tls_cipher_suite qsc_tls_server_get_negotiated_cipher_suite(const qsc_tls_se
 {
     return (state != NULL) ? state->negotiatedsuite : qsc_tls_cipher_suite_none;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

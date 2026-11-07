@@ -124,7 +124,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_ECDH_PRIVATEKEY_SIZE 32U
 
     /*!
-    * \def QSC_ECDH_SECRET_SIZE
+    * \def QSC_ECDH_SHAREDSECRET_SIZE
     * \brief The ECDH shared-secret size in bytes.
     */
 #   define QSC_ECDH_SHAREDSECRET_SIZE 32U
@@ -156,7 +156,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_ECDH_PRIVATEKEY_SIZE 48U
 
    /*!
-    * \def QSC_ECDH_SECRET_SIZE
+    * \def QSC_ECDH_SHAREDSECRET_SIZE
     * \brief The shared-secret size in bytes.
     */
 #   define QSC_ECDH_SHAREDSECRET_SIZE 48U
@@ -188,7 +188,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #   define QSC_ECDH_PRIVATEKEY_SIZE 66U
 
    /*!
-    * \def QSC_ECDH_SECRET_SIZE
+    * \def QSC_ECDH_SHAREDSECRET_SIZE
     * \brief The shared-secret size in bytes.
     */
 #   define QSC_ECDH_SHAREDSECRET_SIZE 66U

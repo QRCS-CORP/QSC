@@ -51,16 +51,20 @@
 
 #ifndef QSC_MCELIECE_MULTI_H
 #define QSC_MCELIECE_MULTI_H
+
 #include "qsccommon.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 QSC_CPLUSPLUS_ENABLED_START
 
 /**
  * \file mceliece_multi.h
  * \brief Independent ISO Classic McEliece ordinary and plaintext-confirmation APIs.
  * \details All sixteen ISO/IEC 18033-2:2006/Amd 2:2026 configurations.
- *          All arrays are caller-owned and must not overlap. The supplied RNG
- *          must be cryptographically secure and concurrency-safe if shared.
- *          The f and pcf configurations use semi-systematic (32,64) key generation.
+ * All arrays are caller-owned and must not overlap. The supplied RNG
+ * must be cryptographically secure and concurrency-safe if shared.
+ * The f and pcf configurations use semi-systematic (32,64) key generation.
  */
 
 /** \def QSC_MCELIECE_460896PC_CIPHERTEXT_SIZE
@@ -912,4 +916,7 @@ QSC_EXPORT_API bool qsc_mceliece_8192128pcf_encapsulate(uint8_t* secret, uint8_t
 QSC_EXPORT_API bool qsc_mceliece_8192128pcf_generate_keypair(uint8_t* publickey, uint8_t* privatekey, bool (*rng_generate)(uint8_t*, size_t));
 
 QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+
 #endif

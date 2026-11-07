@@ -3,6 +3,8 @@
 #include "async.h"
 #include "netutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 qsc_socket_address_families qsc_socket_client_address_family(const qsc_socket* sock)
 {
 	QSC_ASSERT(sock != NULL);
@@ -223,3 +225,5 @@ void qsc_socket_client_shut_down(qsc_socket* sock)
 		qsc_socket_close_socket(sock);
 	}
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

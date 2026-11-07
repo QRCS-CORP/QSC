@@ -237,9 +237,9 @@ QSC_EXPORT_API bool qsc_kyber_encapsulate(uint8_t* secret, uint8_t* ciphertext, 
 * \brief Generates cipher text and shared secret for given public key and a random seed.
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to encapsulate a key.
 * 
-* \param ct: [uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
-* \param ss: [uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
-* \param pk: [const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param ciphertext: [uint8_t*] Pointer to output cipher text (an already allocated array of KYBER_CIPHERTEXT_SIZE bytes)
+* \param secret: [uint8_t*] Pointer to output shared secret (an already allocated array of KYBER_BYTES bytes)
+* \param publickey: [const uint8_t*] Pointer to input public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
 * \param m:	[const uint8_t*] Pointer to the random coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */
 void qsc_kyber_seeded_encapsulate(uint8_t* secret, uint8_t* ciphertext, const uint8_t* publickey, const uint8_t* m);
@@ -261,8 +261,8 @@ QSC_EXPORT_API bool qsc_kyber_generate_keypair(uint8_t* publickey, uint8_t* priv
 * \brief Generates public and private key for the CCA-Secure Kyber key encapsulation mechanism using input seeds.
 * \note Used exclusively for the NIST ACVP KAT tests, use the other call to generate the key-pair.
 *
-* \param pk: [uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
-* \param sk: [uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
+* \param publickey: [uint8_t*] Pointer to output public key (an already allocated array of KYBER_PUBLICKEY_SIZE bytes)
+* \param privatekey: [uint8_t*] Pointer to output private key (an already allocated array of KYBER_SECRETKEY_SIZE bytes)
 * \param d:	[uint8_t*] Pointer to the random d coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 * \param z:	[uint8_t*] Pointer to the random z coin (a populated random array of QSC_KYBER_SYMBYTES bytes)
 */

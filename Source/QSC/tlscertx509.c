@@ -2,6 +2,8 @@
 #include "memutils.h"
 #include "timestamp.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* tlscertx509.c compatibility adapter for the canonical QSC X.509 TLS bridge.
  * RFC 5280 path validation and TLS CertificateVerify verification are delegated
  * to tlscert.c so trust policy and signature handling have one implementation.
@@ -174,3 +176,5 @@ void qsc_tls_cert_x509_bind(qsc_tls_certificate_interface* iface, qsc_tls_cert_x
         iface->state = state;
     }
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

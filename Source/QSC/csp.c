@@ -22,6 +22,8 @@
 #  include <errno.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 bool qsc_csp_generate(uint8_t* output, size_t length)
 {
 	QSC_ASSERT(output != NULL);
@@ -200,3 +202,5 @@ uint64_t qsc_csp_uint64(void)
 
 	return num;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

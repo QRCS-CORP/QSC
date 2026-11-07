@@ -183,14 +183,14 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \def QSC_X509_PRIVATE_KEY_MAX
+ * \par Constant: \c QSC_X509_PRIVATE_KEY_MAX
  * \brief The maximum supported decoded private key length in bytes.
  *
  * \details
  * This value is set to the largest currently supported private key object size
  * so that the generic private-key container can hold any supported key type.
  */
-#define QSC_X509_PRIVATE_KEY_MAX QSC_X509_ML_DSA_87_PRIVATEKEY_SIZE
+#define QSC_X509_PRIVATE_KEY_MAX QSC_X509_ML_DSA_87_PRIVATEKEY_SIZE /*!< Maximum supported private-key container size in bytes. */
 
 /*!
  * \def QSC_X509_PRIVATE_KEY_PUBLIC_MAX
@@ -203,7 +203,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #define QSC_X509_PRIVATE_KEY_PUBLIC_MAX QSC_X509_SPKI_MAX
 
 /*!
- * \struct qsc_x509_private_key
+ * \struct qsc_x509_private_key_t
  * \brief A decoded private key object with optional embedded public key material.
  *
  * \details
@@ -220,7 +220,7 @@ typedef struct qsc_x509_private_key_t
     uint8_t publickey[QSC_X509_PRIVATE_KEY_PUBLIC_MAX]; /*!< The optional decoded public key octets. */
     size_t publickeylen;                                /*!< The number of valid bytes in the publickey buffer. */
     bool publickey_present;                             /*!< Indicates whether the publickey buffer contains a decoded public key. */
-} qsc_x509_private_key;
+} qsc_x509_private_key; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \brief Initialize a private-key container.
@@ -231,7 +231,6 @@ typedef struct qsc_x509_private_key_t
  *
  * \param key: [struct] The private-key container to initialize.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_private_key_initialize(qsc_x509_private_key* key);
 
@@ -295,6 +294,23 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_decode_pkcs8_der(const uint8
  */
 QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_decode_pkcs8_pem(const char* pem, size_t pemlen, qsc_x509_private_key* key);
 
+
+
+/*!
+ * \brief Validate a decoded private-key object.
+ *
+ * \details
+ * Performs strict algorithm, parameter-set, and key-size validation on a
+ * normalized private-key object. When an embedded public key is present, the
+ * helper also validates its size against the decoded algorithm identifier.
+ *
+ * \param key: [const][struct] The private-key object to validate.
+ *
+ * 
+ * \return [enum] Returns a qsc_asn1_status code.
+ */
+QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_validate(const qsc_x509_private_key* key);
+
 /*!
  * \brief Get the expected private key size for an algorithm identifier.
  *
@@ -307,22 +323,6 @@ QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_decode_pkcs8_pem(const char*
  *
  * \return Returns the expected private key size in bytes, or zero if the algorithm is unsupported.
  */
-
-/*!
- * brief Validate a decoded private-key object.
- *
- * \details
- * Performs strict algorithm, parameter-set, and key-size validation on a
- * normalized private-key object. When an embedded public key is present, the
- * helper also validates its size against the decoded algorithm identifier.
- *
- * \param key: [const][struct] The private-key object to validate.
- *
- * 
-eturn [enum] Returns a qsc_asn1_status code.
- */
-QSC_EXPORT_API qsc_asn1_status qsc_x509_private_key_validate(const qsc_x509_private_key* key);
-
 QSC_EXPORT_API size_t qsc_x509_private_key_expected_private_size(const qsc_x509_algorithm_identifier* algorithm);
 
 /*!

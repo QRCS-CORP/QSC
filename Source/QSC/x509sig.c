@@ -6,6 +6,8 @@
 #include "memutils.h"
 #include "x509spki.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static void x509_signature_initialize(qsc_x509_ecdsa_signature* signature)
 {
 	qsc_memutils_clear((uint8_t*)signature, sizeof(qsc_x509_ecdsa_signature));
@@ -390,3 +392,5 @@ qsc_asn1_status qsc_x509_signature_value_decode_ecdsa(const qsc_encoding_ber_ele
 
 	return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

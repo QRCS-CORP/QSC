@@ -52,7 +52,7 @@
 #ifndef QSC_INTRINSICS_H
 #define QSC_INTRINSICS_H
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 /*!
  * \file intrinsics.h

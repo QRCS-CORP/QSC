@@ -1,5 +1,7 @@
 #include "hwtpmquote.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_TPM_ENABLED)
 
 #include "ecdsap256.h"
@@ -335,4 +337,7 @@ qsc_hw_status qsc_hw_tpm_quote_envelope_verify(const uint8_t* envelope,
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_TPM_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

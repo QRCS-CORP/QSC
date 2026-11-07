@@ -5,6 +5,8 @@
 #include "tlscodec.h"
 #include "tlsdefs.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static qsc_tls_status ext_begin(uint8_t* out, size_t outlen, size_t* offset, uint16_t type, size_t* hdrpos)
 {
     qsc_tls_status status;
@@ -1679,3 +1681,5 @@ qsc_tls_status qsc_tls_extensions_decode_pre_shared_key_server(const uint8_t* in
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

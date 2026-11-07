@@ -12,6 +12,8 @@
 #include <string.h>
 #include <time.h>
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define X509W_VERIFY_BUFFER_MAX (QSC_X509_SIGNATURE_MAX + (2U * QSC_X509_CERTIFICATE_WRITE_MAX))
 
 /* qsc_x509w is intentionally offline-only. Network retrieval helpers are excluded
@@ -2561,3 +2563,5 @@ qsc_x509w_status qsc_x509w_tls_local_certificate_from_identity(const qsc_x509w_s
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -21,6 +21,8 @@
 #   include <dlfcn.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \file p11loader.c
  * \brief Process-shared Cryptoki library loader, ownership and bounded mechanism discovery.
  * \details No vendor libraries are statically linked. All module dispatch is serialized;
@@ -670,4 +672,7 @@ qsc_hw_status qsc_hw_pkcs11_mechanism_info_get(qsc_hw_pkcs11_module* module, uin
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

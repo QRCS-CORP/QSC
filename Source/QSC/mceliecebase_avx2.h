@@ -52,9 +52,9 @@
 #ifndef QSC_MCELIECEBASE_AVX2_H
 #define QSC_MCELIECEBASE_AVX2_H
 
- /* \cond NO_DOCUMENT */
-
 #include "qsccommon.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -62,6 +62,6 @@ QSC_CPLUSPLUS_ENABLED_START
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \cond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

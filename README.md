@@ -5,21 +5,42 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/qrcs-corp/qsc/badge)](https://www.codefactor.io/repository/github/qrcs-corp/qsc)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20|%20macOS%20|%20Windows-blue)](#)
 [![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](https://github.com/QRCS-CORP/QSC/security/policy)
-[![License: QRCS License](https://img.shields.io/badge/License-QRCS%20License-blue.svg)](https://github.com/QRCS-CORP/HKDS/blob/main/License.txt)
-[![Language](https://img.shields.io/static/v1?label=Language&message=C%2023&color=blue)](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf)
+[![License: QRCS-PREL](https://img.shields.io/badge/License-QRCS--PREL-blue.svg)](https://github.com/QRCS-CORP/QSC/blob/master/License.txt)
+[![Language](https://img.shields.io/static/v1?label=Language&message=C%20%28C11%20build%29&color=blue)](https://github.com/QRCS-CORP/QSC/blob/master/CMakeLists.txt)
 [![docs](https://img.shields.io/badge/docs-online-brightgreen)](https://qrcs-corp.github.io/QSC/)
 [![GitHub release](https://img.shields.io/github/v/release/QRCS-CORP/QSC)](https://github.com/QRCS-CORP/QSC/releases/tag/2026-04-30)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/QRCS-CORP/QSC.svg)](https://github.com/QRCS-CORP/QSC/commits/main)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/QRCS-CORP/QSC.svg)](https://github.com/QRCS-CORP/QSC/commits/master)
 [![Custom: Standard](https://img.shields.io/static/v1?label=Security%20Standard&message=MISRA&color=blue)](https://misra.org.uk/)
 [![Custom: Target](https://img.shields.io/static/v1?label=Target%20Industry&message=Communications&color=brightgreen)](#)
 
-**A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in C23.**
+**A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in portable C, with a C11 CMake build baseline.**
 
 ---
 
 ## What's New in This Release
 
-The October 2026 update brings substantial cryptographic optimization and side-channel hardening, a major expansion of the non-cryptographic infrastructure, and additional correctness and interoperability testing. It also builds on the recently completed TLS 1.3 stack and expanded elliptic-curve support.
+Version **1.4.0.0 (November 2026)** adds profile-based optimized CMake compilation and optional hardware-protected key interfaces, alongside recent cryptographic optimization, side-channel hardening, TLS 1.3/X.509 integration, expanded elliptic-curve support, and regression coverage. The new build profiles permit smaller statically linked applications without requiring the full TLS and certificate stack.
+
+### Profile-Based Optimized CMake Builds
+
+The separately developed modular CMake integration under `Source/QSC/` introduces explicit source manifests, profile-specific compilation, generated feature metadata, and an exported `QSC::QSC` target. The first integration provided seven core profiles; subsequent integration work extended the selection to gateway, industrial, robotics, AI-model and vehicle uses. `FULL` retains the comprehensive cryptographic, TLS and X.509 stack, while compact profiles select a smaller dependency set.
+
+- **Core profiles:** `FULL`, `CLASSICAL`, `PQC3`, `PQC5`, `HYBRID`, `DEVICE_IDENTITY`, `BOOT_VERIFY`.
+- **Expanded application profiles:** `EDGE_GATEWAY`, `CLOUD_HSM`, `INDUSTRIAL_OT`, `ROBOT_EDGE`, `AI_MODEL_TRUST`, `VEHICLE_ECU` (from the later modular integration package). Consult the particular package's `QSCProfiles.cmake` and `CMakePresets.json` for its authoritative complete profile and preset lists; names may differ between integration revisions.
+- **Build forms:** Static libraries are the default; the later integration package adds optional shared-library builds and more selective TLS/X.509 source inclusion.
+- **Generated build metadata:** `QSCFeatures.h` and a machine-readable capability manifest describe the configured feature set; consumers receive the required compile definitions through the build interface.
+- **Optional hardware integration:** Backend selection is explicit and a software-only build has no mandatory HSM, TPM or vendor SDK dependency.
+- **Installation:** Modular builds provide the `QSC::QSC` imported target for `find_package(QSC CONFIG REQUIRED)` consumers.
+
+This is **compile-time source selection**, not runtime CPU dispatch. Supported instruction-set optimizations still depend on compiler flags, target architecture, and platform capability. See [Optimized CMake Builds](#optimized-cmake-builds) for commands and qualification limits.
+
+### Hardware-Protected Key Interfaces
+
+QSC now supplies an **optional, versioned hardware-provider facade** and adapters for protected key operations. The facade accepts backend-reported capability, custody, usage, and export policy; it can open or create protected key references and request signing, public-key retrieval, eligible key agreement, RNG output, or attestation evidence when a backend supports those operations.
+
+Supported adapter interfaces cover standards-based **PKCS#11 HSMs**, the **Windows NCrypt Platform Crypto Provider / TPM**, **Linux TPM 2.0 through TPM2-TSS ESAPI**, **Arm PSA Crypto / Trusted Firmware-M**, **Microchip ATECC608**, **NXP SE050/SE05x**, and **Apple Secure Enclave / Android Keystore** platform bridges. Dedicated PKCS#11 and NCrypt adapters integrate protected ECDSA signing with QSC TLS 1.3 and X.509/PKCS#10 workflows.
+
+Hardware interfaces are disabled unless explicitly selected at compile time. Adapter availability does not establish that a physical device supports every algorithm, that private keys are hardware-resident, or that an implementation is FIPS 140-3 validated. Native device/firmware qualification, key-custody verification, and attestation evidence validation remain deployment-specific requirements. See [Hardware Security and Key Providers](#hardware-security-and-key-providers).
 
 ### Cryptographic Core Optimization and Hardening
 
@@ -29,7 +50,7 @@ Recent work has focused on improving performance without changing the public cry
 - **SHA-2, SHA-3, SHAKE, cSHAKE, and HKDF** - Optimized hashing, XOF, and derivation implementations across portable and supported SIMD builds, including short-message and multi-block workloads. Known-answer consistency remains a qualification requirement for every code path.
 - **ChaCha20-Poly1305, CSX, and RCS** - Reviewed and optimized stream-cipher and authenticated-encryption paths. CSX and RCS use their reduced-round default profiles, with extended-round configurations available through `QSC_CSX_EXTENDED_ROUND_COUNTS` and `QSC_RCS_EXTENDED_ROUND_COUNTS`; the selected configuration must match the corresponding test vectors and application protocol.
 - **QMAC and related constructions** - Updated test coverage and documentation around nonce uniqueness, authentication semantics, and dependency changes in the SHA-3/Keccak implementation.
-- **Elliptic-curve arithmetic** - Refined P-256 ECDSA signing and ECDH using native field arithmetic, multiplication/reduction pipeline improvements, and constant-time-oriented scalar multiplication. P-256 key agreement includes projective/scalar blinding and temporary-data clearing. NIST P-384 and P-521 key-agreement and signing interfaces remain available.
+- **Elliptic-curve arithmetic** - Refined P-256 ECDSA signing and ECDH using native field arithmetic, multiplication/reduction pipeline improvements, and constant-time-oriented scalar multiplication. P-256 key agreement includes projective/scalar blinding and temporary-data clearing. NIST P-384 and P-521 key-agreement and signing interfaces remain available. Ed25519/Ed448 signatures and X25519/X448 key agreement are included; the SLH-DSA layer provides all six SHAKE-based 128/192/256 fast/small profiles.
 
 Performance work is benchmark-guided and retains portable fallbacks. Constant-time-oriented implementation techniques and test results do not constitute a formal side-channel certification.
 
@@ -80,9 +101,11 @@ The persistent-worker pool and socket event loop also substantially reduce per-t
 
 ### Verification and Release Qualification
 
-After application of the recent warning-correction patch, the Linux development preflight compiled **241 QSC and QSCTest C translation units** under GCC and Clang with `-Wall -Wextra -Werror` and no diagnostics in that configuration. Focused regression, randomized, sanitizer, and cross-module tests were also run. Selected Base64, hexadecimal, PEM, and DER expected outputs were verified independently against OpenSSL and then embedded as **dependency-free QSCTest reference tests**. QSC and QSCTest do not link against OpenSSL.
+The [QSC Technical Qualification Report](docs/pdf/qsc_technical_qualification_report_2026-11-06.pdf) records a source-pinned **15/15 successful native offline cryptographic qualification matrix**: Windows Server 2022 x64, Ubuntu 24.04 x64, Linux ARM64 (GCC and Clang), and macOS ARM64 (Apple Clang), each at QSC security classes 1, 3 and 5. Both consolidated evidence gates passed. The underlying qualification used the November 6 `QSC 2026-11-06-B.zip` source snapshot and the `QSC-ARM-Tests` qualification commit `07f32d8a18a91f7a9035994adcbecd234a09b5ac`; runner status is **PASS_WITH_COVERAGE_GAPS**. These are tests of the stated offline cryptographic harness and configurations, not an exhaustive test of every API or modular build profile.
 
-A successful development preflight is not a certification: native MSVC/Windows and macOS runner execution, the complete long-running QSCTest suite, and GitHub CodeQL analysis have not all been verified for this revision. Additional `-Wpedantic` warnings remain outside the confirmed warning-free compiler configuration. Complete DER semantic conformance and formal side-channel qualification also remain separate audit objectives.
+A separate Linux development preflight compiled **241 QSC and QSCTest C translation units** under GCC and Clang with `-Wall -Wextra -Werror` and no diagnostics in that configuration. Additional regression, sanitizer and cross-module testing, together with independently checked Base64, hexadecimal, PEM and DER reference vectors, support engineering review; QSC and QSCTest do not require an OpenSSL runtime dependency.
+
+The modular CMake system was developed and separately exercised using Linux/GCC full and compact profiles, optional PKCS#11 selection, installed external consumers and smoke/round-trip tests. A later review package added expanded application profiles and shared-library integration. These build-integration results are **distinct** from the 15-configuration native cryptographic qualification matrix. Native MSVC/macOS/ARM build-system qualification, physical HSM/TPM testing and formal certification require their own evidence. The technical report does not assert an official NIST ACVP algorithm validation or FIPS 140-3 module certificate.
 
 ### Complete TLS 1.3 Protocol Stack
 
@@ -98,9 +121,9 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 
 - **ECDH over NIST P-curves** (`ecdh.h`, `ecdhp256.*`, `ecdhp384.*`, `ecdhp521.*`) - Static and ephemeral ECDH key agreement over P-256, P-384, and P-521 per NIST SP 800-56A and FIPS 186-5. Constant-time scalar multiplication; public key validation per SP 800-56A requirements. Reuses field arithmetic from the existing ECDSA implementations to avoid code duplication.
 
-- **EdDH** (`eddh.h`, `eddh25519base.*`, `eddh448base.*`) - Edwards-curve Diffie-Hellman key exchange. Supports X25519 (Curve25519, parameter set `QSC_EDDH_S1EC25519`) and X448 (Goldilocks, parameter set `QSC_EDDH_S3EC448`). Designed for constant-time execution.
+- **EdDH** (`eddh.h`, `eddh25519.*`, `eddh448.*`) - Edwards-curve Diffie-Hellman key exchange. Supports X25519 (Curve25519, parameter set `QSC_EDDH_S1EC25519`) and X448 (Goldilocks, parameter set `QSC_EDDH_S3EC448`). Designed for constant-time execution.
 
-- **EdDSA** (`eddsa.h`, `eddsa25519base.*`, `eddsa448base.*`) - Unified Edwards-curve digital signature interface. Supports Ed25519 and Ed448 (Goldilocks) via a common API; parameter set selected at compile time (`QSC_EDDSA_S1EC25519` or `QSC_EDDSA_S3EC448`).
+- **EdDSA** (`eddsa.h`, `eddsa25519.*`, `eddsa448.*`) - Unified Edwards-curve digital signature interface. Supports Ed25519 and Ed448 (Goldilocks) via a common API; parameter set selected at compile time (`QSC_EDDSA_S1EC25519` or `QSC_EDDSA_S3EC448`).
 
 - **Ed448 / Goldilocks** (`ed448.h`, `ed448.c`) - Full implementation of the Ed448-Goldilocks Edwards curve, underpinning both EdDH-X448 and EdDSA-448.
 
@@ -113,27 +136,28 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 | [QSC Help Documentation](https://qrcs-corp.github.io/QSC/) | Full API reference and usage guide |
 | [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qsc_specification.pdf) | Detailed algorithmic and design specification |
 | [QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/qsc_summary.pdf) | High-level overview of the library |
+| [QSC Technical Qualification Report](docs/pdf/qsc_technical_qualification_report_2026-11-06.pdf) | November 6, 2026 engineering qualification dossier; 15 native configurations, evidence matrices and assessment findings (116 pages) |
 
 ## Overview
 
-QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations, all within a single, dependency-free C23 codebase.
+QSC is a production-grade cryptographic library built for environments that demand verifiable correctness, long-term quantum resistance, and high throughput. The library combines NIST-standardized post-quantum algorithms with classical primitives, proprietary high-security constructions, and SIMD-accelerated implementations, within a portable C codebase with a C11 CMake build baseline and optional, separately selected hardware-provider dependencies.
 
-The library now includes a complete TLS 1.3 protocol stack (RFC 8446) built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack implements the full handshake surface - 1-RTT certificate-authenticated, mutual TLS, PSK resumption with ticket-policy controls, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket, ALPN, SNI-based certificate selection, peer-information inspection, structured verification results, framed-message socket helpers, and hardened shutdown behaviour. It supports hybrid post-quantum key exchange that combines classical ECDH with ML-KEM encapsulation in a single flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, AEAD record layer, and socket I/O adapter.
+The library includes a complete TLS 1.3 protocol stack (RFC 8446) built entirely on the QSC cryptographic core, with no dependency on OpenSSL or any other external TLS library. The stack implements the full handshake surface - 1-RTT certificate-authenticated, mutual TLS, PSK resumption with ticket-policy controls, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket, ALPN, SNI-based certificate selection, peer-information inspection, structured verification results, framed-message socket helpers, and hardened shutdown behaviour. It supports hybrid post-quantum key exchange that combines classical ECDH with ML-KEM encapsulation in a single flight. It integrates directly with the QSC X.509 certificate infrastructure, key schedule, AEAD record layer, and socket I/O adapter.
 
-Additional recent additions include full ECDSA implementations for NIST P-256, P-384, and P-521 interoperable with the CA/Browser Forum Baseline Requirements, ECDH key agreement over the same NIST P-curves, EdDH (X25519 and X448) and EdDSA (Ed25519 and Ed448) Edwards-curve primitives, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, and a comprehensive X.509 certificate infrastructure built on a strict DER/BER-capable ASN.1 engine. The X.509 layer covers the full certificate lifecycle: parsing, validation, generation, revocation, OCSP, PKCS#12 key management, and post-quantum ML-DSA certificate profiles, without any external dependencies.
+Additional recent additions include ECDSA implementations for NIST P-256, P-384, and P-521, ECDH key agreement over the same NIST P-curves, X25519/X448 key agreement and Ed25519/Ed448 signatures, Falcon lattice-based signatures, the HQC code-based key encapsulation mechanism, and a comprehensive X.509 certificate infrastructure built on a strict DER/BER-capable ASN.1 engine. The X.509 layer covers the full certificate lifecycle: parsing, validation, generation, revocation, OCSP, PKCS#12 key management, and post-quantum ML-DSA certificate profiles, without any external dependencies.
 
 Key design goals:
 
 - **Long-term security** - supports post-quantum, classical, and hybrid asymmetric algorithms; proprietary constructions target 256-bit or greater security levels.
 - **Standards alignment** - follows a MISRA-adjacent secure C coding discipline; standardized post-quantum primitives target FIPS 203, FIPS 204, and FIPS 205, and the TLS stack targets RFC 8446. Formal product validation and certification are separate processes.
 - **Public internet compatibility** - NIST P-256, P-384, and P-521 ECDSA and ECDH, Edwards-curve EdDH/EdDSA, hybrid post-quantum groups, and X.509 certificate infrastructure enable deployment in TLS 1.3 stacks and compliance with CA/Browser Forum Baseline Requirements for publicly trusted certificates.
-- **Performance** - portable C paths alongside AVX, AVX2, AVX-512, and supported ARM SIMD implementations, selected at build time. The fastest configuration depends on the CPU and workload.
+- **Performance** - portable C paths alongside AVX, AVX2, AVX-512, and supported ARM SIMD implementations selected at build time; profile-based CMake source selection reduces linked scope for compact applications. The fastest configuration depends on the CPU and workload.
 - **Auditability** - thoroughly commented, well-structured source with a comprehensive test suite covering known-answer tests, NIST CAVP/ACVP vectors, fuzzing, and stress testing across every primitive.
-- **Portability** - compiles on Windows (MSVC), Linux (GCC), and macOS (Clang) with no external dependencies.
+- **Portability** - core software builds target Windows (MSVC), Linux (GCC), and macOS (Clang) without mandatory external cryptographic libraries; optional device backends may require platform SDKs or vendor middleware.
 
-> **Version:** 1.2.0.0  
+> **Version:** 1.4.0.0  
 > **Tested on:** Windows 10 / 11 / Server · Ubuntu Linux · macOS  
-> _All asymmetric ciphers and signature schemes have been updated to the final NIST FIPS standards for standardized algorithms and to NIST PQC Round 3/4 specifications for remaining candidates. The TLS 1.3 stack is complete and conforms to RFC 8446._
+> _Standardized ML-KEM, ML-DSA, and SLH-DSA target FIPS 203/204/205; other candidate and experimental algorithms are identified separately. RFC 8446 TLS 1.3 is implemented; standards alignment does not imply a completed NIST FIPS validation._
 
 ---
 
@@ -153,17 +177,17 @@ The primary validation suite for the QSC library. QSCTest exercises every crypto
 - **Stress Testing** - extended load testing to surface resource leaks, state corruption, and threading issues.
 - **Function Correctness** - round-trip and cross-function consistency checks (e.g., encrypt→decrypt, sign→verify).
 
-Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH P-256/P-384/P-521, EdDH X25519/X448), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, EdDSA Ed25519/Ed448), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP), the X.509 certificate layer, the complete TLS 1.3 protocol stack, and all utility modules.
+Coverage spans the full library: asymmetric ciphers (ML-KEM, McEliece, HQC, ECDH P-256/P-384/P-521, EdDH X25519/X448), signature schemes (ML-DSA, SLH-DSA, Falcon, ECDSA P-256/P-384/P-521, EdDSA Ed25519/Ed448), symmetric ciphers (AES, RCS, CSX, ChaCha20-Poly1305), hash and XOF functions (SHA2, SHA3, SHAKE, cSHAKE), MAC functions (KMAC, QMAC, HMAC, Poly1305), DRBGs (CSG, HCG), entropy providers (ACP, CSP, RDP, ETR), the X.509 certificate layer, the complete TLS 1.3 protocol stack, and all utility modules.
 
-The TLS regression suite is organized into staged feature tests. Current TLS/X.509 stages include ALPN negotiation, SNI and multi-certificate policy, mTLS authorization callbacks, peer-info and verification-result inspection, session-ticket policy controls, framed-message helper policy, record fragmentation and coalescing, socket option and timeout policy, concurrent shutdown and worker cleanup, and negative X.509 certificate-purpose validation. Additional QSCTest coverage includes embedded OpenSSL-verified Base64, hexadecimal, PEM, and DER reference cases, with no external test-library dependency.
+The TLS regression suite is organized into staged feature tests. Current TLS/X.509 stages include ALPN negotiation, SNI and multi-certificate policy, mTLS authorization callbacks, peer-info and verification-result inspection, session-ticket policy controls, framed-message helper policy, record fragmentation and coalescing, socket option and timeout policy, concurrent shutdown and worker cleanup, and negative X.509 certificate-purpose validation. Additional QSCTest coverage includes embedded OpenSSL-verified Base64, hexadecimal, PEM, and DER reference cases, with no external test-library dependency. Hardware-provider qualification also includes portable contract, policy and negative-path tests that can run without physical hardware; native-device tests are reported separately and require the corresponding provider and device.
 
 ---
 
 ### QSCCAVP
 
-The NIST Cryptographic Algorithm Validation Program (CAVP) compliance suite. QSCCAVP runs the official CAVP and ACVP test vector sets against every applicable QSC component to verify conformance with federal standards.
+The CAVP/ACVP-oriented local conformance test suite. It exercises applicable QSC primitives against published or obtained reference vectors and prepares for official algorithm validation workflows. Access to the NIST ACVP service and formal validation remain subject to authorization and completion of the required process.
 
-**Validated components and standards:**
+**Algorithm coverage and target standards:**
 
 | Category | Algorithms | Standard |
 |---|---|---|
@@ -173,7 +197,7 @@ The NIST Cryptographic Algorithm Validation Program (CAVP) compliance suite. QSC
 | Key Encapsulation | ML-KEM (Kyber) | FIPS-203 (ACVP vectors) |
 | Digital Signatures | ML-DSA (Dilithium), SLH-DSA (SPHINCS+) | FIPS-204, FIPS-205 (ACVP vectors) |
 
-QSCCAVP is the authoritative conformance reference for deployments in regulated environments such as government, defence, finance, and critical infrastructure.
+These local tests provide engineering evidence for regulated deployments but are **not** a NIST CAVP algorithm certificate or FIPS 140-3 module validation. Verify official status independently before making compliance claims.
 
 ---
 
@@ -186,9 +210,9 @@ QSCCAVP is the authoritative conformance reference for deployments in regulated 
 
 | Algorithm | Type | Standard |
 |---|---|---|
-| **ML-KEM** (Kyber) | Module-LWE based KEM | NIST FIPS-203 |
+| **ML-KEM** (Kyber-512/768/1024) | Module-LWE based KEM | NIST FIPS 203; Kyber-1280 is a separate experimental, nonstandard profile |
 | **Classic McEliece** | Niederreiter dual-form code-based KEM | NIST PQC Round 3 |
-| **HQC** | QC-MDPC code-based KEM | NIST PQC Round 4 |
+| **HQC** | Quasi-cyclic code-based KEM | NIST PQC Round 4 |
 | **ECDH** (P-256 / P-384 / P-521) | NIST prime-curve ECDH key agreement; constant-time scalar multiplication; public-key validation per SP 800-56A | NIST SP 800-56A, FIPS 186-5 |
 | **EdDH** (X25519 / X448) | Edwards-curve Diffie-Hellman; Curve25519 (`QSC_EDDH_S1EC25519`) and Goldilocks (`QSC_EDDH_S3EC448`) | RFC 7748 |
 
@@ -197,7 +221,7 @@ QSCCAVP is the authoritative conformance reference for deployments in regulated 
 | Algorithm | Type | Standard / Reference |
 |---|---|---|
 | **ML-DSA** (Dilithium) | Module-lattice based signatures | NIST FIPS-204 |
-| **SLH-DSA** (SPHINCS+) | Stateless hash-based signatures | NIST FIPS-205 |
+| **SLH-DSA** (SPHINCS+) | Stateless hash-based signatures; SHAKE-128s/128f, SHAKE-192s/192f, SHAKE-256s/256f | NIST FIPS 205 |
 | **Falcon** | NTRU lattice-based compact signatures | NIST PQC Round 3 |
 | **ECDSA** (P-256 / P-384 / P-521) | Elliptic curve signatures over NIST P-256, P-384, and P-521; RFC 6979 deterministic nonce; interoperable with TLS 1.3 and public CA certificates | FIPS 186-5, RFC 6979, RFC 8422 |
 | **EdDSA** (Ed25519 / Ed448) | Edwards-curve digital signatures; Ed25519 and Ed448-Goldilocks parameter sets selectable at compile time (`QSC_EDDSA_S1EC25519` / `QSC_EDDSA_S3EC448`) | RFC 8032 |
@@ -369,6 +393,34 @@ The X.509 implementation includes standards-oriented checks derived from RFC 528
 
 ---
 
+### Hardware Security and Key Providers
+
+The optional hardware integration uses the common `hwprovider.h` / `hwtypes.h` provider contract. It models capability discovery, protected-key lookup/generation, usage policy, custody and export restrictions, transient key-handle lifetime, signing, key agreement where supported, public-key retrieval, provider RNG, and device-specific attestation evidence. The provider ABI is versioned with `QSC_HW_ABI_VERSION` (independent of the QSC release number). Applications must verify backend capabilities and explicitly request non-exportable custody when required.
+
+| Interface | Headers / modules | Scope and prerequisites |
+|---|---|---|
+| **Provider facade** | `hwprovider.h`, `hwprovider.c`, `hwtypes.h` | Versioned, backend-independent callback interface; no mandatory vendor runtime |
+| **PKCS#11 / Cryptoki** | `hwpkcs11.h`, `p11loader.c`, `p11session.c`, `p11keys.c`, `p11sign.c`, `p11agree.c` | Selective HSM/token module loading; external Cryptoki module and compatible development interface required |
+| **Windows TPM / NCrypt** | `hwncrypt.h`, `hwncrypt.c` | Microsoft Platform Crypto Provider; protected ECDSA key operations; physical TPM access must be confirmed |
+| **Linux TPM 2.0** | `hwtpm.h`, `hwtpm.c`, `hwtpmquote.h` | TPM2-TSS ESAPI/TCTI option, pre-provisioned persistent identities, bounded quote verification; no TPM provisioning by QSC |
+| **Arm PSA Crypto / TF-M** | `hwpsa.h`, `hwpsanative.h` | OEM bridge or selected native PSA client; trusted execution and key-custody properties require platform evidence |
+| **Microchip ATECC608** | `hwatecc.h` | Device-bound P-256 identity and signing with an OEM-supplied CryptoAuthLib/HAL bridge |
+| **NXP SE050/SE05x** | `hwse050.h` | SE05x token policy preflight through an OEM-installed Plug & Trust PKCS#11 module |
+| **Apple / Android** | `hwplatform.h` | Apple Secure Enclave and Android Keystore/StrongBox bridges, subject to platform capabilities |
+| **TLS 1.3 / X.509 binding** | `hwpkcs11tls.h`, `hwncrypttls.h` | CertificateVerify ECDSA signing and X.509/PKCS#10 signing with protected keys; no private-key export required |
+
+#### Hardware Configuration and Security Boundaries
+
+The public C interfaces are guarded by `QSC_HARDWARE_ENABLED` and the relevant backend feature definitions: `QSC_HARDWARE_PKCS11_ENABLED`, `QSC_HARDWARE_NCRYPT_ENABLED`, `QSC_HARDWARE_TPM_ENABLED`, `QSC_HARDWARE_PSA_ENABLED`, `QSC_HARDWARE_ATECC_ENABLED`, `QSC_HARDWARE_SE050_ENABLED`, and `QSC_HARDWARE_PLATFORM_ENABLED`. Native Linux TPM2-TSS and native PSA implementations have additional opt-in controls (`QSC_TPM2_TSS_ENABLED` and `QSC_HARDWARE_PSA_NATIVE_ENABLED`). These are **C preprocessor feature guards**, not necessarily names of CMake cache options; use the hardware options exposed by the selected CMake integration.
+
+- **Key custody:** A reported hardware capability is not proof of non-exportability or physical hardware provenance. Keys and policies must be checked against the selected device, middleware, firmware, and operating-system configuration.
+- **Attestation:** Evidence retrieval and verification are separate operations; a successful API call must not be represented as a trusted-device attestation without independent trust-chain, nonce, and policy checks.
+- **Algorithm availability:** Supported operations differ by backend; software ML-DSA/ML-KEM support does not imply those algorithms are natively available in an HSM or TPM.
+- **Dependencies and threads:** The software-only core remains independent of vendor SDKs. Selected native backends may require vendor packages, and provider close/release must be synchronized with concurrent operations according to each interface contract.
+- **Qualification:** Portable and simulator-backed tests are not substitutes for physical-device qualification. No FIPS 140-3 certification or hardware security rating is claimed by the existence of these adapters.
+
+---
+
 ### Symmetric Cryptography
 
 #### Authenticated Encryption (AEAD)
@@ -427,6 +479,7 @@ The X.509 implementation includes standards-oriented checks derived from RFC 528
 | **ACP** (`acp.h`) | Auto Entropy Collection Provider; aggregates multiple entropy sources |
 | **CSP** (`csp.h`) | OS-native cryptographic entropy provider |
 | **RDP** (`rdp.h`) | Hardware entropy via RDRAND/RDSEED |
+| **ETR** (`etr.h`) | External true-random source callback with SHAKE-512 output conditioning and explicit initialization/failure behavior |
 
 ---
 
@@ -508,14 +561,14 @@ Each proprietary construction in QSC is accompanied by a full technical specific
 
 ## Architecture and Performance
 
-QSC uses a dual implementation strategy for all performance-critical algorithms:
+QSC uses a dual implementation strategy for performance-critical algorithms, alongside profile-driven CMake source selection:
 
-- **Reference path** - clean, portable C23 code that compiles on any conforming compiler and provides a readable, auditable baseline.
+- **Reference path** - clean, portable C code with a C11 CMake baseline that provides a readable, auditable reference implementation.
 - **SIMD-optimized path** - AVX, AVX2, and AVX-512 intrinsic implementations that activate automatically when the appropriate instruction set is enabled at compile time, providing substantial throughput improvements on modern x86-64 hardware.
 
 The paths share public interfaces and are required to produce equivalent outputs. The selected implementation depends on compile-time feature macros, supported CPU instructions, and OS register-state support. AVX-512 is advantageous for some workloads, but the fastest configuration should be established by benchmarking on the intended hardware.
 
-SIMD acceleration is applied selectively across AES (AES-NI), RCS, CSX, SHA-2, SHA-3/SHAKE/Keccak, ML-KEM (Kyber), ML-DSA (Dilithium), SLH-DSA (SPHINCS+), and memory utility operations. Available scalar, AVX2, AVX-512, and ARM-specific paths are qualified separately where toolchains and hardware are available.
+SIMD acceleration is applied selectively across AES (AES-NI), RCS, CSX, SHA-2, SHA-3/SHAKE/Keccak, ML-KEM (Kyber), ML-DSA (Dilithium), SLH-DSA (SPHINCS+), and memory utility operations. The modular CMake profiles independently control which families are compiled and linked; they do not imply that an instruction such as VAES or VPCLMULQDQ is present merely because AVX2 and AES-NI are enabled. Available scalar, AVX2, AVX-512, and ARM-specific paths are qualified separately where toolchains and hardware are available.
 
 The NIST P-curve ECDSA and ECDH implementations use dedicated field and point arithmetic. Recent P-256 work includes optimized multiplication/reduction pipelines, signing-specific and key-agreement-specific execution paths, and blinding and secure-clear handling for ECDH. RFC 6979 deterministic nonce generation is used for ECDSA signing. P-384 and P-521 remain supported through their existing dedicated implementations; EdDH and EdDSA use arithmetic over their respective Edwards-curve fields.
 
@@ -524,6 +577,78 @@ The TLS 1.3 engine is designed for minimal allocation: the record layer heap-all
 ---
 
 ## Compilation
+
+### Optimized CMake Builds
+
+QSC has two separate CMake entry points:
+
+- **Repository root (`CMakeLists.txt`):** The currently published, whole-library C11 build. It exposes `BUILD_SHARED_LIBS`, `QSC_ENABLE_TESTS`, `QSC_ENABLE_QSCTEST`, and `QSC_STRICT_WARNINGS`, but **not** `QSC_PROFILE`. Its library target is `qsc` (alias `qsc::qsc`).
+- **Modular integration (`Source/QSC/CMakeLists.txt`):** The separately delivered profile-based integration with `Source/QSC/cmake/` source manifests, profile/hardware selection and `Source/QSC/CMakePresets.json`. It supports compact builds, generated capability metadata and the installed `QSC::QSC` target. An extended integration package also supports optional shared builds and selective TLS/X.509 inclusion.
+
+**Repository status:** The modular files are not yet present on the inspected public `master` branch. Install the modular integration files before running the following commands; passing `-DQSC_PROFILE` to the root CMake configuration does not select a compact profile.
+
+**Example: full static-library build** (from the repository root, after the modular CMake integration has been installed):
+
+```sh
+cmake -S Source/QSC -B build/qsc-full -DQSC_PROFILE=FULL -DCMAKE_BUILD_TYPE=Release
+cmake --build build/qsc-full --config Release
+cmake --install build/qsc-full --prefix /path/to/qsc-install
+```
+
+**Example: compact PQC level-5 build:**
+
+```sh
+cmake -S Source/QSC -B build/qsc-pqc5 -DQSC_PROFILE=PQC5 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/qsc-pqc5 --config Release
+```
+
+On Visual Studio, supply the desired CMake generator or use the included CMake presets; `--config Release` selects the Release configuration for multi-configuration generators. The `CMAKE_BUILD_TYPE` cache setting applies to single-configuration generators only.
+
+| Profile | Intended use |
+|---|---|
+| `FULL` | Entire QSC library, including TLS 1.3 and X.509 |
+| `CLASSICAL` | Classical cryptographic primitives and required utility modules |
+| `PQC3` | Compact post-quantum security-class-3 cryptographic selection |
+| `PQC5` | Compact post-quantum security-class-5 cryptographic selection |
+| `HYBRID` | Combined classical and post-quantum cryptographic selection |
+| `DEVICE_IDENTITY` | Smaller device-identity and protected-key integration use cases |
+| `BOOT_VERIFY` | Compact signature-verification and boot-verification use cases |
+| `EDGE_GATEWAY` | Field gateway cryptography, networking and selected protocol integration |
+| `CLOUD_HSM` | Cloud services and HSM-centric key-custody integration |
+| `INDUSTRIAL_OT` | Industrial control, operational technology and long-lifecycle endpoints |
+| `ROBOT_EDGE` | Robotics, autonomous machinery and edge-device security |
+| `AI_MODEL_TRUST` | AI model artifact signatures and trust/verification workflows |
+| `VEHICLE_ECU` | Vehicle embedded-control-unit cryptography and secure updates |
+
+The initial seven profiles and the expanded application profiles belong to different revisions of the modular integration. The **authoritative full list of supported profile identifiers and presets is the exact revision installed** (`cmake/QSCProfiles.cmake` and `CMakePresets.json`); avoid selecting a name not present in that version.
+
+Compact profiles select their intended source sets instead of merely hiding APIs behind preprocessor switches. Profile selection is performed at configuration/build time and should be validated against the application's required symbols and parameter sets. The generated `QSCFeatures.h` and capability manifest describe the selected feature set; consumers use the exported `QSC::QSC` target and should not override generated feature definitions inconsistently.
+
+When installed, downstream CMake consumers can use:
+
+```cmake
+find_package(QSC CONFIG REQUIRED)
+target_link_libraries(my_application PRIVATE QSC::QSC)
+```
+
+#### CMake options and compiler flags
+
+| Option or command | Scope | Meaning |
+|---|---|---|
+| `-DQSC_PROFILE=<profile>` | Modular integration | Select the named source/feature profile; `FULL` is the baseline example. Not supported by the legacy root build. |
+| `-DBUILD_SHARED_LIBS=ON` or `OFF` | Root build; later modular revision | Select shared or static output where implemented. Static is the normal compact-distribution choice. |
+| `-DCMAKE_BUILD_TYPE=Release` | Single-configuration generators | Choose optimization configuration for Makefiles/Ninja. |
+| `cmake --build <build-dir> --config Release` | Multi-configuration generators | Select the Release configuration in Visual Studio and comparable generators. |
+| `-DQSC_STRICT_WARNINGS=ON` or `OFF` | Root build | Enable or disable the root build's strict-warning option. |
+| `-DQSC_ENABLE_TESTS=ON` or `OFF` | Root build | Include the optional `tests/` CMake project if it exists. |
+| `-DQSC_ENABLE_QSCTEST=ON` or `OFF` | Root build | Build the QSCTest executable when its sources are present. |
+| `-DCMAKE_C_FLAGS=...` | Both, when supported | Select target/compiler instruction options for a specific build. Do not enable instructions unsupported by the deployment CPU or OS. |
+| `cmake --list-presets` | Modular integration | List the precise presets packaged with the selected revision. Run from `Source/QSC/` or provide `-S` as supported by the installed CMake version. |
+| `cmake -LAH -N <build-dir>` | Configured build tree | Inspect the **actual** supported cache entries, including hardware/provider and compiler selections. |
+
+For modular hardware selection, consult `cmake/QSCHardware.cmake`; source-level guards such as `QSC_HARDWARE_PKCS11_ENABLED` are **not** automatically CMake cache-option names. A backend's middleware and headers are required only when that backend is enabled. The portable software-only library has no mandatory vendor SDK dependency.
+
+**Qualification boundary:** The November 6 technical dossier records native cryptographic tests across five platform/compiler groups and three security classes; it does **not** automatically qualify every CMake profile, shared-library packaging variant, optional ISA branch or physical hardware provider. The separate modular integration review ran primarily on Linux. The public root build and the modular build must be qualified and versioned independently.
 
 ### Prerequisites
 
@@ -596,7 +721,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 
 #### AVX-512
 ```
--msse2 -mavx -mavx2 -mavx512f -mavx512bw -mvaes -mpclmul -mrdrnd -mbmi2 -maes
+-msse2 -mavx -mavx2 -mavx512f -mavx512bw -mpclmul -mrdrnd -mbmi2 -maes
 ```
 
 | Flag | Purpose |
@@ -606,11 +731,13 @@ The default project configuration uses minimal flags with no enhanced instructio
 | `-mavx2` | AVX2 baseline (explicit is safer even when implied) |
 | `-mavx512f` | AVX-512 Foundation (512-bit registers) |
 | `-mavx512bw` | AVX-512 Byte/Word integer instructions |
-| `-mvaes` | Vector-AES in 512-bit registers |
-| `-mpclmul` | PCLMUL for GF(2ⁿ) operations |
+| `-mpclmul` | Baseline PCLMULQDQ carry-less multiplication |
+| `-mvaes` / `-mvpclmulqdq` | Optional, **independent** VAES and VPCLMULQDQ instruction-set features: add only when supported by both CPU and compiler |
 | `-mrdrnd` | RDRAND hardware RNG |
 | `-mbmi2` | BMI2 |
 | `-maes` | AES-NI (128-bit rounds; complement to VAES) |
+
+**CPU and compiler gating:** AVX2 with AES-NI does **not** imply VAES or VPCLMULQDQ. An optional accelerated build may add `-mvaes -mvpclmulqdq` only on suitable hardware and toolchains; Intel/AMD and MSVC compile-time feature detection differ. Keep portable fallback paths available and validate each deployed instruction set. These are compiler flags, not `QSC_PROFILE` values.
 
 ---
 
@@ -618,23 +745,31 @@ The default project configuration uses minimal flags with no enhanced instructio
 
 | Feature | Details |
 |---|---|
-| **Post-Quantum Algorithms** | ML-KEM (FIPS-203), ML-DSA (FIPS-204), SLH-DSA (FIPS-205), Falcon (Round 3), Classic McEliece, HQC (Round 4) |
+| **Post-Quantum Algorithms** | ML-KEM (FIPS 203), ML-DSA (FIPS 204), six SHAKE SLH-DSA profiles (FIPS 205), Falcon (Round 3), Classic McEliece, HQC (Round 4); experimental Kyber-1280 available separately |
 | **Classical Algorithms** | AES, SHA-2/3, HMAC, ChaCha20-Poly1305, ECDH (P-256/P-384/P-521, X25519/X448), ECDSA (P-256/P-384/P-521), EdDSA (Ed25519/Ed448) |
 | **Proprietary Constructions** | RCS, CSX, QMAC, SCB - each with formal security analysis |
 | **X.509 / PKI Infrastructure** | Certificate lifecycle: DER/PEM parsing and generation, chain verification, CRL and OCSP revocation, PKCS#10 CSR, PKCS#12 bundles, trust store management; ECDSA and ML-DSA certificate profiles; RFC 5280, RFC 6125, and X.690-oriented validation |
 | **TLS 1.3** | Complete RFC 8446 implementation: 1-RTT, mTLS, PSK resumption, HelloRetryRequest, KeyUpdate, NewSessionTicket, ALPN, SNI/multi-certificate selection, peer-info inspection, verification-result reporting, socket timeout policy, framed-message helpers, and concurrent shutdown cleanup; no external TLS dependencies |
 | **Hybrid Post-Quantum Key Exchange** | ECDH + ML-KEM combined in a single TLS handshake flight; implemented IETF-aligned hybrid groups are X25519MLKEM768, SecP256r1MLKEM768, and SecP384r1MLKEM1024 |
-| **SIMD Acceleration** | AVX, AVX2, AVX-512, AES-NI, RDRAND across all major primitives |
+| **SIMD Acceleration** | Portable scalar plus supported AVX, AVX2, AVX-512, AES-NI and ARM implementations, selected at build time |
+| **Optimized CMake** | Modular profile-based source selection with seven original profiles and expanded edge, cloud-HSM, industrial, robotics, AI-model and vehicle profiles; static output by default, optional shared builds in the later integration package; generated feature metadata and exported `QSC::QSC` target |
+| **Hardware-Key Integration** | Optional PKCS#11/HSM, NCrypt/TPM, TPM2-TSS, Arm PSA/TF-M, ATECC608, SE050 and Apple/Android keystore providers; protected signing bridges for TLS/X.509 |
+| **External Entropy** | Opt-in ETR true-random callback interface with SHAKE-512 conditioning |
 | **Coding Discipline** | MISRA-adjacent QRCS secure C coding standard; formal MISRA compliance not claimed |
-| **Testing** | Known-answer and NIST vector tests, randomized and stress tests, embedded OpenSSL-verified encoding reference vectors, TLS/X.509 interoperability and staged regression coverage; native runner and CodeQL qualification tracked separately |
+| **Testing** | Known-answer and vector tests, randomized/stress and interoperability tests, and source-pinned offline qualification: 15/15 native configurations and two passing consolidated evidence gates, each with documented coverage boundaries; see the technical qualification report |
 | **Platforms** | Windows (MSVC), Linux (GCC), macOS (Clang) |
 | **Language Interop** | Native C API and direct C/C++ integration |
-| **Self-Contained** | No external runtime dependencies |
+| **Self-Contained** | Software cryptographic core requires no external cryptographic runtime; optional selected hardware adapters may need vendor/platform middleware |
 
 ---
 
 ## Roadmap
 
+- [x] Modular profile-based optimized CMake integration, with expanded application profiles, generated consumer metadata, installation/export and optional shared builds in the later review package
+- [ ] Publish the modular CMake integration alongside the root build and qualify its installed profiles/presets on each supported platform
+- [x] Optional hardware-provider facade, adapter interfaces and protected-key TLS/X.509 integration points
+- [ ] Native physical-HSM/TPM/secure-element and multi-platform qualification of selected backends
+- [ ] Windows/macOS/ARM and native MSVC qualification of the new modular CMake integration
 - [ ] Continued intrinsics-first SIMD optimization and selective assembly where independently beneficial
 - [x] TLS 1.3 *(complete - RFC 8446 compliant; 1-RTT, mTLS, PSK policy, HRR, KeyUpdate, NewSessionTicket, ALPN, SNI, peer-info, framed-message helpers, OpenSSL interoperability, and hybrid post-quantum groups)*
 - [x] Expanded microbenchmark coverage for cryptographic primitives and peripheral utilities

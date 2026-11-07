@@ -2,6 +2,8 @@
 #include "memutils.h"
 #include "stringutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static int32_t x509_ascii_tolower(int32_t c)
 {
     int32_t res;
@@ -254,3 +256,5 @@ bool qsc_x509_certificate_match_endpoint(const qsc_x509_certificate* certificate
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

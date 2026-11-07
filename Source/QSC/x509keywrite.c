@@ -7,6 +7,8 @@
 #include "x509spki.h"
 #include "x509write.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_PEM_PKCS8_LABEL "PRIVATE KEY"
 #define QSC_X509_PEM_SEC1_LABEL "EC PRIVATE KEY"
 #define QSC_X509_EC_PUBLIC_KEY_ENCODE_MAX 133U
@@ -1025,3 +1027,5 @@ qsc_asn1_status qsc_x509_private_key_encode_pkcs8_ml_kem_pem(qsc_x509_pqc_parame
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

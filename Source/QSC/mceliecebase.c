@@ -29,6 +29,8 @@
 #  define QSC_MCELIECE_DYNAMIC_ALLOCATION
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* params.h */
 
 #define MCELIECE_SHAREDSECRET_SIZE 32ULL
@@ -2388,3 +2390,5 @@ bool qsc_mceliece_ref_generate_keypair(uint8_t* pk, uint8_t* sk, bool (*rng_gene
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

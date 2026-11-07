@@ -100,7 +100,7 @@ QSC_CPLUSPLUS_ENABLED_START
 {
     qsc_tls_role_client = 0,    /*!< The connection is operating as a TLS client. */
     qsc_tls_role_server = 1     /*!< The connection is operating as a TLS server. */
-} qsc_tls_role;
+} qsc_tls_role; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_connection
@@ -123,7 +123,7 @@ typedef struct qsc_tls_connection
     {
         qsc_tls_client_state client;    /*!< Client-side TLS protocol state. */
         qsc_tls_server_state server;    /*!< Server-side TLS protocol state. */
-    } state;
+    } state;  /*!< State retained for the associated processing operation. */
 
     qsc_tls_role role;                                          /*!< Active endpoint role. */
     qsc_tls_session_ticket receivedticket;                      /*!< Most recently received and processed NewSessionTicket. */
@@ -134,7 +134,7 @@ typedef struct qsc_tls_connection
     bool hasreceivedticket;                                     /*!< True when receivedticket is available to the caller. */
     bool keyupdaterequestoutstanding;                           /*!< True after sending update_requested until a subsequent peer KeyUpdate is received. */
     bool keyupdateresponsepending;                              /*!< True when a peer requested a reciprocal KeyUpdate that must precede the next application record. */
-} qsc_tls_connection;
+} qsc_tls_connection; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Initialize a TLS engine connection as a client.

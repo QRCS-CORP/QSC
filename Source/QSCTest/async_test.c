@@ -2,7 +2,7 @@
 #include "async.h"
 #include "testutils.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 typedef struct
 {
@@ -11,7 +11,7 @@ typedef struct
 	int32_t z;
 } thread_data;
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 static void thread_func(thread_data* data)
 {

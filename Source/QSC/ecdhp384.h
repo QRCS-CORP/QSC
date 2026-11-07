@@ -71,7 +71,7 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -199,6 +199,6 @@ QSC_EXPORT_API int32_t qsc_crypto_scalarmult_secp384r1(uint8_t* secret, const ui
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

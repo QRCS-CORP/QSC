@@ -1,0 +1,333 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/qsc/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "QSC_BUILD_PROFILE_TESTS": "ON"
+      }
+    },
+    {
+      "name": "full",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "FULL"
+      }
+    },
+    {
+      "name": "full-shared",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "FULL",
+        "QSC_BUILD_SHARED": "ON"
+      }
+    },
+    {
+      "name": "boot-verify",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "BOOT_VERIFY"
+      }
+    },
+    {
+      "name": "device-identity",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "DEVICE_IDENTITY"
+      }
+    },
+    {
+      "name": "classical",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "CRYPTO_CLASSICAL"
+      }
+    },
+    {
+      "name": "pqc3",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "CRYPTO_PQC3"
+      }
+    },
+    {
+      "name": "pqc5",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "CRYPTO_PQC5"
+      }
+    },
+    {
+      "name": "hybrid",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "CRYPTO_HYBRID"
+      }
+    },
+    {
+      "name": "cloud-hsm",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "CLOUD_HSM"
+      }
+    },
+    {
+      "name": "edge-gateway",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "EDGE_GATEWAY"
+      }
+    },
+    {
+      "name": "tls-client",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "TLS_CLIENT"
+      }
+    },
+    {
+      "name": "tls-server",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "TLS_SERVER"
+      }
+    },
+    {
+      "name": "industrial-ot",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "INDUSTRIAL_OT"
+      }
+    },
+    {
+      "name": "robot-edge",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "ROBOT_EDGE"
+      }
+    },
+    {
+      "name": "ai-model-trust",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "AI_MODEL_TRUST"
+      }
+    },
+    {
+      "name": "vehicle-ecu",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "VEHICLE_ECU"
+      }
+    },
+    {
+      "name": "hsm-pkcs11",
+      "inherits": "base",
+      "cacheVariables": {
+        "QSC_PROFILE": "CLOUD_HSM",
+        "QSC_ENABLE_HARDWARE": "ON",
+        "QSC_HARDWARE_PROVIDERS": "PKCS11"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "full",
+      "configurePreset": "full"
+    },
+    {
+      "name": "full-shared",
+      "configurePreset": "full-shared"
+    },
+    {
+      "name": "boot-verify",
+      "configurePreset": "boot-verify"
+    },
+    {
+      "name": "device-identity",
+      "configurePreset": "device-identity"
+    },
+    {
+      "name": "classical",
+      "configurePreset": "classical"
+    },
+    {
+      "name": "pqc3",
+      "configurePreset": "pqc3"
+    },
+    {
+      "name": "pqc5",
+      "configurePreset": "pqc5"
+    },
+    {
+      "name": "hybrid",
+      "configurePreset": "hybrid"
+    },
+    {
+      "name": "cloud-hsm",
+      "configurePreset": "cloud-hsm"
+    },
+    {
+      "name": "edge-gateway",
+      "configurePreset": "edge-gateway"
+    },
+    {
+      "name": "tls-client",
+      "configurePreset": "tls-client"
+    },
+    {
+      "name": "tls-server",
+      "configurePreset": "tls-server"
+    },
+    {
+      "name": "industrial-ot",
+      "configurePreset": "industrial-ot"
+    },
+    {
+      "name": "robot-edge",
+      "configurePreset": "robot-edge"
+    },
+    {
+      "name": "ai-model-trust",
+      "configurePreset": "ai-model-trust"
+    },
+    {
+      "name": "vehicle-ecu",
+      "configurePreset": "vehicle-ecu"
+    },
+    {
+      "name": "hsm-pkcs11",
+      "configurePreset": "hsm-pkcs11"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "full",
+      "configurePreset": "full",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "full-shared",
+      "configurePreset": "full-shared",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "boot-verify",
+      "configurePreset": "boot-verify",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "device-identity",
+      "configurePreset": "device-identity",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "classical",
+      "configurePreset": "classical",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "pqc3",
+      "configurePreset": "pqc3",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "pqc5",
+      "configurePreset": "pqc5",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "hybrid",
+      "configurePreset": "hybrid",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "cloud-hsm",
+      "configurePreset": "cloud-hsm",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "edge-gateway",
+      "configurePreset": "edge-gateway",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "tls-client",
+      "configurePreset": "tls-client",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "tls-server",
+      "configurePreset": "tls-server",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "industrial-ot",
+      "configurePreset": "industrial-ot",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "robot-edge",
+      "configurePreset": "robot-edge",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ai-model-trust",
+      "configurePreset": "ai-model-trust",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "vehicle-ecu",
+      "configurePreset": "vehicle-ecu",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "hsm-pkcs11",
+      "configurePreset": "hsm-pkcs11",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_SYSTEM_HAS_AVX) || defined(QSC_SYSTEM_ARM_INTRINSICS)
 #	include "intrinsics.h"
 #endif
@@ -1408,4 +1410,5 @@ void qsc_chacha_poly1305_initialize(qsc_chacha_poly1305_state* ctx, const qsc_ch
 	}
 }
 
+/* \endcond DOXYGEN_NO_DOCUMENT */
 

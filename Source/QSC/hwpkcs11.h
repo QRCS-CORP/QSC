@@ -64,7 +64,7 @@ QSC_CPLUSPLUS_ENABLED_START
  * The caller synchronizes concurrent use and close of the same session handle.
  */
 
-/** \def QSC_HARDWARE_PKCS11_ENABLED
+/** \par Configuration macro: \c QSC_HARDWARE_PKCS11_ENABLED
  * \brief Opt in to the Cryptoki adapter; requires QSC_HARDWARE_ENABLED.
  * \note Disabled by default. The adapter requires an external PKCS#11 development header.
  */

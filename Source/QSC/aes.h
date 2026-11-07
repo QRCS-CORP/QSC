@@ -65,7 +65,7 @@
 #	define QSC_HBA_KMAC_EXTENSION
 #endif
 
-/*! \def QSC_HBA_HKDF_EXTENSION
+/*! \par Configuration macro: \c QSC_HBA_HKDF_EXTENSION
  * \brief Enables the HKDF extensions for the HBA cipher mode as an alternative to the cSHAKE mode.
  *
  * Define QSC_HBA_HKDF_EXTENSION consistently when compiling the library and callers
@@ -214,6 +214,9 @@ typedef enum
  * \brief Maximum GCM IV length accepted by initialize function.
  * Nonces longer than 32 bytes serve no cryptographic purpose and
  * protect against accidental runaway in the GHASH IV derivation loop.
+ */
+/** \def QSC_GCM_MAX_NONCE_SIZE
+ * \brief Maximum accepted GCM initialization nonce length, in bytes.
  */
 #define QSC_GCM_MAX_NONCE_SIZE 32U
 
@@ -679,7 +682,7 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm128_state
 	uint64_t aadlen;                /*!< [uint64_t] Total AAD length in bits */
 	uint64_t ctlen;                 /*!< [uint64_t] Total ciphertext bits; completion marker after zero-byte messages */
 	bool encrypt;                   /*!< [bool] true when initialized for encryption, false for decryption */
-} qsc_aes_gcm128_state;
+} qsc_aes_gcm128_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Decrypt ciphertext and verify the authentication tag using GCM-AES-128.
@@ -760,7 +763,7 @@ QSC_EXPORT_API void qsc_aes_gcm128_encrypt(qsc_aes_gcm128_state* ctx, uint8_t* o
  * \param keyparams: [const struct] Pointer to a constant qsc_aes_keyparams structure
  * supplying the 128-bit key (keylen == QSC_AES128_KEY_SIZE), the nonce 
  * (noncelen in [1, QSC_GCM_MAX_NONCE_SIZE]), and an optional info field (unused by GCM, may be NULL/0).
- * \param encryption:[bool] \c true to prepare the context for encryption; \c false for decryption.
+ * \param encryption: [bool] \c true to prepare the context for encryption; \c false for decryption.
  *
  * \warning Must be called before qsc_aes_gcm128_set_associated, qsc_aes_gcm128_encrypt, qsc_aes_gcm128_decrypt, or qsc_aes_gcm128_transform.
  * \warning A nonce must never be reused under the same key.
@@ -844,7 +847,7 @@ QSC_EXPORT_API typedef struct qsc_aes_gcm256_state
     uint64_t aadlen;				/*!< [uint64_t] AAD length in bits */
     uint64_t ctlen;					/*!< [uint64_t] Ciphertext length in bits (high-bit single-use marker for empty messages) */
 	bool encrypt;					/*!< [bool] Initialized for encryption */
-} qsc_aes_gcm256_state;
+} qsc_aes_gcm256_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /** * \brief Decrypt ciphertext and verify the authentication tag using GCM-AES-256.
  * 

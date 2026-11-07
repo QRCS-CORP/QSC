@@ -209,7 +209,7 @@ typedef enum qsc_tls_socket_log_level
     qsc_tls_socket_log_level_warning = 2, /*!< A non-fatal warning event occurred. */
     qsc_tls_socket_log_level_info = 3,    /*!< An informational lifecycle event occurred. */
     qsc_tls_socket_log_level_debug = 4    /*!< A diagnostic event occurred. */
-} qsc_tls_socket_log_level;
+} qsc_tls_socket_log_level; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_socket_event
@@ -234,7 +234,7 @@ typedef enum qsc_tls_socket_event
     qsc_tls_socket_event_worker_start = 14,        /*!< A concurrent server worker started. */
     qsc_tls_socket_event_worker_stop = 15,         /*!< A concurrent server worker stopped. */
     qsc_tls_socket_event_error = 16                /*!< A generic TLS socket wrapper error occurred. */
-} qsc_tls_socket_event;
+} qsc_tls_socket_event; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_socket_options
@@ -254,7 +254,7 @@ typedef struct qsc_tls_socket_options
     bool keep_alive;               /*!< Enable TCP keep-alive behavior where supported. */
     bool dual_stack;               /*!< Enable IPv4/IPv6 dual-stack behavior where supported. */
     bool blocking;                 /*!< Use blocking socket behavior when true. */
-} qsc_tls_socket_options;
+} qsc_tls_socket_options; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_socket_ticket_policy
@@ -272,7 +272,7 @@ typedef struct qsc_tls_socket_ticket_policy
     bool auto_send_server_ticket;       /*!< Automatically emit a server ticket after a successful server handshake. */
     uint32_t lifetime_seconds;          /*!< The ticket lifetime hint in seconds. */
     uint32_t renewal_interval_seconds;  /*!< The ticket renewal interval in seconds for long-lived services. */
-} qsc_tls_socket_ticket_policy;
+} qsc_tls_socket_ticket_policy; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \enum qsc_tls_socket_status
@@ -298,7 +298,7 @@ typedef enum qsc_tls_socket_status
     qsc_tls_socket_status_closed = 15,                      /*!< The connection was closed or cancelled. */
     qsc_tls_socket_status_internal_error = 16,              /*!< An internal wrapper error occurred. */
     qsc_tls_socket_status_timeout = 17                      /*!< A configured TLS socket operation deadline expired. */
-} qsc_tls_socket_status;
+} qsc_tls_socket_status; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_socket_result
@@ -312,7 +312,7 @@ typedef struct qsc_tls_socket_result
     qsc_x509w_status x509status;         /*!< The X.509 wrapper status. */
     qsc_x509_verify_status verifystatus; /*!< The X.509 path verification status. */
     qsc_tls_alert_description alert;     /*!< The TLS alert value associated with the failure, when present. */
-} qsc_tls_socket_result;
+} qsc_tls_socket_result; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief The TLS socket structured logging callback prototype.
@@ -356,7 +356,7 @@ typedef struct qsc_tls_socket_peer_info
     bool early_data_accepted;                             /*!< Reserved 0-RTT status; false for the QSC TLS socket profile. */
     bool alpn_selected;                                    /*!< Indicates whether ALPN selected a mutually supported application protocol. */
     char selected_alpn[QSC_TLS_SOCKET_ALPN_SIZE_MAX + 1U]; /*!< The selected ALPN protocol as a null-terminated string when selected. */
-} qsc_tls_socket_peer_info;
+} qsc_tls_socket_peer_info; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_socket_context
@@ -401,7 +401,7 @@ typedef struct qsc_tls_socket_context
     bool allowunverified;                                                       /*!< Permit unverified peer certificates in development policy mode. */
     bool hassessionticket;                                                      /*!< Indicates that a client session ticket has been configured. */
     bool initialized;                                                           /*!< Indicates that the context has been initialized. */
-} qsc_tls_socket_context;
+} qsc_tls_socket_context; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_socket_connection
@@ -429,7 +429,7 @@ typedef struct qsc_tls_socket_connection
     bool owns_socket;                               /*!< Indicates that the connection owns and must close the socket. */
     bool haslastticket;                             /*!< Indicates that lastticket contains a valid ticket. */
     bool cancelrequested;                           /*!< Indicates that cancellation has been requested. */
-} qsc_tls_socket_connection;
+} qsc_tls_socket_connection; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_socket_listener
@@ -445,7 +445,7 @@ typedef struct qsc_tls_socket_listener
     qsc_tls_socket_options socketoptions;      /*!< The listener socket options. */
     bool initialized;                          /*!< Indicates that the listener has been initialized. */
     bool listening;                            /*!< Indicates that the listener is bound and accepting. */
-} qsc_tls_socket_listener;
+} qsc_tls_socket_listener; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 struct qsc_tls_socket_server;
 
@@ -457,7 +457,7 @@ typedef struct qsc_tls_socket_server_worker_state
 {
     struct qsc_tls_socket_server* server; /*!< The owning server instance. */
     size_t index;                         /*!< The fixed connection slot index assigned to the worker. */
-} qsc_tls_socket_server_worker_state;
+} qsc_tls_socket_server_worker_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief The TLS socket server connect callback prototype.
@@ -519,7 +519,7 @@ typedef struct qsc_tls_socket_server
     volatile bool running;                                                                  /*!< Atomically accessed indicator that a server accept loop is executing. */
     bool concurrent;                                                                        /*!< Indicates that concurrent server mode is active. */
     bool initialized;                                                                       /*!< Indicates that the server has been initialized. */
-} qsc_tls_socket_server;
+} qsc_tls_socket_server; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Clear a TLS socket structured result.

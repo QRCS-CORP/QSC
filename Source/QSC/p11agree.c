@@ -4,6 +4,8 @@
 
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \file p11agree.c
  * \brief Token-backed ECDH derivation with deliberate, explicitly permitted raw-secret export.
  * \details A derived CKO_SECRET_KEY is transient and destroyed before returning. Private key bytes are never accessed.
@@ -150,4 +152,7 @@ qsc_hw_status qsc_hw_pkcs11_key_agree(qsc_hw_pkcs11_key* key, const uint8_t* pee
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

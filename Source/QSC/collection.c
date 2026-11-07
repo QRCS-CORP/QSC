@@ -5,6 +5,8 @@
 #	include "acp.h"
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /**
  * \brief Private naturally aligned allocation header for collection item and key buffers.
  * \note Index slots are owned by the key allocation and freed on disposal.
@@ -910,3 +912,5 @@ bool qsc_collection_test()
 	return res;
 }
 #endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

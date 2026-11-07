@@ -14,6 +14,8 @@
 #   include <pthread.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \brief An indexed task in a bounded persistent-worker queue. */
 typedef struct
 {
@@ -649,3 +651,5 @@ void qsc_threadpool_worker_destroy(qsc_threadpool_worker_state* pool)
 		qsc_memutils_alloc_free(pool);
 	}
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

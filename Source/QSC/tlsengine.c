@@ -12,6 +12,8 @@
 #include "stringutils.h"
 #include "timestamp.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static qsc_tls_status tls_engine_apply_peer_key_update(qsc_tls_connection* connection)
 {
     uint8_t next_secret[QSC_TLS_HASH_MAX_SIZE] = { 0U };
@@ -1229,3 +1231,5 @@ bool qsc_tls_engine_is_handshake_complete(const qsc_tls_connection* connection)
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

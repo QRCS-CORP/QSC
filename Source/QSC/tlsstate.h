@@ -78,7 +78,7 @@ typedef struct qsc_tls_transcript_state
 		qsc_sha384_state sha384; /*!< SHA-384 transcript hash state. */
 		qsc_sha512_state sha512; /*!< SHA-512 transcript hash state. */
 	} ctx; /*!< Storage for the active transcript hash state. */
-} qsc_tls_transcript_state;
+} qsc_tls_transcript_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_record_state
@@ -92,7 +92,7 @@ typedef struct qsc_tls_record_state
 	uint8_t iv[12U];		/*!< Current static record IV bytes. */
 	uint64_t sequence;		/*!< Current record sequence number. */
 	bool initialized;		/*!< True when the record protection state is initialized. */
-} qsc_tls_record_state;
+} qsc_tls_record_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_alpn_protocols
@@ -105,7 +105,7 @@ typedef struct qsc_tls_alpn_protocols
 	size_t protocolcount;													/*!< Number of valid protocol identifiers. */
 	bool required;															/*!< Require a mutually supported protocol when true. */
 	bool configured;														/*!< Indicates that ALPN policy has been configured. */
-} qsc_tls_alpn_protocols;
+} qsc_tls_alpn_protocols; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_peer_capabilities
@@ -119,7 +119,7 @@ typedef struct qsc_tls_peer_capabilities
 	size_t sigschemecount;													/*!< Number of valid entries in the sigschemes array. */
 	qsc_tls_signature_scheme certsigschemes[QSC_TLS_MAX_SIGNATURE_SCHEMES];	/*!< Peer supported certificate signature schemes. */
 	size_t certsigschemecount;												/*!< Number of valid entries in the certsigschemes array. */
-} qsc_tls_peer_capabilities;
+} qsc_tls_peer_capabilities; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_local_certificate_config
@@ -139,7 +139,7 @@ typedef struct qsc_tls_local_certificate_config
 	void* signstate;														/*!< Caller-supplied state passed to the signing callback. */
 	bool configured;														/*!< True when a local certificate chain and signing mode are configured. */
 	bool staticsignature;													/*!< Reserved, always false in the current implementation. */
-} qsc_tls_local_certificate_config;
+} qsc_tls_local_certificate_config; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_psk_state
@@ -152,7 +152,7 @@ typedef struct qsc_tls_psk_state
 	size_t binderlen;									/*!< Length of the PSK binder in bytes. */
 	bool enabled;										/*!< True when PSK resumption is enabled for the connection. */
 	bool resumed;										/*!< True when the current handshake used the configured PSK ticket. */
-} qsc_tls_psk_state;
+} qsc_tls_psk_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 QSC_CPLUSPLUS_ENABLED_END
 

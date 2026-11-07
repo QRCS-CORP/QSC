@@ -49,6 +49,12 @@
  * Contact: contact@qrcscorp.ca
  */
 
+#include "qsccommon.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
+
+QSC_CPLUSPLUS_ENABLED_START
+
 /*
  * \file kyber_parameter_impl.h
  * \brief Private single-source, parameter-specialized Kyber implementation.
@@ -146,3 +152,7 @@
 #undef QSC_KYBER_IMPL_SYM
 #undef QSC_KYBER_IMPL_CONCAT
 #undef QSC_KYBER_IMPL_CONCAT2
+
+QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

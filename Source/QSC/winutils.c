@@ -27,6 +27,8 @@
 #       include "fileutils.h"
 #   endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if !defined(ERROR_TRANSACTIONAL_CONFLICT)
 #   define ERROR_TRANSACTIONAL_CONFLICT 6800
 #endif
@@ -1643,3 +1645,5 @@ void qsc_winutils_test()
 #endif
 
 #endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

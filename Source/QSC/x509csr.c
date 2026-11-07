@@ -10,6 +10,8 @@
 #include "x509write.h"
 #include "x509sigver.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_CSR_PEM_LINE 64U
 #define QSC_X509_CSR_PEM_BEGIN "-----BEGIN CERTIFICATE REQUEST-----\n"
 #define QSC_X509_CSR_PEM_END "-----END CERTIFICATE REQUEST-----\n"
@@ -1621,3 +1623,5 @@ qsc_asn1_status qsc_x509_csr_encode_pem(const uint8_t* der, size_t derlen, char*
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

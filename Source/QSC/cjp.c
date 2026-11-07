@@ -1,15 +1,11 @@
-/* 2020-2026 Quantum Resistant Cryptographic Solutions Corporation
- * All Rights Reserved.
- *
- * See cjp.h for license and usage restrictions.
- */
-
 #include "cjp.h"
 #include "cpuidex.h"
 #include "csp.h"
 #include "memutils.h"
 #include "rdp.h"
 #include "sha3.h"
+
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 #   include <windows.h>
@@ -678,3 +674,5 @@ uint64_t qsc_cjp_uint64(void)
 
     return num;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

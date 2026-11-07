@@ -2,6 +2,8 @@
 #include "memutils.h"
 #include "sha3.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define ETR_SOURCE_MIN_SIZE 64U
 #define ETR_SOURCE_MAX_SIZE 1024U
 
@@ -137,3 +139,5 @@ bool qsc_etr_initialize(qsc_etr_source_callback source, void* context)
 
 	return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

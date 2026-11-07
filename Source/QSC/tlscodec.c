@@ -2,6 +2,8 @@
 #include "intutils.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static bool tls_codec_can_write(size_t outlen, size_t offset, size_t needlen)
 {
 	return (offset <= outlen && needlen <= (outlen - offset));
@@ -628,3 +630,5 @@ qsc_tls_status qsc_tls_codec_vector_end_u24(uint8_t* output, size_t outlen, cons
 
 	return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

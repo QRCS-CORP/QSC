@@ -24,6 +24,8 @@
 #   include <windows.h>
 #endif
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 typedef struct qsc_tls_socket_context_storage
 {
     qsc_x509w_trust_store truststore;
@@ -3703,3 +3705,5 @@ void qsc_tls_socket_server_dispose(qsc_tls_socket_server* server)
         qsc_memutils_secure_erase(server, sizeof(*server));
     }
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

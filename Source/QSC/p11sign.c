@@ -4,6 +4,8 @@
 
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \file p11sign.c
  * \brief CKM_ECDSA prehashed signing using a verified sensitive, nonextractable private token key.
  */
@@ -99,4 +101,7 @@ qsc_hw_status qsc_hw_pkcs11_key_sign(qsc_hw_pkcs11_key* key, const uint8_t* dige
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

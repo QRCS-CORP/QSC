@@ -4,6 +4,8 @@
 
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /** \file p11keys.c
  * \brief Protected PKCS#11 EC private-key discovery, generation and public-point retrieval.
  * \details Never reads CKA_VALUE from a private-key object. All Cryptoki calls serialize per module.
@@ -628,4 +630,7 @@ qsc_hw_status qsc_hw_pkcs11_key_release(qsc_hw_pkcs11_key** key)
 	return status;
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_PKCS11_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

@@ -4,6 +4,8 @@
 #include "sha2.h"
 #include "tlstranscript.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /* RFC 9846 Section 7.1: HkdfLabel.label is prefixed with the literal "tls13 " (6 bytes) */
 static const char TLS13_LABEL_PREFIX[] = "tls13 ";
 
@@ -936,3 +938,5 @@ qsc_tls_status qsc_tls_keyschedule_compute_psk_binder(qsc_tls_hash_algorithm has
 
     return qsc_tls_keyschedule_compute_finished(hash, binderkey, binderkeylen, partialtranshash, transcripthashlen, output, outlen, written);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

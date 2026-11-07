@@ -2,7 +2,7 @@
 #include "ed25519.h"
 #include "memutils.h"
 
-/* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 int32_t qsc_crypto_scalarmult_curve25519(uint8_t* q, const uint8_t* n, const uint8_t* p)
 {
@@ -170,3 +170,5 @@ void qsc_x25519_public_from_private(uint8_t* publickey, const uint8_t* privateke
 {
 	(void)qsc_crypto_scalarmult_curve25519_ref10_base(publickey, privatekey);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

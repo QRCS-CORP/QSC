@@ -64,10 +64,25 @@ QSC_CPLUSPLUS_ENABLED_START
  * All functions are synchronous; separate caller buffers are required.
  * Standard algorithm conformance is not established by this wrapper alone.
  */
+/** \def QSC_KYBER1280_PUBLICKEY_SIZE
+ * \brief Serialized encapsulation public-key size for Kyber-1280, in bytes.
+ */
 #define QSC_KYBER1280_PUBLICKEY_SIZE 1952U
+/** \def QSC_KYBER1280_PRIVATEKEY_SIZE
+ * \brief Serialized decapsulation private-key size for Kyber-1280, in bytes.
+ */
 #define QSC_KYBER1280_PRIVATEKEY_SIZE 3936U
+/** \def QSC_KYBER1280_CIPHERTEXT_SIZE
+ * \brief Encapsulation ciphertext size for Kyber-1280, in bytes.
+ */
 #define QSC_KYBER1280_CIPHERTEXT_SIZE 1920U
+/** \def QSC_KYBER1280_SHAREDSECRET_SIZE
+ * \brief Decapsulated shared-secret size for Kyber-1280, in bytes.
+ */
 #define QSC_KYBER1280_SHAREDSECRET_SIZE 32U
+/** \def QSC_KYBER1280_SEED_SIZE
+ * \brief Deterministic key-generation seed size for Kyber-1280, in bytes.
+ */
 #define QSC_KYBER1280_SEED_SIZE 32U
 
 /**

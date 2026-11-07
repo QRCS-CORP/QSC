@@ -71,7 +71,7 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -640,7 +640,6 @@ void qsc_ed25519_x25519_generate(uint8_t out[32U], const uint8_t scalar[32U]);
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif
-

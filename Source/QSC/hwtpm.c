@@ -1,5 +1,7 @@
 #include "hwtpm.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_TPM_ENABLED)
 
 #include "memutils.h"
@@ -768,4 +770,7 @@ void qsc_hw_tpm_dispose(qsc_hw_tpm_context* context)
 	}
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_TPM_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

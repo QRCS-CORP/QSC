@@ -73,7 +73,7 @@
 #include "memutils.h"
 #include "intrinsics.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -879,6 +879,6 @@ static inline void ed448_invert(ed448_fe* out, const ed448_fe* a)
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \endcond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

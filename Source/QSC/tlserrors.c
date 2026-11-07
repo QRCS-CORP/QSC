@@ -1,5 +1,7 @@
 #include "tlserrors.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_TLS_ERROR_STRING_DEPTH 11U
 #define QSC_TLS_ERROR_STRING_WIDTH 128U
 
@@ -33,3 +35,5 @@ const char* qsc_tls_error_to_string(qsc_tls_status status)
 
 	return ret;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

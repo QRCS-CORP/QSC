@@ -3,6 +3,8 @@
 #include "memutils.h"
 #include "stringutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_WRITE_TAG_CONSTRUCTED 0x20U
 #define QSC_X509_WRITE_TAG_NUMBER_MASK 0x1FU
 #define QSC_X509_WRITE_MAX_IDENTIFIER_BYTES 8U
@@ -1902,3 +1904,5 @@ qsc_asn1_status qsc_x509_write_issuer_alt_name(const qsc_x509_issuer_alt_name* i
 
     return qsc_x509_write_sequence_of_general_names(issueraltname->entries, issueraltname->count, output, outputlen);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

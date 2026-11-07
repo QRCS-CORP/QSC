@@ -8,6 +8,8 @@
 #include "x509spki.h"
 #include "x509write.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_CERTWRITE_PEM_LINE 64U
 #define QSC_X509_CERTWRITE_PEM_BEGIN "-----BEGIN CERTIFICATE-----\n"
 #define QSC_X509_CERTWRITE_PEM_END "-----END CERTIFICATE-----\n"
@@ -1898,3 +1900,5 @@ qsc_asn1_status qsc_x509_cert_issuance_apply_csr_extensions(qsc_x509_certificate
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

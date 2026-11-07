@@ -6,6 +6,8 @@
 #include "memutils.h"
 #include "oid.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static qsc_x509_public_key_algorithm x509_map_public_key_algorithm(qsc_oid_id oid)
 {
     if (oid == QSC_OID_ID_RSA_ENCRYPTION)
@@ -996,3 +998,5 @@ else
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

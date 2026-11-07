@@ -92,7 +92,13 @@
 #include <stdint.h>
 
 #if defined(__cplusplus)
+/** \def QSC_CPLUSPLUS_ENABLED_START
+ * \brief Begin an extern C linkage region for C++ consumers.
+ */
 #   define QSC_CPLUSPLUS_ENABLED_START extern "C" {
+/** \def QSC_CPLUSPLUS_ENABLED_END
+ * \brief End an extern C linkage region for C++ consumers.
+ */
 #   define QSC_CPLUSPLUS_ENABLED_END }
 #else
 #   define QSC_CPLUSPLUS_ENABLED_START
@@ -250,7 +256,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #		define QSC_SYSTEM_ISWIN32
 #   endif
 #else
-    typedef int32_t errno_t;
+    typedef int32_t errno_t; /*!< Public type alias used by the QSC API. */
 #endif
 
 #if defined(__x86_64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64)
@@ -596,6 +602,9 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
+/** \def QSC_ATTRIBUTE
+ * \brief Apply a compiler-supported declaration attribute.
+ */
 #   define QSC_ATTRIBUTE __attribute__
 #else
 #   define QSC_ATTRIBUTE(a)
@@ -645,7 +654,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
-* \def QSC_CACHE_ALIGNED
+* \par Configuration macro: \c QSC_CACHE_ALIGNED
 * \brief Defines cache-line alignment using GCC's QSC_ATTRIBUTE syntax.
 */
 #if defined(__GNUC__)
@@ -683,7 +692,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
-* \def QSC_SYSTEM_IS_XXX_ENDIAN
+* \par Configuration macro: \c QSC_SYSTEM_IS_XXX_ENDIAN
 * \brief Defined if the system is big-endian.
 */
 #if !defined(QSC_SYSTEM_IS_LITTLE_ENDIAN) && !defined(QSC_SYSTEM_IS_BIG_ENDIAN)
@@ -963,7 +972,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_SYSTEM_ARM_INTRINSICS_DISABLED
+ * \par Configuration macro: \c QSC_SYSTEM_ARM_INTRINSICS_DISABLED
  * \brief Define to disable QSC ARM intrinsic paths at compile time.
  *
  * This switch does not disable compiler auto-vectorization. It selects the
@@ -972,7 +981,7 @@ QSC_CPLUSPLUS_ENABLED_START
 /* #define QSC_SYSTEM_ARM_INTRINSICS_DISABLED */
 
 /*!
- * \def QSC_SYSTEM_ARM_CRYPTO_ENABLED
+ * \par Configuration macro: \c QSC_SYSTEM_ARM_CRYPTO_ENABLED
  * \brief Explicitly enable AES and SHA-256 instructions for a Microsoft ARM64 target.
  *
  * Define only when the deployment CPU supports AES, PMULL, and SHA-256. GCC and Clang
@@ -1038,13 +1047,13 @@ QSC_CPLUSPLUS_ENABLED_START
 ==============================================================================*/
 
 /*!
-* \def QSC_ASM_ENABLED
+* \par Configuration macro: \c QSC_ASM_ENABLED
 * \brief Global flag for enabling ASM compilation (user-modifiable).
 */
 /*#define QSC_ASM_ENABLED */
 
 /*!
-* \def QSC_MISRA_FULL_COMPLIANCE
+* \par Configuration macro: \c QSC_MISRA_FULL_COMPLIANCE
 * \brief Enable full MISRA compliant cryptographic module compliance.
 */
 //#define QSC_MISRA_FULL_COMPLIANCE
@@ -1097,7 +1106,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_RDRAND_COMPATIBLE
+ * \par Configuration macro: \c QSC_RDRAND_COMPATIBLE
  * \brief Enables the RDRAND intrinsic for a compile target supporting RDRAND.
  * \details GCC/Clang expose __RDRND__ with -mrdrnd. MSVC callers must opt in
  * explicitly for a suitably provisioned deployment; qsc_rdrand_available()
@@ -1124,7 +1133,7 @@ QSC_CPLUSPLUS_ENABLED_START
 ==============================================================================*/
 
 /*!
- * \def QSC_SYSTEM_AESNI_ENABLED
+ * \par Configuration macro: \c QSC_SYSTEM_AESNI_ENABLED
  * \brief Enables the 128-bit x86 AES-NI implementation.
  * \details GCC, Clang, and Intel compilers use explicit AES and SSSE3
  * target feature macros. Native MSVC lacks equivalent AES-NI feature macros,
@@ -1143,7 +1152,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_SYSTEM_HAS_PCLMUL
+ * \par Configuration macro: \c QSC_SYSTEM_HAS_PCLMUL
  * \brief Enables x86 carryless multiplication via PCLMULQDQ.
  * \details GCC, Clang, and Intel compilers use explicit target feature
  * macros. Native MSVC uses an AVX-enabled compatibility fallback because it
@@ -1162,7 +1171,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_SYSTEM_RCS_AESNI_ENABLED
+ * \par Configuration macro: \c QSC_SYSTEM_RCS_AESNI_ENABLED
  * \brief Enables RCS's AES-NI implementation, including SSSE3 and SSE4.1 operations.
  * \details GCC/Clang targets require AES-NI, SSSE3, and SSE4.1; MSVC
  * builds may explicitly opt in only when all three features are available.
@@ -1173,7 +1182,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_SYSTEM_HAS_VAES512
+ * \par Configuration macro: \c QSC_SYSTEM_HAS_VAES512
  * \brief Enables the 512-bit AES and RCS VAES implementations.
  * \details Requires AES-NI (for key expansion), VAES, AVX-512F, AVX-512BW,
  * and AVX-512DQ (for shuffles and 128-bit lane insertion). MSVC targets may
@@ -1185,7 +1194,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 /*!
- * \def QSC_SHA2_SHANI_ENABLED
+ * \par Configuration macro: \c QSC_SHA2_SHANI_ENABLED
  * \brief Enables the x86 SHA-NI SHA-256 compression path.
  *
  * \details
@@ -1208,13 +1217,13 @@ QSC_CPLUSPLUS_ENABLED_START
 #endif
 
 ///*!
-// * \def QSC_KECCAK_UNROLLED_PERMUTATION
+// * \par Configuration macro: \c QSC_KECCAK_UNROLLED_PERMUTATION
 // * \brief Define to use the unrolled form of the Keccak permutation function.
 // */
 //#define QSC_KECCAK_UNROLLED_PERMUTATION
 
 /*!
- * \def QSC_TLS_SECURITY_CLASS_1
+ * \par Configuration macro: \c QSC_TLS_SECURITY_CLASS_1
  * \brief Selects the QSC TLS post-quantum Security Class 1 profile.
  *
  * \details
@@ -1249,7 +1258,7 @@ QSC_CPLUSPLUS_ENABLED_START
 //#define QSC_TLS_SECURITY_CLASS_3
 
 /*!
- * \def QSC_TLS_SECURITY_CLASS_5
+ * \par Configuration macro: \c QSC_TLS_SECURITY_CLASS_5
  * \brief Selects the QSC TLS post-quantum Security Class 5 profile.
  *
  * \details

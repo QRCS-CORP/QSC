@@ -8,6 +8,8 @@
 #include "x509sig.h"
 #include "x509write.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_ASN1_CLASS_UNIVERSAL 0x00U
 #define QSC_ASN1_CLASS_CONTEXT 0x80U
 #define QSC_ASN1_TAG_INTEGER 2U
@@ -879,3 +881,5 @@ bool qsc_x509_crl_is_revoked(const qsc_x509_crl* crl, const qsc_x509_certificate
 
     return res;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

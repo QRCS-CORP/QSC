@@ -6,9 +6,10 @@
 #include "x509sigver.h"
 #include "stringutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_PEM_CSR_BEGIN "-----BEGIN CERTIFICATE REQUEST-----"
 #define QSC_X509_PEM_CSR_END "-----END CERTIFICATE REQUEST-----"
-
 #define QSC_X509_PEM_CERT_BEGIN "-----BEGIN CERTIFICATE-----"
 #define QSC_X509_PEM_CERT_END "-----END CERTIFICATE-----"
 #define QSC_X509_PEM_CRL_BEGIN "-----BEGIN X509 CRL-----"
@@ -693,3 +694,5 @@ qsc_asn1_status qsc_x509_pem_encode_private_key_sec1_from_key(const qsc_x509_pri
 {
     return qsc_x509_private_key_encode_sec1_pem(key, includeparameters, includepublickey, pem, pemlen);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

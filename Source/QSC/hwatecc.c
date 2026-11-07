@@ -1,5 +1,7 @@
 #include "hwatecc.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #if defined(QSC_HARDWARE_ENABLED) && defined(QSC_HARDWARE_ATECC_ENABLED)
 
 #include "memutils.h"
@@ -459,4 +461,7 @@ void qsc_hw_atecc_dispose(qsc_hw_atecc_context* context)
 	}
 }
 
-#endif /* QSC_HARDWARE_ENABLED && QSC_HARDWARE_ATECC_ENABLED */
+#endif
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+

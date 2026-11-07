@@ -54,7 +54,7 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
 
 QSC_CPLUSPLUS_ENABLED_START
 
@@ -236,6 +236,6 @@ void qsc_kyber_ref_generate_seeded_keypair(uint8_t pk[QSC_KYBER_PUBLICKEY_BYTES]
 
 QSC_CPLUSPLUS_ENABLED_END
 
-/* \cond NO_DOCUMENT */
+/* \endcond DOXYGEN_NO_DOCUMENT */
 
 #endif

@@ -1,5 +1,7 @@
 #include "donna128.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static void Mul64x64To128(uint64_t x, uint64_t y, uint64_t* low, uint64_t* high)
 {
 	QSC_ASSERT(low != NULL);
@@ -197,3 +199,5 @@ uint128 qsc_donna128_subtract(const uint128* x, const uint128* y)
 
 	return r;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

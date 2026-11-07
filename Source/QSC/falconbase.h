@@ -54,7 +54,9 @@
 
 #include "qsccommon.h"
 
- /* \cond NO_DOCUMENT */
+/* \cond DOXYGEN_NO_DOCUMENT */
+
+QSC_CPLUSPLUS_ENABLED_START
 
 /* api.h */
 
@@ -261,5 +263,9 @@ int32_t qsc_falcon_ref_1024_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, s
 */
 bool qsc_falcon_ref_512_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 bool qsc_falcon_ref_1024_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
-/* \endcond NO_DOCUMENT */
+
+QSC_CPLUSPLUS_ENABLED_END
+
+/* \endcond DOXYGEN_NO_DOCUMENT */
+
 #endif

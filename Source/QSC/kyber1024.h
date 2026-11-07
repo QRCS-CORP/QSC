@@ -64,10 +64,25 @@ QSC_CPLUSPLUS_ENABLED_START
  * All functions are synchronous; separate caller buffers are required.
  * Standard algorithm conformance is not established by this wrapper alone.
  */
+/** \def QSC_KYBER1024_PUBLICKEY_SIZE
+ * \brief Serialized encapsulation public-key size for Kyber-1024, in bytes.
+ */
 #define QSC_KYBER1024_PUBLICKEY_SIZE 1568U
+/** \def QSC_KYBER1024_PRIVATEKEY_SIZE
+ * \brief Serialized decapsulation private-key size for Kyber-1024, in bytes.
+ */
 #define QSC_KYBER1024_PRIVATEKEY_SIZE 3168U
+/** \def QSC_KYBER1024_CIPHERTEXT_SIZE
+ * \brief Encapsulation ciphertext size for Kyber-1024, in bytes.
+ */
 #define QSC_KYBER1024_CIPHERTEXT_SIZE 1568U
+/** \def QSC_KYBER1024_SHAREDSECRET_SIZE
+ * \brief Decapsulated shared-secret size for Kyber-1024, in bytes.
+ */
 #define QSC_KYBER1024_SHAREDSECRET_SIZE 32U
+/** \def QSC_KYBER1024_SEED_SIZE
+ * \brief Deterministic key-generation seed size for Kyber-1024, in bytes.
+ */
 #define QSC_KYBER1024_SEED_SIZE 32U
 
 /**

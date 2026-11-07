@@ -132,7 +132,7 @@ QSC_CPLUSPLUS_ENABLED_START
 #	define QSC_SYSTEM_RCS_AESNI_ENABLED
 #endif
 
-/*! \def QSC_RCS_EXTENDED_ROUND_COUNTS
+/*! \par Configuration macro: \c QSC_RCS_EXTENDED_ROUND_COUNTS
  * \brief Opt-in larger RCS Rijndael-256 round counts (RCS-256: 22; RCS-512: 30).
  * Default uses RCS-256: 14 and RCS-512: 21 rounds.
  * Both profiles use full 24-round KMAC, and their ciphertext and tags

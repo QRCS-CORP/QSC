@@ -59,7 +59,7 @@
 QSC_CPLUSPLUS_ENABLED_START
 
 /*!
- * \file x509_types.h
+ * \file x509types.h
  * \brief Public data types used by the QSC X.509 parsing and validation layer.
  *
  * \details

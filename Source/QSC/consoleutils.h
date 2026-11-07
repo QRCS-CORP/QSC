@@ -100,6 +100,9 @@ QSC_CPLUSPLUS_ENABLED_START
  * \def QSC_CONSOLE_MAX_LINE
  * \brief The maximum length of a console string.
  */
+/** \def QSC_CONSOLE_STRING_NOT_FOUND
+ * \brief Sentinel value indicating that a console string search found no matching position.
+ */
 #define QSC_CONSOLE_STRING_NOT_FOUND -1L
 
 /*!

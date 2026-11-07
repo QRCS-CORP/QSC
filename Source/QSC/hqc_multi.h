@@ -56,7 +56,7 @@
 
 QSC_CPLUSPLUS_ENABLED_START
 
-/** \def QSC_HQC1_PUBLICKEY_SIZE
+/** \par Constant: \c QSC_HQC1_PUBLICKEY_SIZE
  * \brief HQC-1 public key length in bytes.
  */
 #define QSC_HQC1_PUBLICKEY_SIZE 2241U

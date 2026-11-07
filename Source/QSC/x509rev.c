@@ -3,6 +3,8 @@
 #include "x509name.h"
 #include "x509revext.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 static qsc_x509_revocation_status x509_map_crl_verify_status(qsc_x509_crl_verify_status status)
 {
     qsc_x509_revocation_status res;
@@ -250,3 +252,5 @@ qsc_x509_revocation_status qsc_x509_certificate_check_revocation(const qsc_x509_
 
     return revstatus;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

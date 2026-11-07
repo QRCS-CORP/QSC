@@ -171,7 +171,7 @@ QSC_EXPORT_API bool qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t
  * The new seed material is absorbed into the Keccak state.
  *
  * \param ctx: [qsc_csg_state*] Pointer to the DRBG state structure.
- * \param seed:[const uint8_t*] Pointer to the update seed.
+ * \param seed: [const uint8_t*] Pointer to the update seed.
  * \param seedlen: [size_t] The length of the update seed in bytes.
  */
 QSC_EXPORT_API void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen);

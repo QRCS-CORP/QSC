@@ -86,7 +86,7 @@ typedef struct qsc_tls_group_descriptor
     bool iskem;                           /*!< True if the group contains a KEM component. */
     bool ishybrid;                        /*!< True if the group combines classical and KEM components. */
     bool supported;                       /*!< True if the group is compiled into the current build. */
-} qsc_tls_group_descriptor;
+} qsc_tls_group_descriptor; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_key_exchange_state
@@ -100,7 +100,7 @@ typedef struct qsc_tls_key_exchange_state
     uint8_t privatekey[QSC_TLS_MAX_PRIVATE_KEY_SIZE];                 /*!< Stored private or decapsulation key material. */
     size_t privatekeylen;                                             /*!< Length of the private key material in bytes. */
     bool initialized;                                                 /*!< True when the state contains a valid generated key pair. */
-} qsc_tls_key_exchange_state;
+} qsc_tls_key_exchange_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \brief Get the descriptor for a named group.

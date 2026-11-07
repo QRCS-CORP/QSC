@@ -2,6 +2,8 @@
 #include "memutils.h"
 #include "stringutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_X509_TAG_SEQUENCE 16U
 #define QSC_X509_TAG_SET 17U
 #define QSC_X509_TAG_OBJECT_IDENTIFIER 6U
@@ -946,3 +948,5 @@ qsc_asn1_status qsc_x509_name_to_string(const qsc_x509_name* name, char* output,
 
     return status;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

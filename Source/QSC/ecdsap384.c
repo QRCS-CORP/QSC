@@ -12,6 +12,9 @@
 #	else
 #		include <x86intrin.h>
 #	endif
+
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 /*! \def ECDSAP384_X64_INTRINSICS
  * \brief Enable 64-bit x86 carry and multiplication intrinsics.
  */
@@ -5177,3 +5180,5 @@ bool qsc_p384_verify_prehashed_with_comb_context(uint8_t* message, size_t* msgle
 {
 	return qsc_ecdsap384_verify_prehashed_with_comb_context(message, msglen, signedmsg, smsglen, context, digest, digestlen);
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

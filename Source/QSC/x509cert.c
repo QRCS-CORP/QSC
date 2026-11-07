@@ -7,6 +7,8 @@
 #include "encoding.h"
 #include "memutils.h"
 
+/* \cond DOXYGEN_NO_DOCUMENT */
+
 #define QSC_ASN1_CLASS_UNIVERSAL 0x00U
 #define QSC_ASN1_CLASS_CONTEXT 0x80U
 #define QSC_ASN1_TAG_BOOLEAN 1U
@@ -1480,3 +1482,5 @@ const qsc_x509_extension* qsc_x509_certificate_find_extension(const qsc_x509_cer
 
 	return extension;
 }
+
+/* \endcond DOXYGEN_NO_DOCUMENT */

@@ -104,7 +104,7 @@ typedef enum qsc_tls_client_phase
     qsc_tls_client_phase_established = 6,                     /*!< The handshake completed successfully and application traffic keys are active. */
     qsc_tls_client_phase_closed = 7,                          /*!< The connection has been closed locally or by peer notification. */
     qsc_tls_client_phase_failed = 8                           /*!< A fatal error occurred and the handshake or connection failed. */
-} qsc_tls_client_phase;
+} qsc_tls_client_phase; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_client_config
@@ -125,7 +125,7 @@ typedef struct qsc_tls_client_config
     const qsc_tls_session_ticket* offeredticket;              /*!< Optional PSK ticket to offer for resumption; NULL = fresh handshake. */
     bool enableresumption;                                    /*!< Advertise support for TLS 1.3 PSK resumption and accept NewSessionTicket messages. */
     bool enableearlydata;                                     /*!< Reserved 0-RTT switch; QSC rejects true because application early data is not supported. */
-} qsc_tls_client_config;
+} qsc_tls_client_config; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /**
  * \struct qsc_tls_client_state
@@ -176,21 +176,9 @@ typedef struct qsc_tls_client_state
     bool pskaccepted;                                         /*!< True if the server selected our PSK (ServerHello pre_shared_key). */
     bool earlydataoffered;                                    /*!< Reserved compatibility field; always false because QSC does not emit 0-RTT early_data. */
     bool earlydataaccepted;                                   /*!< Reserved compatibility field; always false because QSC does not accept 0-RTT. */
-} qsc_tls_client_state;
+} qsc_tls_client_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
-/**
- * \brief Initialize a TLS client handshake state.
- *
- * \details
- * Clears the supplied state object, copies the client policy, selects the initial
- * handshake phase, and prepares the client for ClientHello emission. The configuration
- * arrays referenced by \p config must remain valid for the lifetime of the client state.
- *
- * \param state: [struct*] The client state to initialize.
- * \param config: [const struct*] The client configuration and algorithm policy.
- *
- * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
- */
+
 
 /**
  * \brief Copy a certificate-validation interface into a TLS client configuration.
@@ -231,6 +219,19 @@ QSC_EXPORT_API qsc_tls_status qsc_tls_client_config_set_local_certificate(qsc_tl
     const qsc_tls_certificate_view* chain, size_t chainlength, qsc_tls_signature_scheme verifyscheme,
     const uint8_t* privatekeydata, size_t privatekeylen);
 
+/**
+ * \brief Initialize a TLS client handshake state.
+ *
+ * \details
+ * Clears the supplied state object, copies the client policy, selects the initial
+ * handshake phase, and prepares the client for ClientHello emission. The configuration
+ * arrays referenced by \p config must remain valid for the lifetime of the client state.
+ *
+ * \param state: [struct*] The client state to initialize.
+ * \param config: [const struct*] The client configuration and algorithm policy.
+ *
+ * \return [qsc_tls_status] Returns qsc_tls_status_success on success.
+ */
 QSC_EXPORT_API qsc_tls_status qsc_tls_client_initialize(qsc_tls_client_state* state, const qsc_tls_client_config* config);
 
 /**

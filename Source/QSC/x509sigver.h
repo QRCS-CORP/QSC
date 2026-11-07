@@ -75,7 +75,7 @@ QSC_CPLUSPLUS_ENABLED_START
  */
 
 /*!
- * \struct qsc_x509_verify_state
+ * \struct qsc_x509_verify_state_t
  * \brief Working state used by QSC-backed X.509 signature verification helpers.
  *
  * \details
@@ -89,7 +89,7 @@ typedef struct qsc_x509_verify_state_t
 {
     uint8_t* signaturemessage;     /*!< Caller-supplied scratch buffer used to hold reconstructed or staged signed-message bytes. */
     size_t signaturemessage_size;  /*!< The capacity of the \c signaturemessage buffer in bytes. */
-} qsc_x509_verify_state;
+} qsc_x509_verify_state; /*!< Public typedef alias for the preceding documented structure or enumeration. */
 
 /*!
  * \brief Initialize a QSC X.509 verification state object.
@@ -103,7 +103,6 @@ typedef struct qsc_x509_verify_state_t
  * \param buffer: The caller-supplied scratch buffer.
  * \param buflen: The capacity of the scratch buffer in bytes.
  *
- * \return [void] This function does not return a value.
  */
 QSC_EXPORT_API void qsc_x509_qsc_verify_state_initialize(qsc_x509_verify_state* state, uint8_t* buffer, size_t buflen);
 

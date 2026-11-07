@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "version": "@PROJECT_VERSION@",
+  "profile": "@QSC_PROFILE@",
+  "algorithms": "@QSC_MANIFEST_ALGORITHMS@",
+  "hardware_enabled": @QSC_JSON_HARDWARE_ENABLED@,
+  "hardware_providers": "@QSC_MANIFEST_HARDWARE@",
+  "cpu_target": "@QSC_CPU_TARGET@",
+  "compiled_sources": @QSC_SELECTED_SOURCE_COUNT@,
+  "shared_library": @QSC_JSON_SHARED_LIBRARY@,
+  "tls_x509_pruning": false
+}
