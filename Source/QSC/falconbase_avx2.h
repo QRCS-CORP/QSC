@@ -54,9 +54,9 @@
 
 /* \cond DOXYGEN_NO_DOCUMENT */
 
-QSC_CPLUSPLUS_ENABLED_START
-
 #include "qsccommon.h"
+
+QSC_CPLUSPLUS_ENABLED_START
 
 #if defined(QSC_SYSTEM_HAS_AVX2)
 
