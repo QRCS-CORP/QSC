@@ -1052,7 +1052,7 @@ static inline void rcs_bitslice_mix_columns(uint32_t q[8U], uint32_t scratch[8U]
 	}
 }
 
-static void rcs_transform_256_bitsliced(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, const uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
+static void rcs_transform_256_bitsliced(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
 {
 	/* encrypt one 32-byte Rijndael-256 counter block with persistent bitplanes */
 	uint32_t q[8U];
@@ -1505,7 +1505,7 @@ static inline void rcs_bitslice_mix_columns64(uint64_t q[8U], uint64_t scratch[8
 	}
 }
 
-static void rcs_transform_512_bitsliced(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, const uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
+static void rcs_transform_512_bitsliced(const qsc_rcs_state* ctx, uint8_t* output, const uint8_t* input, uint32_t keys[RCS512_ROUND_COUNT + 1U][8U])
 {
 	/* encrypt two independent Rijndael-256 counter blocks with one Boolean circuit */
 	uint64_t q[8U];

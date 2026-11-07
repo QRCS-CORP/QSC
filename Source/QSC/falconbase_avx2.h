@@ -283,9 +283,10 @@ int32_t qsc_falcon_avx2_1024_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, 
 bool qsc_falcon_avx2_512_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 bool qsc_falcon_avx2_1024_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk);
 
+#endif
+
 QSC_CPLUSPLUS_ENABLED_END
 
 /* \endcond DOXYGEN_NO_DOCUMENT */
 
-#endif
 #endif

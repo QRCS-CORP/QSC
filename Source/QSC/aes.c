@@ -1899,13 +1899,13 @@ void qsc_aes_initialize(qsc_aes_state* ctx, const qsc_aes_keyparams* keyparams, 
 
 #	if UINTPTR_MAX > UINT32_MAX
 		static void aes_bitslice_prepare_keys(const qsc_aes_state* ctx, uint64_t keys[15U][8U]);
-		static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool encryption, const uint64_t keys[15U][8U]);
-		static void aes_cbc_scalar_one_precomputed(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, const uint64_t keys[15U][8U]);
+		static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool encryption, uint64_t keys[15U][8U]);
+		static void aes_cbc_scalar_one_precomputed(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, uint64_t keys[15U][8U]);
 #	endif
 
 #if UINTPTR_MAX > UINT32_MAX
 
-static void aes_cbc_scalar_four(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, const uint64_t keys[15U][8U])
+static void aes_cbc_scalar_four(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, uint64_t keys[15U][8U])
 {
 	/* decrypt four chained CBC blocks using the portable four-block AES kernel */
 	uint8_t cipher[64U];
@@ -2125,7 +2125,7 @@ void qsc_aes_cbc_encrypt_block(qsc_aes_state* ctx, uint8_t* output, const uint8_
 
 #if UINTPTR_MAX > UINT32_MAX
 
-static void aes_ctr_scalar_four(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool be, const uint64_t keys[15U][8U])
+static void aes_ctr_scalar_four(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool be, uint64_t keys[15U][8U])
 {
 	/* process four portable AES-CTR blocks using the 64-bit bitsliced S-box */
 	uint8_t counters[64U];
@@ -2892,7 +2892,7 @@ static void aes_bitslice_prepare_keys(const qsc_aes_state* ctx, uint64_t keys[15
 	}
 }
 
-static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool encryption, const uint64_t keys[15U][8U])
+static void aes_ecb_scalar_four_precomputed(const qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, bool encryption, uint64_t keys[15U][8U])
 {
 	/* encrypt or decrypt four blocks through persistent 64-bit AES bitplanes */
 	uint64_t q[8U];
@@ -3034,7 +3034,7 @@ static void aes_bitslice_mixcolumns32(uint32_t q[8U], uint32_t differences[8U])
 	}
 }
 
-static void aes_cbc_scalar_one_precomputed(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, const uint64_t keys[15U][8U])
+static void aes_cbc_scalar_one_precomputed(qsc_aes_state* ctx, uint8_t* output, const uint8_t* input, uint64_t keys[15U][8U])
 {
 	/* encrypt one chained CBC block using a 32-bit persistent bitslice schedule */
 	uint32_t q[8U];
@@ -4542,7 +4542,7 @@ static void aes_gcm128_finalize(qsc_aes_gcm128_state* ctx, uint8_t* tag)
 
 #if !defined(QSC_SYSTEM_AESNI_ENABLED) && !defined(QSC_SYSTEM_ARM_AES_ENABLED) && !defined(QSC_SYSTEM_HAS_PCLMUL) && UINTPTR_MAX > UINT32_MAX
 
-static void gcm_public_scalar_four(const qsc_aes_state* aes, uint8_t counter[16U], uint8_t hash[16U], const uint64_t hhigh[4U], const uint64_t hlow[4U], uint8_t* output, const uint8_t* input, bool decrypt, const uint64_t keys[15U][8U])
+static void gcm_public_scalar_four(const qsc_aes_state* aes, uint8_t counter[16U], uint8_t hash[16U], const uint64_t hhigh[4U], const uint64_t hlow[4U], uint8_t* output, const uint8_t* input, bool decrypt, uint64_t keys[15U][8U])
 {
 	/* transform and authenticate four GCM blocks using portable batched AES */
 	uint8_t counters[64U];
