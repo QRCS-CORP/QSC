@@ -137,6 +137,7 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 | [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qsc_specification.pdf) | Detailed algorithmic and design specification |
 | [QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/qsc_summary.pdf) | High-level overview of the library |
 | [QSC Technical Qualification Report](docs/pdf/qsc_technical_qualification_report_2026-11-06.pdf) | November 6, 2026 engineering qualification dossier; 15 native configurations, evidence matrices and assessment findings (116 pages) |
+| [Commercial SDK and Wrapper Specifications](#commercial-sdk-and-language-wrappers) | Public technical specifications for the commercially licensed integration SDK and language bindings |
 
 ## Overview
 
@@ -201,6 +202,26 @@ These local tests provide engineering evidence for regulated deployments but are
 
 ---
 
+
+## Commercial SDK and Language Wrappers
+
+QSC is supported by a commercial integration SDK and language bindings for customers incorporating QSC into their own applications and products. **The QSC SDK and wrapper implementations are available to commercially licensed customers under the applicable QRCS commercial licensing agreement (QRCS-CASL).** These components, including their source code and binaries, **are not included in the public QSC research and evaluation distribution**.
+
+The corresponding technical specifications are publicly available for architecture review, integration planning, and evaluation of the available interfaces:
+
+| Component | Integration interface | Public specification |
+|---|---|---|
+| **QSC SDK (C)** | C developer examples, integration utilities, and the SDK qualification workbench. | [Specification (PDF)](docs/pdf/wrappers/qscsdk_specification.pdf) |
+| **QSCABI** | Native C application binary interface for language bindings and external integrations. | [Specification (PDF)](docs/pdf/wrappers/qscabi_specification.pdf) |
+| **QSCCPP** | C++17 library interface with typed cryptographic APIs and resource ownership. | [Specification (PDF)](docs/pdf/wrappers/qsccpp_specification.pdf) |
+| **QSCCS** | C#/.NET wrapper with managed types, native interop, and resource management. | [Specification (PDF)](docs/pdf/wrappers/qsccs_specification.pdf) |
+| **QSCRS** | Rust wrapper with a safe API over the native QSCABI boundary. | [Specification (PDF)](docs/pdf/wrappers/qscrs_specification.pdf) |
+| **QSCPY** | Python wrapper using the native QSCABI interface. | [Specification (PDF)](docs/pdf/wrappers/qscpy_specification.pdf) |
+| **QSCOSSL** | Selected OpenSSL-compatible APIs backed by QSC; not a complete OpenSSL replacement. | [Specification (PDF)](docs/pdf/wrappers/qscossl_specification.pdf) |
+
+The published specifications describe interfaces and implementation requirements; access to these documents does not grant a license to the associated SDK or wrapper implementations. Commercial distributions and supported integration packages are provided under the applicable agreement with QRCS. For commercial licensing or access inquiries, contact **[licensing@qrcscorp.ca](mailto:licensing@qrcscorp.ca)**.
+
+---
 
 ## Library Contents
 
@@ -758,7 +779,7 @@ The default project configuration uses minimal flags with no enhanced instructio
 | **Coding Discipline** | MISRA-adjacent QRCS secure C coding standard; formal MISRA compliance not claimed |
 | **Testing** | Known-answer and vector tests, randomized/stress and interoperability tests, and source-pinned offline qualification: 15/15 native configurations and two passing consolidated evidence gates, each with documented coverage boundaries; see the technical qualification report |
 | **Platforms** | Windows (MSVC), Linux (GCC), macOS (Clang) |
-| **Language Interop** | Native C API and direct C/C++ integration |
+| **Language Interop** | Public native C interface; commercially licensed C SDK, C ABI, C++, C#, Rust, Python, and selected OpenSSL-compatible integration wrappers (see [Commercial SDK and Language Wrappers](#commercial-sdk-and-language-wrappers)) |
 | **Self-Contained** | Software cryptographic core requires no external cryptographic runtime; optional selected hardware adapters may need vendor/platform middleware |
 
 ---
