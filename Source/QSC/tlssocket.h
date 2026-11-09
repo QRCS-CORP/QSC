@@ -883,6 +883,33 @@ QSC_EXPORT_API void qsc_tls_socket_connection_initialize(qsc_tls_socket_connecti
 QSC_EXPORT_API void qsc_tls_socket_connection_dispose(qsc_tls_socket_connection* connection);
 
 /**
+ * \brief Bind an already connected, caller-owned blocking TCP socket and complete a TLS handshake.
+ *
+ * \details
+ * The input socket is borrowed, not closed or shut down by TLS disposal or TLS shutdown.
+ * The caller must retain it until the TLS connection is disposed and must avoid concurrent
+ * non-TLS I/O on the descriptor. The endpoint must be a connected IPv4/IPv6 stream socket.
+ * This operation supports blocking sockets only. Configuration and certificate validation
+ * use the same QSC policy/identity machinery as the managed-client and listener paths.
+ * The connection must be initialized and not already active. Following a failed handshake,
+ * dispose the connection before reuse. A client hostname is required to permit hostname
+ * verification under the caller's trust policy; an absent hostname is rejected.
+ * QSC may adjust socket timeouts while performing the blocking handshake.
+ *
+ * \param connection Caller-owned TLS connection initialized with qsc_tls_socket_connection_initialize.
+ * \param context Initialized TLS policy context, retained through the handshake.
+ * \param socket Connected caller-owned TCP socket, borrowed for the TLS connection lifetime.
+ * \param role qsc_tls_role_client or qsc_tls_role_server.
+ * \param hostname Null-terminated reference identity/SNI for a client; NULL for a server.
+ * \return qsc_tls_socket_status_success when authenticated handshake completes; an error otherwise.
+ * \note Does not take ownership or close the descriptor on any outcome. Not thread-safe with concurrent
+ * access to the same connection, context, or socket.
+ */
+QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_connection_attach(qsc_tls_socket_connection* connection,
+	const qsc_tls_socket_context* context, const qsc_socket* socket, qsc_tls_role role, const char* hostname);
+
+
+/**
  * \brief Connect to a remote host and complete a TLS client handshake.
  *
  * \param connection: [struct*] A pointer to an initialized connection structure.
@@ -959,7 +986,12 @@ QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_send(qsc_tls_socket_connecti
 QSC_EXPORT_API qsc_tls_socket_status qsc_tls_socket_receive(qsc_tls_socket_connection* connection, uint8_t* output, size_t outlen, size_t* read);
 
 /**
- * \brief Send a TLS close_notify alert and close the TLS socket connection.
+ * \brief Send a TLS close_notify alert and close an owned TLS transport.
+ *
+ * \details
+ * The function shuts down and closes a socket only when connection->owns_socket is true.
+ * A socket attached through qsc_tls_socket_connection_attach is borrowed: TLS close_notify
+ * is emitted but the underlying descriptor remains open and under caller ownership.
  *
  * \param connection: [struct*] A pointer to the established TLS socket connection.
  *

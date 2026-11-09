@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="QSC">
+ <defs><linearGradient id="q" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#6ff2ec"/><stop offset="1" stop-color="#66a0ff"/></linearGradient></defs>
+ <rect x="1" y="1" width="62" height="62" rx="17" fill="#142436" stroke="#395774" stroke-width="1.5"/>
+ <path d="M32 11 49 20.5v21L32 51 15 41.5v-21z" fill="none" stroke="url(#q)" stroke-width="2.8" stroke-linejoin="round"/>
+ <path d="M24 27c0-4 3.2-7 8-7s8 3 8 8-3.2 8-8 8-8-3-8-9zm10 9 8 8" fill="none" stroke="#e2f6ff" stroke-width="3.4" stroke-linecap="round"/>
+ <circle cx="32" cy="12" r="2.5" fill="#89f4ef"/><circle cx="50" cy="41" r="2.5" fill="#70a7ff"/><circle cx="14" cy="41" r="2.5" fill="#70a7ff"/>
+</svg>

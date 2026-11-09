@@ -24,8 +24,6 @@
 #   include <windows.h>
 #endif
 
-/* \cond DOXYGEN_NO_DOCUMENT */
-
 typedef struct qsc_tls_socket_context_storage
 {
     qsc_x509w_trust_store truststore;
@@ -2428,6 +2426,99 @@ void qsc_tls_socket_connection_dispose(qsc_tls_socket_connection* connection)
     }
 }
 
+/**
+ * \brief Attach and handshake on an already connected, caller-owned TCP socket.
+ * \param connection Initialized, inactive TLS connection; never owns the attached socket.
+ * \param context Valid QSC TLS policy, trust and identity context.
+ * \param socket Caller-owned connected IPv4/IPv6 TCP stream socket.
+ * \param role Endpoint role, client or server.
+ * \param hostname Client reference hostname; NULL for server.
+ * \return TLS socket success on handshake completion, otherwise a failure status.
+ * \note Failure leaves the caller-owned descriptor open; dispose connection state before reuse.
+ */
+qsc_tls_socket_status qsc_tls_socket_connection_attach(qsc_tls_socket_connection* connection,
+	const qsc_tls_socket_context* context, const qsc_socket* socket, qsc_tls_role role, const char* hostname)
+{
+	/** Keep only the selected role's configuration on the stack. */
+	union
+	{
+		qsc_tls_client_config client; /**< Client handshake configuration. */
+		qsc_tls_server_config server; /**< Server handshake configuration. */
+	} config;
+	qsc_tls_status st;
+	qsc_tls_socket_status status;
+
+	status = qsc_tls_socket_status_invalid_input;
+	st = qsc_tls_status_invalid_input;
+	qsc_memutils_clear(&config, sizeof(config));
+
+	if (connection != NULL && context != NULL && socket != NULL &&
+		connection->connected == false && context->initialized == true &&
+		socket != &connection->socket &&
+		(socket->address_family == qsc_socket_address_family_ipv4 ||
+		 socket->address_family == qsc_socket_address_family_ipv6) &&
+		socket->socket_transport == qsc_socket_transport_stream &&
+		socket->socket_protocol == qsc_socket_protocol_tcp &&
+		(role == qsc_tls_role_client || role == qsc_tls_role_server) &&
+		(role != qsc_tls_role_client || (hostname != NULL && hostname[0U] != '\0')) &&
+		qsc_socket_is_connected(socket) == true)
+	{
+		qsc_tls_socket_connection_initialize(connection);
+		qsc_memutils_copy(&connection->socket, socket, sizeof(qsc_socket));
+		connection->owns_socket = false;
+		connection->connected = true;
+		connection->role = role;
+		connection->family = socket->address_family;
+		connection->socketoptions = context->socketoptions;
+		connection->ticketpolicy = context->ticketpolicy;
+		connection->logcallback = context->logcallback;
+		connection->logstate = context->logstate;
+
+		if (role == qsc_tls_role_client)
+		{
+			status = tls_socket_build_client_config(context, hostname, NULL, &config.client);
+
+			if (status == qsc_tls_socket_status_success)
+			{
+				st = qsc_tls_engine_initialize_client(&connection->engine, &config.client);
+				status = tls_socket_status_from_tls(st);
+			}
+		}
+		else
+		{
+			status = tls_socket_build_server_config(context, &config.server);
+
+			if (status == qsc_tls_socket_status_success)
+			{
+				st = qsc_tls_engine_initialize_server(&connection->engine, &config.server);
+				status = tls_socket_status_from_tls(st);
+
+				if (status == qsc_tls_socket_status_success)
+				{
+					connection->signcontext.scheme = connection->engine.state.server.config.localcert.verifyscheme;
+					connection->signcontext.privatekey = connection->engine.state.server.config.localcert.signprivatekey;
+					connection->signcontext.privatekeylen = connection->engine.state.server.config.localcert.signprivatekeylen;
+					connection->engine.state.server.config.localcert.signcallback = qsc_tls_signer_default_sign;
+					connection->engine.state.server.config.localcert.signstate = &connection->signcontext;
+				}
+			}
+		}
+
+		if (status == qsc_tls_socket_status_success)
+		{
+			status = tls_socket_connection_handshake(connection);
+		}
+
+		if (status != qsc_tls_socket_status_success)
+		{
+			connection->connected = false;
+			connection->handshaked = false;
+		}
+	}
+
+	return status;
+}
+
 qsc_tls_socket_status qsc_tls_socket_client_connect_host(qsc_tls_socket_connection* connection, const qsc_tls_socket_context* context, const char* hostname, const char* service)
 {
     return qsc_tls_socket_client_connect_host_ex(connection, context, hostname, service, NULL, false);
@@ -2600,8 +2691,12 @@ qsc_tls_socket_status qsc_tls_socket_shutdown(qsc_tls_socket_connection* connect
     {
         st = qsc_tls_io_shutdown(&connection->io);
         status = tls_socket_status_from_tls(st);
-        (void)qsc_socket_shut_down(&connection->socket, qsc_socket_shut_down_flag_both);
-        (void)qsc_socket_close_socket(&connection->socket);
+        /* A borrowed descriptor must remain under caller ownership even after close_notify. */
+        if (connection->owns_socket == true)
+        {
+            (void)qsc_socket_shut_down(&connection->socket, qsc_socket_shut_down_flag_both);
+            (void)qsc_socket_close_socket(&connection->socket);
+        }
         connection->connected = false;
         connection->owns_socket = false;
         tls_socket_set_result(&connection->lastresult, status, st, (qsc_socket_exceptions)QSC_SOCKET_RET_SUCCESS, QSC_X509W_STATUS_SUCCESS, QSC_X509_VERIFY_STATUS_SUCCESS, qsc_tls_alert_close_notify);
@@ -3705,5 +3800,3 @@ void qsc_tls_socket_server_dispose(qsc_tls_socket_server* server)
         qsc_memutils_secure_erase(server, sizeof(*server));
     }
 }
-
-/* \endcond DOXYGEN_NO_DOCUMENT */

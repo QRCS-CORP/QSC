@@ -26,6 +26,8 @@ var NAVTREE =
 [
   [ "QSC Post Quantum Cryptographic Library", "index.html", [
     [ "QSC: Quantum Secure Cryptographic Solutions Library", "index.html", null ],
+    [ "Getting started", "qsc_getting_started.html", null ],
+    [ "API catalog", "qsc_api_catalog.html", null ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
       [ "Data Structure Index", "classes.html", null ],
