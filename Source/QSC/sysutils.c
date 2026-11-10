@@ -490,7 +490,7 @@ uint64_t qsc_sysutils_system_timestamp(void)
 #if defined(QSC_SYSTEM_OS_WINDOWS)
 
 #if defined(QSC_SYSTEM_ARCH_IX86_32)
-	if (qsc_sysutils_rdtsc_available(void))
+	if (qsc_sysutils_rdtsc_available())
 	{
 		rtme = __rdtsc();
 	}
