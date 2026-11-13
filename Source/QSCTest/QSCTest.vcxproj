@@ -240,7 +240,7 @@
       </PrecompiledHeaderFile>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)QSC</AdditionalIncludeDirectories>
@@ -344,6 +344,8 @@
     <ClCompile Include="pbmac1_test.c" />
     <ClCompile Include="poly1305_test.c" />
     <ClCompile Include="qmac_test.c" />
+    <ClCompile Include="hcg_test.c" />
+    <ClCompile Include="csg_test.c" />
     <ClCompile Include="rcs_test.c" />
     <ClCompile Include="qsc_test.c" />
     <ClCompile Include="scb_test.c" />
@@ -428,6 +430,8 @@
     <ClInclude Include="falcon_test.h" />
     <ClInclude Include="hqc_test.h" />
     <ClInclude Include="qmac_test.h" />
+    <ClInclude Include="hcg_test.h" />
+    <ClInclude Include="csg_test.h" />
     <ClInclude Include="qsctestcommon.h" />
     <ClInclude Include="csx_test.h" />
     <ClInclude Include="dilithium_test.h" />

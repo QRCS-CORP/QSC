@@ -92,6 +92,8 @@
 #include "poly1305_test.h"
 #include "pbmac1_test.h"
 #include "qmac_test.h"
+#include "csg_test.h"
+#include "hcg_test.h"
 #include "rcs_test.h"
 #include "scb_test.h"
 #include "secrand_test.h"
@@ -171,6 +173,8 @@ static void primitives_test(void)
 	qsctest_sphincsplus_run();
 	
 	qsctest_secrand_run();
+	qsctest_hcg_run();
+	qsctest_csg_run();
 	qsctest_scb_run();
 }
 
@@ -494,7 +498,15 @@ int32_t main(void)
 			qsctest_secrand_run();
 			qsctest_print_line("");
 
-			qsctest_print_section("02.06", "SHAKE Cost-Based KDF");
+			qsctest_print_section("02.06", "HMAC_DRBG-SHA-512 (HCG)");
+			qsctest_hcg_run();
+			qsctest_print_line("");
+
+			qsctest_print_section("02.07", "XDRBG-SHAKE-256 (CSG candidate)");
+			qsctest_csg_run();
+			qsctest_print_line("");
+
+			qsctest_print_section("02.08", "SHAKE Cost-Based KDF");
 			qsctest_scb_run();
 			qsctest_print_line("");
 			

@@ -1,269 +1,290 @@
 #include "csg.h"
 #include "acp.h"
-#include "intutils.h"
 #include "memutils.h"
+#include "sha3.h"
 
 /* \cond DOXYGEN_NO_DOCUMENT */
 
-static bool csg_fill_buffer(qsc_csg_state* ctx)
+static bool csg_xof_operation(const uint8_t* first, size_t firstlen, const uint8_t* additional, size_t addlen, uint8_t operation, uint8_t* output, size_t outlen)
 {
+	/* perform one SHAKE-256 operation using the XDRBG Appendix B encoding */
+	uint8_t input[(2U * QSC_CSG_STATE_SIZE) + QSC_CSG_MAX_ADDITIONAL_SIZE + 1U] = { 0U };
 	bool res;
 
 	res = false;
 
-	if (ctx != NULL)
+	if (first != NULL && firstlen != 0U && firstlen <= (2U * QSC_CSG_STATE_SIZE) &&
+		(additional != NULL || addlen == 0U) && addlen <= QSC_CSG_MAX_ADDITIONAL_SIZE &&
+		operation <= 2U && output != NULL && outlen != 0U &&
+		outlen <= QSC_CSG_STATE_SIZE + QSC_CSG_MAX_REQUEST_SIZE)
 	{
-		if (ctx->rate == QSC_KECCAK_512_RATE)
+		qsc_memutils_copy(input, first, firstlen);
+
+		if (addlen != 0U)
 		{
-			qsc_cshake_squeezeblocks(&ctx->kstate, qsc_keccak_rate_512, ctx->cache, 1U);
-			ctx->crmd = ctx->rate;
-			ctx->cpos = 0U;
-			res = true;
+			qsc_memutils_copy(input + firstlen, additional, addlen);
 		}
-		else if (ctx->rate == QSC_KECCAK_256_RATE)
-		{
-			qsc_cshake_squeezeblocks(&ctx->kstate, qsc_keccak_rate_256, ctx->cache, 1U);
-			ctx->crmd = ctx->rate;
-			ctx->cpos = 0U;
-			res = true;
-		}
+
+		input[firstlen + addlen] = (uint8_t)((85U * (uint32_t)operation) + (uint32_t)addlen);
+		qsc_shake256_compute(output, outlen, input, firstlen + addlen + 1U);
+		res = true;
 	}
+
+	qsc_memutils_secure_erase(input, sizeof(input));
 
 	return res;
 }
 
 static bool csg_auto_reseed(qsc_csg_state* ctx)
 {
+	/* perform an ACP-backed reseed without retaining acquired seed bytes */
+	uint8_t entropy[QSC_CSG_MIN_RESEED_SIZE] = { 0U };
 	bool res;
 
-	res = true;
+	res = false;
 
-	if (ctx != NULL)
+	if (ctx != NULL && ctx->initialized == true)
 	{
-		if (ctx->pres == true && ctx->bctr >= QSC_CSG_RESEED_THRESHHOLD)
+		if (qsc_acp_generate(entropy, sizeof(entropy)) == true)
 		{
-			res = false;
-
-			if (ctx->rate == QSC_KECCAK_512_RATE)
-			{
-				uint8_t prand[QSC_CSG_512_SEED_SIZE] = { 0U };
-
-				if (qsc_acp_generate(prand, sizeof(prand)) == true)
-				{
-					qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_512, prand, sizeof(prand));
-					res = csg_fill_buffer(ctx);
-
-					if (res == true)
-					{
-						ctx->bctr = 0U;
-					}
-				}
-
-				qsc_memutils_secure_erase(prand, sizeof(prand));
-			}
-			else if (ctx->rate == QSC_KECCAK_256_RATE)
-			{
-				uint8_t prand[QSC_CSG_256_SEED_SIZE] = { 0U };
-
-				if (qsc_acp_generate(prand, sizeof(prand)) == true)
-				{
-					qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_256, prand, sizeof(prand));
-					res = csg_fill_buffer(ctx);
-
-					if (res == true)
-					{
-						ctx->bctr = 0U;
-					}
-				}
-
-				qsc_memutils_secure_erase(prand, sizeof(prand));
-			}
+			res = qsc_csg_reseed(ctx, entropy, sizeof(entropy), NULL, 0U);
 		}
 	}
+
+	qsc_memutils_secure_erase(entropy, sizeof(entropy));
 
 	return res;
 }
 
 void qsc_csg_dispose(qsc_csg_state* ctx)
 {
-	QSC_ASSERT(ctx != NULL);
-
 	if (ctx != NULL)
 	{
-		qsc_keccak_dispose(&ctx->kstate);
-		qsc_memutils_secure_erase(ctx->cache, sizeof(ctx->cache));
-		ctx->bctr = 0U;
-		ctx->cpos = 0U;
-		ctx->crmd = 0U;
-		ctx->rate = 0U;
-		ctx->pres = false;
+		qsc_memutils_secure_erase(ctx, sizeof(qsc_csg_state));
 	}
 }
 
-void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predres)
+bool qsc_csg_instantiate(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen)
 {
-	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(seed != NULL);
-	QSC_ASSERT(seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE);
+	uint8_t value[QSC_CSG_STATE_SIZE] = { 0U };
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL)
+	{
+		/* a caller must not pass seed or personalization pointing into the state */
+		if (seed != NULL && seedlen >= QSC_CSG_MIN_INSTANTIATE_SIZE &&
+			seedlen <= QSC_CSG_MAX_SEED_SIZE && (info != NULL || infolen == 0U) &&
+			infolen <= QSC_CSG_MAX_ADDITIONAL_SIZE)
+		{
+			res = csg_xof_operation(seed, seedlen, info, infolen, 0U, value, sizeof(value));
+		}
+
+		qsc_csg_dispose(ctx);
+
+		if (res == true)
+		{
+			qsc_memutils_copy(ctx->value, value, sizeof(value));
+			ctx->reseed_counter = 1U;
+			ctx->initialized = true;
+		}
+	}
+
+	qsc_memutils_secure_erase(value, sizeof(value));
+
+	return res;
+}
+
+bool qsc_csg_initialize_auto(qsc_csg_state* ctx, const uint8_t* info, size_t infolen, bool predres)
+{
+	uint8_t entropy[QSC_CSG_MAX_SEED_SIZE] = { 0U };
+	bool res;
+
+	res = false;
 
 	if (ctx != NULL)
 	{
 		qsc_csg_dispose(ctx);
 
-		if (seed != NULL && (seedlen == QSC_CSG_256_SEED_SIZE || seedlen == QSC_CSG_512_SEED_SIZE))
+		if ((info != NULL || infolen == 0U) && infolen <= QSC_CSG_MAX_ADDITIONAL_SIZE)
 		{
-			bool init;
-
-			init = true;
-
-			if (seedlen == QSC_CSG_512_SEED_SIZE)
+			if (qsc_acp_generate(entropy, sizeof(entropy)) == true)
 			{
-				ctx->rate = QSC_KECCAK_512_RATE;
-			}
-			else
-			{
-				ctx->rate = QSC_KECCAK_256_RATE;
-			}
+				res = qsc_csg_instantiate(ctx, entropy, sizeof(entropy), info, infolen);
 
-			ctx->bctr = 0U;
-			ctx->cpos = 0U;
-			ctx->crmd = 0U;
-			ctx->pres = predres;
-
-			if (ctx->rate == QSC_KECCAK_512_RATE)
-			{
-				if (ctx->pres == true)
+				if (res == true)
 				{
-					uint8_t prand[QSC_CSG_512_SEED_SIZE] = { 0U };
-
-					if (qsc_acp_generate(prand, sizeof(prand)) == true)
-					{
-						qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_512, seed, seedlen, info, infolen, prand, sizeof(prand));
-					}
-					else
-					{
-						init = false;
-					}
-
-					qsc_memutils_secure_erase(prand, sizeof(prand));
+					ctx->auto_reseed = true;
+					ctx->pres = predres;
 				}
-				else
-				{
-					qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_512, seed, seedlen, info, infolen, NULL, 0U);
-				}
-			}
-			else
-			{
-				if (ctx->pres == true)
-				{
-					uint8_t prand[QSC_CSG_256_SEED_SIZE] = { 0U };
-
-					if (qsc_acp_generate(prand, sizeof(prand)) == true)
-					{
-						qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_256, seed, seedlen, info, infolen, prand, sizeof(prand));
-					}
-					else
-					{
-						init = false;
-					}
-
-					qsc_memutils_secure_erase(prand, sizeof(prand));
-				}
-				else
-				{
-					qsc_cshake_initialize(&ctx->kstate, qsc_keccak_rate_256, seed, seedlen, info, infolen, NULL, 0U);
-				}
-			}
-
-			if (init == true)
-			{
-				if (csg_fill_buffer(ctx) == false)
-				{
-					qsc_csg_dispose(ctx);
-				}
-			}
-			else
-			{
-				qsc_csg_dispose(ctx);
 			}
 		}
 	}
+
+	qsc_memutils_secure_erase(entropy, sizeof(entropy));
+
+	return res;
 }
 
-bool qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
+void qsc_csg_initialize(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* info, size_t infolen, bool predres)
 {
-	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(output != NULL);
-	QSC_ASSERT(otplen != 0U);
-
+	uint8_t value[QSC_CSG_STATE_SIZE] = { 0U };
 	bool res;
 
 	res = false;
 
-	if (ctx != NULL && output != NULL && otplen != 0U && (ctx->rate == QSC_KECCAK_256_RATE || ctx->rate == QSC_KECCAK_512_RATE))
+	if (seedlen == QSC_CSG_256_SEED_SIZE && ctx != NULL && seed != NULL && (info != NULL || infolen == 0U) && infolen <= QSC_CSG_MAX_ADDITIONAL_SIZE)
 	{
-		const size_t outlen = otplen;
-		size_t outpos;
-		size_t rmdlen;
+		res = csg_xof_operation(seed, seedlen, info, infolen, 0U, value, sizeof(value));
+		qsc_csg_dispose(ctx);
 
-		ctx->bctr += otplen;
-		outpos = 0U;
-
-		if (ctx->crmd < otplen)
+		if (res == true)
 		{
-			if (ctx->crmd != 0U)
-			{
-				qsc_memutils_copy(output, ctx->cache + ctx->cpos, ctx->crmd);
-				outpos += ctx->crmd;
-				otplen -= ctx->crmd;
-			}
-
-			while (otplen != 0U)
-			{
-				if (csg_fill_buffer(ctx) == false)
-				{
-					break;
-				}
-
-				rmdlen = qsc_intutils_min(ctx->crmd, otplen);
-				qsc_memutils_copy(output + outpos, ctx->cache, rmdlen);
-
-				otplen -= rmdlen;
-				outpos += rmdlen;
-				ctx->crmd -= rmdlen;
-				ctx->cpos += rmdlen;
-			}
+			qsc_memutils_copy(ctx->value, value, sizeof(value));
+			ctx->initialized = true;
+			ctx->reseed_counter = 1U;
+			ctx->legacy_seed = true;
 		}
-		else
+	}
+	else
+	{
+		res = qsc_csg_instantiate(ctx, seed, seedlen, info, infolen);
+	}
+
+	if (res == true && ctx != NULL)
+	{
+		ctx->pres = predres;
+		ctx->auto_reseed = predres;
+	}
+
+	qsc_memutils_secure_erase(value, sizeof(value));
+}
+
+bool qsc_csg_reseed(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen, const uint8_t* additional, size_t addlen)
+{
+	uint8_t input[QSC_CSG_STATE_SIZE + QSC_CSG_MAX_SEED_SIZE] = { 0U };
+	uint8_t newvalue[QSC_CSG_STATE_SIZE] = { 0U };
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL && ctx->initialized == true && seed != NULL &&
+		seedlen >= QSC_CSG_MIN_RESEED_SIZE && seedlen <= QSC_CSG_MAX_SEED_SIZE &&
+		(additional != NULL || addlen == 0U) && addlen <= QSC_CSG_MAX_ADDITIONAL_SIZE)
+	{
+		qsc_memutils_copy(input, ctx->value, QSC_CSG_STATE_SIZE);
+		qsc_memutils_copy(input + QSC_CSG_STATE_SIZE, seed, seedlen);
+		res = csg_xof_operation(input, QSC_CSG_STATE_SIZE + seedlen, additional, addlen, 1U, newvalue, sizeof(newvalue));
+
+		if (res == true)
 		{
-			rmdlen = qsc_intutils_min(ctx->crmd, otplen);
-			qsc_memutils_copy(output, ctx->cache + ctx->cpos, rmdlen);
-			ctx->crmd -= rmdlen;
-			ctx->cpos += rmdlen;
-			otplen -= rmdlen;
+			qsc_memutils_copy(ctx->value, newvalue, sizeof(newvalue));
+			ctx->reseed_counter = 1U;
+			ctx->generated_bytes = 0U;
+			ctx->legacy_seed = false;
 		}
+	}
 
-		if (otplen == 0U)
+	qsc_memutils_secure_erase(newvalue, sizeof(newvalue));
+	qsc_memutils_secure_erase(input, sizeof(input));
+
+	return res;
+}
+
+bool qsc_csg_generate_ex(qsc_csg_state* ctx, uint8_t* output, size_t otplen, const uint8_t* additional, size_t addlen)
+{
+	uint8_t stream[QSC_CSG_STATE_SIZE + QSC_CSG_MAX_REQUEST_SIZE] = { 0U };
+	bool res;
+
+	res = false;
+
+	if (ctx != NULL && ctx->initialized == true && output != NULL &&
+		otplen != 0U && otplen <= QSC_CSG_MAX_REQUEST_SIZE &&
+		(additional != NULL || addlen == 0U) && addlen <= QSC_CSG_MAX_ADDITIONAL_SIZE)
+	{
+		if (ctx->pres == true ||
+			(ctx->auto_reseed == true && ctx->generated_bytes >= QSC_CSG_RESEED_THRESHOLD) ||
+			ctx->reseed_counter > QSC_CSG_RESEED_INTERVAL)
 		{
-			if (ctx->crmd != 0U)
+			if (ctx->auto_reseed == false)
 			{
-				qsc_memutils_secure_erase(ctx->cache, ctx->cpos);
+				/* a deterministic caller can recover by providing fresh entropy. */
+				qsc_memutils_clear(output, otplen);
 			}
-
-			if (csg_auto_reseed(ctx) == true)
+			else if (csg_auto_reseed(ctx) == true)
 			{
 				res = true;
 			}
 			else
 			{
-				qsc_memutils_clear(output, outlen);
+				/* an operational entropy-source failure invalidates auto mode. */
+				qsc_memutils_clear(output, otplen);
 				qsc_csg_dispose(ctx);
 			}
 		}
 		else
 		{
-			qsc_memutils_clear(output, outlen);
-			qsc_csg_dispose(ctx);
+			res = true;
+		}
+
+		if (res == true)
+		{
+			res = csg_xof_operation(ctx->value, sizeof(ctx->value), additional, addlen, 2U, stream, QSC_CSG_STATE_SIZE + otplen);
+
+			if (res == true)
+			{
+				qsc_memutils_copy(ctx->value, stream, QSC_CSG_STATE_SIZE);
+				qsc_memutils_copy(output, stream + QSC_CSG_STATE_SIZE, otplen);
+				ctx->reseed_counter += 1U;
+				ctx->generated_bytes += (uint64_t)otplen;
+			}
+			else
+			{
+				qsc_memutils_clear(output, otplen);
+				qsc_csg_dispose(ctx);
+			}
+		}
+	}
+	else if (output != NULL && otplen != 0U && otplen <= QSC_CSG_MAX_REQUEST_SIZE)
+	{
+		qsc_memutils_clear(output, otplen);
+	}
+
+	qsc_memutils_secure_erase(stream, sizeof(stream));
+
+	return res;
+}
+
+bool qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
+{
+	size_t pos;
+	size_t step;
+	bool res;
+
+	res = false;
+	pos = 0U;
+
+	if (ctx != NULL && ctx->initialized == true && output != NULL && otplen != 0U)
+	{
+		res = true;
+
+		while (pos < otplen && res == true)
+		{
+			step = otplen - pos;
+
+			if (step > QSC_CSG_MAX_REQUEST_SIZE)
+			{
+				step = QSC_CSG_MAX_REQUEST_SIZE;
+			}
+
+			res = qsc_csg_generate_ex(ctx, output + pos, step, NULL, 0U);
+			pos += step;
+		}
+
+		if (res == false)
+		{
+			qsc_memutils_clear(output, otplen);
 		}
 	}
 	else if (output != NULL && otplen != 0U)
@@ -276,25 +297,8 @@ bool qsc_csg_generate(qsc_csg_state* ctx, uint8_t* output, size_t otplen)
 
 void qsc_csg_update(qsc_csg_state* ctx, const uint8_t* seed, size_t seedlen)
 {
-	QSC_ASSERT(ctx != NULL);
-	QSC_ASSERT(seed != NULL);
-
-	if (ctx != NULL && seed != NULL && seedlen != 0U && (ctx->rate == QSC_KECCAK_256_RATE || ctx->rate == QSC_KECCAK_512_RATE))
-	{
-		if (ctx->rate == QSC_KECCAK_512_RATE)
-		{
-			qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_512, seed, seedlen);
-		}
-		else
-		{
-			qsc_cshake_update(&ctx->kstate, qsc_keccak_rate_256, seed, seedlen);
-		}
-
-		if (csg_fill_buffer(ctx) == false)
-		{
-			qsc_csg_dispose(ctx);
-		}
-	}
+	(void)qsc_csg_reseed(ctx, seed, seedlen, NULL, 0U);
 }
 
 /* \endcond DOXYGEN_NO_DOCUMENT */
+
