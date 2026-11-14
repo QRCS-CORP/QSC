@@ -12,6 +12,7 @@
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/QRCS-CORP/QSC.svg)](https://github.com/QRCS-CORP/QSC/commits/master)
 [![Custom: Standard](https://img.shields.io/static/v1?label=Security%20Standard&message=MISRA&color=blue)](https://misra.org.uk/)
 [![Custom: Target](https://img.shields.io/static/v1?label=Target%20Industry&message=Communications&color=brightgreen)](#)
+[![ACVTS Demo](https://img.shields.io/badge/ACVTS%20Demo-25%2F25%20passed-brightgreen)](docs/pdf/qsc_acvts_qualification_report.pdf)
 
 **A compact, self-contained, and highly optimized post-quantum secure cryptographic library written in portable C, with a C11 CMake build baseline.**
 
@@ -107,6 +108,14 @@ A separate Linux development preflight compiled **241 QSC and QSCTest C translat
 
 The modular CMake system was developed and separately exercised using Linux/GCC full and compact profiles, optional PKCS#11 selection, installed external consumers and smoke/round-trip tests. A later review package added expanded application profiles and shared-library integration. These build-integration results are **distinct** from the 15-configuration native cryptographic qualification matrix. Native MSVC/macOS/ARM build-system qualification, physical HSM/TPM testing and formal certification require their own evidence. The technical report does not assert an official NIST ACVP algorithm validation or FIPS 140-3 module certificate.
 
+### NIST ACVTS Demo Algorithm Qualification
+
+In November 2026, QRCS completed **25 of 25 planned algorithm qualification targets** against the **NIST ACVTS Demo sample server**, covering **86 submitted vector sets**. The preserved qualification results report a successful NIST server verdict for each target. Tested algorithm families include SHA-2, SHA-3, SHAKE, HMAC, AES, PBKDF, ML-KEM, ML-DSA, SLH-DSA, HMAC_DRBG, KDA-HKDF, ECDSA, deterministic ECDSA, EdDSA, XECDH, and KAS-ECC-SSC.
+
+The [QSC ACVTS Qualification Report](docs/pdf/qsc_acvts_qualification_report.pdf) documents the results, tested configurations, NIST session and vector-set identifiers, supporting evidence, and qualification boundaries. The campaign used **two explicitly identified, source-pinned QSC revisions**. A [machine-readable evidence manifest](https://github.com/QRCS-CORP/QSC-ACVP/blob/main/Source/ACVP/docs/evidence/2026-11/evidence-manifest.json) and the [public qualification record](https://github.com/QRCS-CORP/QSC-ACVP/blob/main/Source/ACVP/docs/evidence/2026-11/qualification-report.md) provide traceability to the GitHub Actions runs and preserved result artifacts.
+
+**Qualification scope:** These were NIST ACVTS **Demo sample** tests. Passing results do not constitute NIST CAVP algorithm certification, FIPS 140-3/CMVP module validation, or qualification of every platform, instruction-set path, or subsequent QSC source revision.
+
 ### Complete TLS 1.3 Protocol Stack
 
 The TLS 1.3 implementation is now complete. The stack implements the RFC 8446 handshake, record layer, certificate authentication, mutual TLS, session-ticket policy controls, HelloRetryRequest, post-handshake KeyUpdate and NewSessionTicket handling, ALPN negotiation, SNI-based certificate selection, and framed-message socket helpers. The TLS group layer supports classical ECDHE, pure ML-KEM, and the currently implemented IETF-aligned ECDHE+ML-KEM hybrid groups. See the [TLS 1.3 Protocol Stack](#tls-13-protocol-stack) section for the full module map and feature detail.
@@ -137,6 +146,7 @@ The EC primitive layer has been substantially extended beyond the existing ECDSA
 | [QSC Technical Specification](https://qrcs-corp.github.io/QSC/pdf/qsc_specification.pdf) | Detailed algorithmic and design specification |
 | [QSC Summary Document](https://qrcs-corp.github.io/QSC/pdf/qsc_summary.pdf) | High-level overview of the library |
 | [QSC Technical Qualification Report](docs/pdf/qsc_technical_qualification_report_2026-11-06.pdf) | November 6, 2026 engineering qualification dossier; 15 native configurations, evidence matrices and assessment findings (116 pages) |
+| [QSC ACVTS Qualification Report](docs/pdf/qsc_acvts_qualification_report.pdf) | November 2026 NIST ACVTS Demo sample results; 25/25 qualification targets and 86 vector sets, with source-pinned evidence and qualification boundaries |
 | [Commercial SDK and Wrapper Specifications](#commercial-sdk-and-language-wrappers) | Public technical specifications for the commercially licensed integration SDK and language bindings |
 
 ## Overview
