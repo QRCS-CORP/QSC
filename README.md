@@ -2,11 +2,19 @@
 
 [![Build](https://img.shields.io/github/actions/workflow/status/QRCS-CORP/QSC/build.yml?branch=master)](https://github.com/QRCS-CORP/QSC/actions/workflows/build.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/QRCS-CORP/QSC/codeql-analysis.yml?label=CodeQL&branch=master)](https://github.com/QRCS-CORP/QSC/actions/workflows/codeql-analysis.yml)
-[![CodeFactor](https://www.codefactor.io/repository/github/qrcs-corp/qsc/badge)](https://www.codefactor.io/repository/github/qrcs-corp/qsc)
+[![CodeFactor](https://www.codefactor.io/repository/github/qrcs-corp/qsc/badge)]
+(https://www.codefactor.io/repository/github/qrcs-corp/qsc)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](https://github.com/QRCS-CORP/QSC/security/policy)
+[![Language](https://img.shields.io/static/v1?label=Language&message=C%20%28C11%20build%29&color=blue)](https://github.com/QRCS-CORP/QSC/blob/master/CMakeLists.txt)
+[![docs](https://img.shields.io/badge/docs-online-brightgreen)](https://qrcs-corp.github.io/QSC/)
+[![GitHub release](https://img.shields.io/github/v/release/QRCS-CORP/QSC)](https://github.com/QRCS-CORP/QSC/releases/tag/2026-04-30)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/QRCS-CORP/QSC.svg)](https://github.com/QRCS-CORP/QSC/commits/master)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-2C75A5)](#compilation)
 [![License: QRCS-PREL](https://img.shields.io/badge/License-QRCS--PREL-2C75A5)](License.txt)
 [![Documentation](https://img.shields.io/badge/documentation-online-2C75A5)](https://qrcs-corp.github.io/QSC/)
 [![ACVTS Demo](https://img.shields.io/badge/ACVTS%20Demo-25%2F25%20passed-brightgreen)](docs/pdf/qsc_acvts_qualification_report.pdf)
+[![Custom: Standard](https://img.shields.io/static/v1?label=Security%20Standard&message=MISRA&color=blue)](https://misra.org.uk/)
+[![Custom: Target](https://img.shields.io/static/v1?label=Target%20Industry&message=Communications&color=brightgreen)](#)
 
 **Portable cryptographic software for secure communications, digital infrastructure and embedded systems.**
 
