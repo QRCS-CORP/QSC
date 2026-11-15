@@ -2,8 +2,7 @@
 
 [![Build](https://img.shields.io/github/actions/workflow/status/QRCS-CORP/QSC/build.yml?branch=master)](https://github.com/QRCS-CORP/QSC/actions/workflows/build.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/QRCS-CORP/QSC/codeql-analysis.yml?label=CodeQL&branch=master)](https://github.com/QRCS-CORP/QSC/actions/workflows/codeql-analysis.yml)
-[![CodeFactor](https://www.codefactor.io/repository/github/qrcs-corp/qsc/badge)]
-(https://www.codefactor.io/repository/github/qrcs-corp/qsc)
+[![CodeFactor](https://www.codefactor.io/repository/github/qrcs-corp/qsc/badge)](https://www.codefactor.io/repository/github/qrcs-corp/qsc)
 [![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](https://github.com/QRCS-CORP/QSC/security/policy)
 [![Language](https://img.shields.io/static/v1?label=Language&message=C%20%28C11%20build%29&color=blue)](https://github.com/QRCS-CORP/QSC/blob/master/CMakeLists.txt)
 [![docs](https://img.shields.io/badge/docs-online-brightgreen)](https://qrcs-corp.github.io/QSC/)
