@@ -6,7 +6,7 @@
 [![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](https://github.com/QRCS-CORP/QSC/security/policy)
 [![Language](https://img.shields.io/static/v1?label=Language&message=C%20%28C11%20build%29&color=blue)](https://github.com/QRCS-CORP/QSC/blob/master/CMakeLists.txt)
 [![docs](https://img.shields.io/badge/docs-online-brightgreen)](https://qrcs-corp.github.io/QSC/)
-[![GitHub release](https://img.shields.io/github/v/release/QRCS-CORP/QSC)](https://github.com/QRCS-CORP/QSC/releases/tag/2026-04-30)
+[![GitHub release](https://img.shields.io/github/v/release/QRCS-CORP/QSC)](https://github.com/QRCS-CORP/QSC/releases/tag/2026-11-12)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/QRCS-CORP/QSC.svg)](https://github.com/QRCS-CORP/QSC/commits/master)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Linux%20%7C%20macOS-2C75A5)](#compilation)
 [![License: QRCS-PREL](https://img.shields.io/badge/License-QRCS--PREL-2C75A5)](License.txt)
